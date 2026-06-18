@@ -4,25 +4,118 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
-enum OrganizationType { platform single_gym multi_branch_gym franchise }
-enum RecordStatus { active inactive suspended archived }
-enum UserStatus { pending active inactive blocked deleted }
-enum SystemRole { admin fitness_manager trainer receptionist member }
-enum MembershipStatus { pending active expired paused cancelled }
-enum AttendanceMethod { qr manual biometric mobile }
-enum WorkoutGoal { fat_loss muscle_gain strength bodybuilding powerlifting functional_fitness sports_performance general_fitness }
-enum WorkoutSessionStatus { planned in_progress completed skipped cancelled }
-enum MealType { breakfast lunch dinner snack }
-enum PostureSource { mobile_camera uploaded_video trainer_capture }
-enum SeverityLevel { low medium high critical }
-enum ProductCategory { apparel footwear accessory equipment supplement }
-enum OrderStatus { draft pending_payment paid processing fulfilled cancelled refunded }
-enum PaymentStatus { pending authorized paid failed refunded cancelled }
-enum NotificationChannel { push email sms in_app }
-enum NotificationStatus { pending sent delivered read failed }
+enum OrganizationType {
+  platform
+  single_gym
+  multi_branch_gym
+  franchise
+}
+enum RecordStatus {
+  active
+  inactive
+  suspended
+  archived
+}
+enum UserStatus {
+  pending
+  active
+  inactive
+  blocked
+  deleted
+}
+enum SystemRole {
+  admin
+  fitness_manager
+  trainer
+  receptionist
+  member
+}
+enum MembershipStatus {
+  pending
+  active
+  expired
+  paused
+  cancelled
+}
+enum AttendanceMethod {
+  qr
+  manual
+  biometric
+  mobile
+}
+enum WorkoutGoal {
+  fat_loss
+  muscle_gain
+  strength
+  bodybuilding
+  powerlifting
+  functional_fitness
+  sports_performance
+  general_fitness
+}
+enum WorkoutSessionStatus {
+  planned
+  in_progress
+  completed
+  skipped
+  cancelled
+}
+enum MealType {
+  breakfast
+  lunch
+  dinner
+  snack
+}
+enum PostureSource {
+  mobile_camera
+  uploaded_video
+  trainer_capture
+}
+enum SeverityLevel {
+  low
+  medium
+  high
+  critical
+}
+enum ProductCategory {
+  apparel
+  footwear
+  accessory
+  equipment
+  supplement
+}
+enum OrderStatus {
+  draft
+  pending_payment
+  paid
+  processing
+  fulfilled
+  cancelled
+  refunded
+}
+enum PaymentStatus {
+  pending
+  authorized
+  paid
+  failed
+  refunded
+  cancelled
+}
+enum NotificationChannel {
+  push
+  email
+  sms
+  in_app
+}
+enum NotificationStatus {
+  pending
+  sent
+  delivered
+  read
+  failed
+}
 
 model Organization {
   id           String       @id @default(uuid()) @db.Uuid

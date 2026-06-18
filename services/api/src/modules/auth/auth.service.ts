@@ -91,7 +91,7 @@ export class AuthService {
     const accessPayload = { sub: user.id, email: user.email, organizationId: user.organizationId, branchIds, roleKeys, permissions };
     const accessToken = await this.jwtService.signAsync(accessPayload, {
       secret: this.config.get<string>('JWT_ACCESS_SECRET') ?? 'change-me-access-secret',
-      expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES_IN') ?? '15m',
+      expiresIn: (this.config.get<string>('JWT_ACCESS_EXPIRES_IN') ?? '15m') as any,
     });
     const session = await this.authRepository.createSession({
       userId: user.id,
@@ -102,7 +102,7 @@ export class AuthService {
     });
     const refreshToken = await this.jwtService.signAsync({ sub: user.id, sid: session.id }, {
       secret: this.config.get<string>('JWT_REFRESH_SECRET') ?? 'change-me-refresh-secret',
-      expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '30d',
+      expiresIn: (this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '30d') as any,
     });
     const refreshTokenHash = await bcrypt.hash(refreshToken, Number(this.config.get('BCRYPT_ROUNDS') ?? 12));
     await (this.authRepository as any).prisma.userSession.update({ where: { id: session.id }, data: { refreshTokenHash } });
@@ -110,11 +110,11 @@ export class AuthService {
   }
 
   private extractPermissions(user: any): string[] {
-    return [...new Set((user.roles ?? []).flatMap((assignment: any) => assignment.role.permissions.map((item: any) => item.permission.key)))];
+    return [...new Set<string>((user.roles ?? []).flatMap((assignment: any) => assignment.role.permissions.map((item: any) => String(item.permission.key))))];
   }
 
   private extractRoleKeys(user: any): string[] {
-    return [...new Set((user.roles ?? []).map((assignment: any) => assignment.role.systemKey ?? assignment.role.name))];
+    return [...new Set<string>((user.roles ?? []).map((assignment: any) => String(assignment.role.systemKey ?? assignment.role.name)))];
   }
 
   private refreshExpiry(): Date {
