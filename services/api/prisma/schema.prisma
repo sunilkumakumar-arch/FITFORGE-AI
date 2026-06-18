@@ -457,6 +457,30 @@ model BodyMeasurement {
   recordedAt     DateTime @default(now())
 }
 
+model DailyBranchMetric {
+  id                String   @id @default(uuid()) @db.Uuid
+  organizationId    String   @db.Uuid
+  branchId          String   @db.Uuid
+  metricDate        DateTime
+  activeMemberships Int      @default(0)
+  attendanceCount   Int      @default(0)
+  paidPayments      Int      @default(0)
+  revenueMinor      Int      @default(0)
+  ordersCount       Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  @@unique([branchId, metricDate])
+}
+
+model SystemJobRun {
+  id          String   @id @default(uuid()) @db.Uuid
+  jobName     String
+  status      String
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  summary     Json     @default("{}")
+}
+
 model Notification {
   id             String @id @default(uuid()) @db.Uuid
   organizationId String? @db.Uuid

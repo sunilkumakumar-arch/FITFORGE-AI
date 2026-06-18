@@ -438,6 +438,35 @@ CREATE TABLE "BodyMeasurement" (
 );
 
 -- CreateTable
+CREATE TABLE "DailyBranchMetric" (
+    "id" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "branchId" UUID NOT NULL,
+    "metricDate" TIMESTAMP(3) NOT NULL,
+    "activeMemberships" INTEGER NOT NULL DEFAULT 0,
+    "attendanceCount" INTEGER NOT NULL DEFAULT 0,
+    "paidPayments" INTEGER NOT NULL DEFAULT 0,
+    "revenueMinor" INTEGER NOT NULL DEFAULT 0,
+    "ordersCount" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "DailyBranchMetric_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SystemJobRun" (
+    "id" UUID NOT NULL,
+    "jobName" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "startedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "completedAt" TIMESTAMP(3),
+    "summary" JSONB NOT NULL DEFAULT '{}',
+
+    CONSTRAINT "SystemJobRun_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Notification" (
     "id" UUID NOT NULL,
     "organizationId" UUID,
@@ -530,6 +559,9 @@ CREATE UNIQUE INDEX "Payment_organizationId_idempotencyKey_key" ON "Payment"("or
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PaymentWebhookEvent_eventId_key" ON "PaymentWebhookEvent"("eventId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DailyBranchMetric_branchId_metricDate_key" ON "DailyBranchMetric"("branchId", "metricDate");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "NotificationPreference_phone_channel_key" ON "NotificationPreference"("phone", "channel");

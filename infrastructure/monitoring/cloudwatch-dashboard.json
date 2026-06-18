@@ -1,0 +1,6 @@
+{
+  "widgets": [
+    { "type": "metric", "width": 12, "height": 6, "properties": { "title": "API 5xx Errors", "metrics": [["AWS/ApplicationELB", "HTTPCode_Target_5XX_Count"]], "period": 300, "stat": "Sum" } },
+    { "type": "metric", "width": 12, "height": 6, "properties": { "title": "RDS CPU", "metrics": [["AWS/RDS", "CPUUtilization"]], "period": 300, "stat": "Average" } }
+  ]
+}

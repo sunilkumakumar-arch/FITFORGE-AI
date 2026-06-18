@@ -143,6 +143,24 @@ Completed:
 - GitHub Actions CI workflow
 - Unit tests for commerce, trainer booking, and posture analysis
 
+### Phase 11 - Operations, Security, Analytics, and Deployment Hardening
+
+Completed:
+
+- Production jobs module
+- Expired inventory reservation release job
+- Membership auto-renewal scan job
+- Razorpay payment reconciliation job
+- Daily branch analytics aggregation job
+- System job run tracking
+- Daily branch metric persistence
+- Global rate-limit guard
+- AWS Terraform scaffold
+- CloudWatch dashboard scaffold
+- RDS backup snapshot script
+- Staging deployment workflow
+- Unit tests for production jobs and rate limiting
+
 ---
 
 ## 2. Generated Code Files
@@ -281,6 +299,18 @@ Implemented in code:
 - Seed script and migration SQL
 - Local Docker Compose stack
 - GitHub Actions CI workflow
+- Production jobs service and controller
+- Reservation release worker endpoint
+- Membership renewal scan endpoint
+- Razorpay reconciliation endpoint
+- Daily branch analytics aggregation endpoint
+- System job run tracking
+- Daily branch metric model
+- Global rate-limit guard
+- AWS Terraform scaffold
+- CloudWatch dashboard scaffold
+- RDS backup script
+- Staging deployment workflow
 
 Backend validation completed:
 
@@ -401,12 +431,15 @@ Missing or incomplete:
 - API-level integration tests
 - End-to-end tests
 - Razorpay live-mode reconciliation jobs
+- Razorpay reconciliation live-provider verification
 - Razorpay refund workflow live-provider verification
 - Razorpay subscription billing automation
 - Membership auto-renewal scheduler
+- EventBridge or worker scheduling for membership renewal scans
 - PT package credit accounting
 - Product cart frontend production forms
 - Inventory reservation timeout release scheduled job
+- EventBridge or worker scheduling for reservation release
 - Order fulfillment warehouse UI
 - WhatsApp webhook signature verification, if supported by selected provider
 - QR code rotation job and branch display UI
@@ -414,6 +447,7 @@ Missing or incomplete:
 - Full trainer calendar frontend UI
 - Franchise royalty calculations
 - Advanced revenue analytics aggregation
+- Advanced revenue analytics visualization
 - Production audit log immutability controls
 - Object storage integration for media and documents
 - AI posture real-time MediaPipe client implementation
@@ -428,10 +462,10 @@ Missing or incomplete:
 - MFA
 - Email/SMS notification providers
 - Production Docker hardening and image scanning
-- Terraform or IaC for AWS
-- Production CD workflow
-- Production monitoring dashboards
-- Backup automation scripts
+- Terraform apply validation in AWS account
+- Production deployment promotion with real ECS service targets
+- Production monitoring alarm actions
+- Automated backup schedule verification
 - Disaster recovery runbooks in executable form
 - Security headers and WAF deployment configuration
 - OWASP penetration test execution
@@ -448,10 +482,10 @@ Recommended task groups:
 2. Add permission decorators to each protected endpoint.
 3. Add tenant-scoped Prisma query helpers.
 4. Add integration tests with a test PostgreSQL database.
-5. Add Razorpay reconciliation scheduled job.
-6. Add membership renewal scheduler.
+5. Add Razorpay reconciliation provider integration tests.
+6. Add EventBridge schedules for renewal and reservation jobs.
 7. Add PT package credit ledger.
-8. Add expired inventory reservation release worker.
+8. Add PT package credit ledger.
 9. Add posture analysis integration tests.
 10. Add object storage for media and documents.
 
@@ -483,12 +517,12 @@ Recommended task groups:
 
 ### DevOps
 
-1. Add ECS deployment manifests or Terraform.
-2. Add database backup job.
-3. Add monitoring and alerting dashboards.
+1. Validate Terraform against staging AWS account.
+2. Wire backup job to EventBridge.
+3. Wire monitoring dashboard alarms to SNS.
 4. Add secret management guide.
 5. Add production smoke tests.
-6. Add release promotion workflow.
+6. Replace deployment placeholder with ECS service update.
 
 ---
 
@@ -497,7 +531,7 @@ Recommended task groups:
 Current estimated deployment readiness:
 
 ```text
-60%
+70%
 ```
 
 Reasoning:
@@ -510,6 +544,7 @@ Reasoning:
 - Payment and WhatsApp integrations now include stronger production behavior but still need live sandbox/provider verification.
 - Inventory, cart, checkout, fulfillment, trainer booking, and AI posture MVP backend now exist.
 - Seed, migration SQL, Docker Compose, and CI now exist.
+- Production job endpoints, rate limiting, analytics rollups, Terraform scaffold, monitoring scaffold, backup script, and staging deployment workflow now exist.
 - Security controls are partially implemented but require hardening.
 - IaC, monitoring, backup automation, and production operational controls are not yet fully implemented.
 
@@ -517,19 +552,19 @@ Readiness by area:
 
 | Area | Readiness |
 |---|---:|
-| Backend API foundation | 72% |
-| Database schema | 76% |
+| Backend API foundation | 78% |
+| Database schema | 82% |
 | Authentication | 55% |
 | RBAC | 40% |
 | Memberships and attendance | 65% |
-| Payments | 52% |
+| Payments | 62% |
 | WhatsApp notifications | 50% |
 | Admin web | 48% |
 | Mobile app | 30% |
 | AI/computer vision | 35% |
-| DevOps/deployment | 35% |
-| Security hardening | 30% |
-| Commercial readiness | 52% |
+| DevOps/deployment | 55% |
+| Security hardening | 42% |
+| Commercial readiness | 62% |
 
 ---
 

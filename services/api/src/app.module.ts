@@ -6,6 +6,7 @@ import { AuthGuard } from './auth/auth.guard';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { RbacGuard } from './auth/rbac.guard';
+import { RateLimitGuard } from './auth/rate-limit.guard';
 import { PrismaService } from './core/prisma.service';
 import { AuditService } from './core/audit.service';
 import { ResourceController } from './resources/resource.controller';
@@ -29,6 +30,8 @@ import { TrainersController } from './trainers/trainers.controller';
 import { TrainersService } from './trainers/trainers.service';
 import { PostureController } from './posture/posture.controller';
 import { PostureService } from './posture/posture.service';
+import { JobsController } from './jobs/jobs.controller';
+import { JobsService } from './jobs/jobs.service';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.example'] }), JwtModule.register({})],
@@ -41,6 +44,7 @@ import { PostureService } from './posture/posture.service';
     CommerceController,
     TrainersController,
     PostureController,
+    JobsController,
     PaymentsController,
     WhatsappController,
     AnalyticsController,
@@ -58,10 +62,12 @@ import { PostureService } from './posture/posture.service';
     CommerceService,
     TrainersService,
     PostureService,
+    JobsService,
     PaymentsService,
     WhatsappService,
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RbacGuard },
+    { provide: APP_GUARD, useClass: RateLimitGuard },
   ],
 })
 export class AppModule {}
