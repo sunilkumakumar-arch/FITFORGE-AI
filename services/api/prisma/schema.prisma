@@ -6,16 +6,85 @@ datasource db {
   provider = "postgresql"
 }
 
-enum UserStatus { pending active inactive blocked deleted }
-enum RoleKey { super_admin admin franchise_owner gym_owner branch_manager fitness_manager trainer receptionist member vendor }
-enum MembershipStatus { pending active expired paused cancelled }
-enum AttendanceMethod { qr manual biometric mobile }
-enum WorkoutGoal { fat_loss muscle_gain strength bodybuilding powerlifting functional_fitness general_fitness }
-enum OrderStatus { draft pending_payment paid processing fulfilled cancelled refunded }
-enum PaymentStatus { pending authorized paid failed refunded cancelled }
-enum ProductCategory { apparel footwear accessory equipment supplement }
-enum NotificationChannel { whatsapp email sms push in_app }
-enum NotificationStatus { pending sent delivered read failed }
+enum UserStatus {
+  pending
+  active
+  inactive
+  blocked
+  deleted
+}
+enum RoleKey {
+  super_admin
+  admin
+  franchise_owner
+  gym_owner
+  branch_manager
+  fitness_manager
+  trainer
+  receptionist
+  member
+  vendor
+}
+enum MembershipStatus {
+  pending
+  active
+  expired
+  paused
+  cancelled
+}
+enum AttendanceMethod {
+  qr
+  manual
+  biometric
+  mobile
+}
+enum WorkoutGoal {
+  fat_loss
+  muscle_gain
+  strength
+  bodybuilding
+  powerlifting
+  functional_fitness
+  general_fitness
+}
+enum OrderStatus {
+  draft
+  pending_payment
+  paid
+  processing
+  fulfilled
+  cancelled
+  refunded
+}
+enum PaymentStatus {
+  pending
+  authorized
+  paid
+  failed
+  refunded
+  cancelled
+}
+enum ProductCategory {
+  apparel
+  footwear
+  accessory
+  equipment
+  supplement
+}
+enum NotificationChannel {
+  whatsapp
+  email
+  sms
+  push
+  in_app
+}
+enum NotificationStatus {
+  pending
+  sent
+  delivered
+  read
+  failed
+}
 
 model Organization {
   id        String   @id @default(uuid()) @db.Uuid
