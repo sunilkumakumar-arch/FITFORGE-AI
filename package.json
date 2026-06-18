@@ -1,0 +1,20 @@
+{
+  "name": "fitforge-ai",
+  "version": "1.0.0",
+  "description": "AI-powered fitness ecosystem",
+  "private": true,
+  "workspaces": [
+    "apps/admin-web"
+  ],
+  "scripts": {
+    "web:dev": "npm run dev --workspace apps/admin-web",
+    "web:build": "npm run build --workspace apps/admin-web",
+    "web:lint": "npm run lint --workspace apps/admin-web",
+    "web:typecheck": "npm run typecheck --workspace apps/admin-web"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sunilkumakumar-arch/FITFORGE-AI.git"
+  },
+  "license": "UNLICENSED"
+}
