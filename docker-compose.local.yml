@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: fitforge
+      POSTGRES_PASSWORD: fitforge
+      POSTGRES_DB: fitforge_ai
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+  api:
+    build: ./services/api
+    env_file:
+      - ./services/api/.env.example
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "3000:3000"
+  admin-web:
+    build:
+      context: .
+      dockerfile: apps/admin-web/Dockerfile
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:3000/api/v1
+    depends_on:
+      - api
+    ports:
+      - "3001:3000"
+volumes:
+  postgres_data:

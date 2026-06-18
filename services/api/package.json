@@ -10,6 +10,7 @@
     "test": "jest --config jest.config.js",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
+    "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy"
   },
@@ -32,6 +33,9 @@
     "reflect-metadata": "latest",
     "rxjs": "latest"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "devDependencies": {
     "@nestjs/cli": "latest",
     "@nestjs/testing": "latest",
@@ -42,6 +46,7 @@
     "jest": "latest",
     "prisma": "latest",
     "ts-jest": "latest",
+    "ts-node": "^10.9.2",
     "typescript": "latest"
   }
 }

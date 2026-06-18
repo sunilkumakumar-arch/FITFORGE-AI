@@ -121,6 +121,28 @@ Completed:
 - Additional Prisma models for payment webhook events and notification preferences
 - Focused unit tests for priority production services
 
+### Phase 10 - Commercial Workflow, AI Posture MVP, and Deployment Slice
+
+Completed:
+
+- Explicit inventory and e-commerce module
+- Product catalog endpoints
+- Inventory upsert and listing endpoints
+- Cart item add and cart retrieval endpoints
+- Checkout with inventory reservation
+- Order fulfillment with stock decrement
+- Trainer availability endpoints
+- Trainer booking endpoints with conflict detection
+- AI posture MVP backend with joint angle calculation
+- Posture sessions and findings persistence
+- Body measurement API
+- Seed script for demo organization, branch, permissions, roles, admin user, and starter plan
+- Prisma migration SQL
+- Local Docker Compose stack
+- Admin web Dockerfile
+- GitHub Actions CI workflow
+- Unit tests for commerce, trainer booking, and posture analysis
+
 ---
 
 ## 2. Generated Code Files
@@ -250,6 +272,15 @@ Implemented in code:
 - Razorpay refund support
 - WhatsApp opt-in and opt-out preferences
 - WhatsApp delivery webhook status updates
+- Explicit Phase 10 inventory and e-commerce service and controller
+- Product cart and checkout APIs
+- Inventory reservation and order fulfillment
+- Explicit trainer availability and booking service and controller
+- Explicit posture analysis service and controller
+- Body measurement API
+- Seed script and migration SQL
+- Local Docker Compose stack
+- GitHub Actions CI workflow
 
 Backend validation completed:
 
@@ -352,7 +383,7 @@ Completed as architecture and implementation surface:
 
 Implemented in runnable code:
 
-- Backend posture-specific module is not yet fully implemented in Phase 8 code.
+- Backend posture MVP now stores posture sessions, findings, joint angle metrics, risk score, form score, and body measurements.
 - Frontend and mobile expose feature surfaces for AI/posture, but real camera inference is not yet implemented.
 
 ---
@@ -363,7 +394,7 @@ The current implementation is runnable but not yet commercially production-compl
 
 Missing or incomplete:
 
-- Full database migrations with seeded roles and permissions
+- Incremental production migration history beyond the generated initial migration
 - Production-grade tenant isolation enforcement in every remaining generic query
 - Fine-grained RBAC permission decorators on lower-priority generic endpoints
 - Complete DTO validation for lower-priority generic backend APIs
@@ -374,31 +405,31 @@ Missing or incomplete:
 - Razorpay subscription billing automation
 - Membership auto-renewal scheduler
 - PT package credit accounting
-- Product cart flow
-- Inventory reservation and release flow
-- Order fulfillment workflow
+- Product cart frontend production forms
+- Inventory reservation timeout release scheduled job
+- Order fulfillment warehouse UI
 - WhatsApp webhook signature verification, if supported by selected provider
 - QR code rotation job and branch display UI
 - Biometric attendance integration
-- Full trainer calendar and availability engine
+- Full trainer calendar frontend UI
 - Franchise royalty calculations
 - Advanced revenue analytics aggregation
 - Production audit log immutability controls
 - Object storage integration for media and documents
-- AI posture real-time MediaPipe implementation
+- AI posture real-time MediaPipe client implementation
 - MoveNet fallback implementation
 - TensorFlow Lite model bundling
 - Flutter camera integration
 - Web camera integration
 - Progress photo upload
-- Body measurement tracking UI and APIs
+- Body measurement tracking UI
 - Admin user invitation flow
 - Password reset flow
 - MFA
 - Email/SMS notification providers
-- Docker Compose for full local stack
+- Production Docker hardening and image scanning
 - Terraform or IaC for AWS
-- GitHub Actions CI/CD workflows
+- Production CD workflow
 - Production monitoring dashboards
 - Backup automation scripts
 - Disaster recovery runbooks in executable form
@@ -416,16 +447,13 @@ Recommended task groups:
 1. Add complete DTOs with `class-validator`.
 2. Add permission decorators to each protected endpoint.
 3. Add tenant-scoped Prisma query helpers.
-4. Add seed script for roles, permissions, plans, demo branches, and admin user.
-5. Add migration generation and deployment workflow.
-6. Add integration tests with a test PostgreSQL database.
-7. Add Razorpay reconciliation and refund workflows.
-8. Add WhatsApp webhook receiver and delivery status updates.
-9. Add membership renewal scheduler.
-10. Add PT package credit ledger.
-11. Add inventory reservation service.
-12. Add cart and checkout services.
-13. Add posture analysis APIs and persistence models.
+4. Add integration tests with a test PostgreSQL database.
+5. Add Razorpay reconciliation scheduled job.
+6. Add membership renewal scheduler.
+7. Add PT package credit ledger.
+8. Add expired inventory reservation release worker.
+9. Add posture analysis integration tests.
+10. Add object storage for media and documents.
 
 ### Frontend
 
@@ -455,13 +483,12 @@ Recommended task groups:
 
 ### DevOps
 
-1. Add Docker Compose for local PostgreSQL, Redis, API, and web.
-2. Add GitHub Actions workflows.
-3. Add ECS deployment manifests or Terraform.
-4. Add database backup job.
-5. Add monitoring and alerting dashboards.
-6. Add secret management guide.
-7. Add production smoke tests.
+1. Add ECS deployment manifests or Terraform.
+2. Add database backup job.
+3. Add monitoring and alerting dashboards.
+4. Add secret management guide.
+5. Add production smoke tests.
+6. Add release promotion workflow.
 
 ---
 
@@ -470,7 +497,7 @@ Recommended task groups:
 Current estimated deployment readiness:
 
 ```text
-48%
+60%
 ```
 
 Reasoning:
@@ -481,26 +508,28 @@ Reasoning:
 - Web dashboard builds and typechecks.
 - Flutter source exists but has not been validated in this environment.
 - Payment and WhatsApp integrations now include stronger production behavior but still need live sandbox/provider verification.
+- Inventory, cart, checkout, fulfillment, trainer booking, and AI posture MVP backend now exist.
+- Seed, migration SQL, Docker Compose, and CI now exist.
 - Security controls are partially implemented but require hardening.
-- CI/CD, IaC, monitoring, backup automation, and production operational controls are not yet implemented.
+- IaC, monitoring, backup automation, and production operational controls are not yet fully implemented.
 
 Readiness by area:
 
 | Area | Readiness |
 |---|---:|
-| Backend API foundation | 60% |
-| Database schema | 65% |
+| Backend API foundation | 72% |
+| Database schema | 76% |
 | Authentication | 55% |
 | RBAC | 40% |
 | Memberships and attendance | 65% |
 | Payments | 52% |
 | WhatsApp notifications | 50% |
-| Admin web | 45% |
+| Admin web | 48% |
 | Mobile app | 30% |
-| AI/computer vision | 20% |
-| DevOps/deployment | 15% |
+| AI/computer vision | 35% |
+| DevOps/deployment | 35% |
 | Security hardening | 30% |
-| Commercial readiness | 35% |
+| Commercial readiness | 52% |
 
 ---
 

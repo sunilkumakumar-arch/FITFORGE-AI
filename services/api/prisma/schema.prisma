@@ -289,6 +289,7 @@ model Product {
   isActive       Boolean @default(true)
   createdAt      DateTime @default(now())
   inventoryItems InventoryItem[]
+  cartItems      CartItem[]
   @@unique([organizationId, slug])
 }
 
@@ -299,10 +300,48 @@ model InventoryItem {
   productId         String @db.Uuid
   sku               String
   quantityAvailable Int @default(0)
+  quantityReserved  Int @default(0)
   reorderThreshold  Int @default(0)
   branch            Branch @relation(fields: [branchId], references: [id])
   product           Product @relation(fields: [productId], references: [id])
+  reservations      InventoryReservation[]
   @@unique([branchId, sku])
+}
+
+model InventoryReservation {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizationId  String    @db.Uuid
+  branchId        String    @db.Uuid
+  inventoryItemId String    @db.Uuid
+  orderId         String?   @db.Uuid
+  quantity        Int
+  status          String    @default("active")
+  expiresAt       DateTime
+  releasedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+}
+
+model Cart {
+  id             String     @id @default(uuid()) @db.Uuid
+  organizationId String     @db.Uuid
+  branchId       String?    @db.Uuid
+  userId         String     @db.Uuid
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  items          CartItem[]
+  @@unique([userId])
+}
+
+model CartItem {
+  id        String  @id @default(uuid()) @db.Uuid
+  cartId    String  @db.Uuid
+  productId String  @db.Uuid
+  quantity  Int
+  unitPriceMinor Int
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+  @@unique([cartId, productId])
 }
 
 model Order {
@@ -361,6 +400,61 @@ model TrainerBooking {
   status         String @default("requested")
   paymentId      String? @db.Uuid
   createdAt      DateTime @default(now())
+}
+
+model TrainerAvailability {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  branchId       String   @db.Uuid
+  trainerId      String   @db.Uuid
+  startsAt       DateTime
+  endsAt         DateTime
+  isAvailable    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+}
+
+model PostureSession {
+  id               String   @id @default(uuid()) @db.Uuid
+  organizationId   String   @db.Uuid
+  branchId         String?  @db.Uuid
+  memberId         String   @db.Uuid
+  capturedBy       String?  @db.Uuid
+  exerciseType     String
+  source           String   @default("mobile_camera")
+  overallRiskScore Float
+  formScore        Float
+  confidenceScore  Float
+  repCount         Int      @default(0)
+  summary          String?
+  metrics          Json     @default("{}")
+  createdAt        DateTime @default(now())
+  findings         PostureFinding[]
+}
+
+model PostureFinding {
+  id               String   @id @default(uuid()) @db.Uuid
+  postureSessionId String   @db.Uuid
+  findingType      String
+  severity         String
+  confidenceScore  Float
+  message          String
+  correctivePlan   Json     @default("[]")
+  createdAt        DateTime @default(now())
+  session          PostureSession @relation(fields: [postureSessionId], references: [id], onDelete: Cascade)
+}
+
+model BodyMeasurement {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  branchId       String?  @db.Uuid
+  memberId       String   @db.Uuid
+  source         String   @default("manual")
+  weightKg       Float?
+  bodyFatPercent Float?
+  chestCm        Float?
+  waistCm        Float?
+  hipsCm         Float?
+  recordedAt     DateTime @default(now())
 }
 
 model Notification {

@@ -23,6 +23,12 @@ import { WorkoutsController } from './workouts/workouts.controller';
 import { WorkoutsService } from './workouts/workouts.service';
 import { NutritionController } from './nutrition/nutrition.controller';
 import { NutritionService } from './nutrition/nutrition.service';
+import { CommerceController } from './commerce/commerce.controller';
+import { CommerceService } from './commerce/commerce.service';
+import { TrainersController } from './trainers/trainers.controller';
+import { TrainersService } from './trainers/trainers.service';
+import { PostureController } from './posture/posture.controller';
+import { PostureService } from './posture/posture.service';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.example'] }), JwtModule.register({})],
@@ -32,6 +38,9 @@ import { NutritionService } from './nutrition/nutrition.service';
     AttendanceController,
     WorkoutsController,
     NutritionController,
+    CommerceController,
+    TrainersController,
+    PostureController,
     PaymentsController,
     WhatsappController,
     AnalyticsController,
@@ -46,6 +55,9 @@ import { NutritionService } from './nutrition/nutrition.service';
     AttendanceService,
     WorkoutsService,
     NutritionService,
+    CommerceService,
+    TrainersService,
+    PostureService,
     PaymentsService,
     WhatsappService,
     { provide: APP_GUARD, useClass: AuthGuard },
