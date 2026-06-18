@@ -340,6 +340,16 @@ model Payment {
   @@unique([organizationId, idempotencyKey])
 }
 
+model PaymentWebhookEvent {
+  id          String    @id @default(uuid()) @db.Uuid
+  provider    String
+  eventId     String    @unique
+  eventType   String
+  payload     Json
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+}
+
 model TrainerBooking {
   id             String @id @default(uuid()) @db.Uuid
   organizationId String @db.Uuid
@@ -365,6 +375,17 @@ model Notification {
   body           String
   providerId     String?
   createdAt      DateTime @default(now())
+}
+
+model NotificationPreference {
+  id             String              @id @default(uuid()) @db.Uuid
+  organizationId String?             @db.Uuid
+  userId         String?             @db.Uuid
+  phone          String
+  channel        NotificationChannel @default(whatsapp)
+  enabled        Boolean             @default(true)
+  updatedAt      DateTime            @updatedAt
+  @@unique([phone, channel])
 }
 
 model AuditLog {

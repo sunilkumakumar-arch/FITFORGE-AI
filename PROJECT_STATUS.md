@@ -108,6 +108,19 @@ Completed:
 - Revenue analytics endpoint
 - Build and validation fixes
 
+### Phase 9 - Production Feature Hardening
+
+Completed:
+
+- Explicit membership management module with DTO validation
+- Explicit attendance management module with QR/manual check-in and duplicate prevention
+- Explicit workout management module for exercises and workout programs
+- Explicit nutrition management module with macro calculation
+- Razorpay idempotent order creation, webhook replay tracking, and refund support
+- WhatsApp opt-in, opt-out, template send, and delivery webhook handling
+- Additional Prisma models for payment webhook events and notification preferences
+- Focused unit tests for priority production services
+
 ---
 
 ## 2. Generated Code Files
@@ -229,6 +242,14 @@ Implemented in code:
 - Revenue analytics endpoint
 - Dashboard analytics endpoint
 - Basic backend unit test
+- Explicit Phase 9 membership management service and controller
+- Explicit Phase 9 attendance management service and controller
+- Explicit Phase 9 workout management service and controller
+- Explicit Phase 9 nutrition management service and controller
+- Razorpay webhook replay protection
+- Razorpay refund support
+- WhatsApp opt-in and opt-out preferences
+- WhatsApp delivery webhook status updates
 
 Backend validation completed:
 
@@ -343,21 +364,20 @@ The current implementation is runnable but not yet commercially production-compl
 Missing or incomplete:
 
 - Full database migrations with seeded roles and permissions
-- Production-grade tenant isolation enforcement in every query
-- Fine-grained RBAC permission decorators on every endpoint
-- Complete DTO validation for all backend APIs
+- Production-grade tenant isolation enforcement in every remaining generic query
+- Fine-grained RBAC permission decorators on lower-priority generic endpoints
+- Complete DTO validation for lower-priority generic backend APIs
 - API-level integration tests
 - End-to-end tests
 - Razorpay live-mode reconciliation jobs
-- Razorpay refund workflow
+- Razorpay refund workflow live-provider verification
 - Razorpay subscription billing automation
 - Membership auto-renewal scheduler
 - PT package credit accounting
 - Product cart flow
 - Inventory reservation and release flow
 - Order fulfillment workflow
-- WhatsApp opt-in and opt-out management
-- WhatsApp delivery webhook handling
+- WhatsApp webhook signature verification, if supported by selected provider
 - QR code rotation job and branch display UI
 - Biometric attendance integration
 - Full trainer calendar and availability engine
@@ -450,7 +470,7 @@ Recommended task groups:
 Current estimated deployment readiness:
 
 ```text
-42%
+48%
 ```
 
 Reasoning:
@@ -460,7 +480,7 @@ Reasoning:
 - Prisma schema validates.
 - Web dashboard builds and typechecks.
 - Flutter source exists but has not been validated in this environment.
-- Payment and WhatsApp integrations are implemented as first working adapters but need live sandbox verification.
+- Payment and WhatsApp integrations now include stronger production behavior but still need live sandbox/provider verification.
 - Security controls are partially implemented but require hardening.
 - CI/CD, IaC, monitoring, backup automation, and production operational controls are not yet implemented.
 
@@ -472,9 +492,9 @@ Readiness by area:
 | Database schema | 65% |
 | Authentication | 55% |
 | RBAC | 40% |
-| Memberships and attendance | 50% |
-| Payments | 40% |
-| WhatsApp notifications | 35% |
+| Memberships and attendance | 65% |
+| Payments | 52% |
+| WhatsApp notifications | 50% |
 | Admin web | 45% |
 | Mobile app | 30% |
 | AI/computer vision | 20% |

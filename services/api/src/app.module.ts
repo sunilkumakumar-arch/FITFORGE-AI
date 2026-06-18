@@ -17,16 +17,35 @@ import { PaymentsService } from './payments/payments.service';
 import { WhatsappController } from './whatsapp/whatsapp.controller';
 import { WhatsappService } from './whatsapp/whatsapp.service';
 import { AnalyticsController } from './analytics/analytics.controller';
+import { MembershipsController } from './memberships/memberships.controller';
+import { MembershipsService } from './memberships/memberships.service';
+import { WorkoutsController } from './workouts/workouts.controller';
+import { WorkoutsService } from './workouts/workouts.service';
+import { NutritionController } from './nutrition/nutrition.controller';
+import { NutritionService } from './nutrition/nutrition.service';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.example'] }), JwtModule.register({})],
-  controllers: [AuthController, AttendanceController, PaymentsController, WhatsappController, AnalyticsController, ResourceController],
+  controllers: [
+    AuthController,
+    MembershipsController,
+    AttendanceController,
+    WorkoutsController,
+    NutritionController,
+    PaymentsController,
+    WhatsappController,
+    AnalyticsController,
+    ResourceController,
+  ],
   providers: [
     PrismaService,
     AuditService,
     AuthService,
     ResourceService,
+    MembershipsService,
     AttendanceService,
+    WorkoutsService,
+    NutritionService,
     PaymentsService,
     WhatsappService,
     { provide: APP_GUARD, useClass: AuthGuard },
