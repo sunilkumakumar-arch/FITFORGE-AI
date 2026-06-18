@@ -1,0 +1,631 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrganizationType {
+  platform
+  single_gym
+  multi_branch_gym
+  franchise
+}
+enum RecordStatus {
+  active
+  inactive
+  suspended
+  archived
+}
+enum UserStatus {
+  pending
+  active
+  inactive
+  blocked
+  deleted
+}
+enum SystemRole {
+  admin
+  fitness_manager
+  trainer
+  receptionist
+  member
+}
+enum MembershipStatus {
+  pending
+  active
+  expired
+  paused
+  cancelled
+}
+enum AttendanceMethod {
+  qr
+  manual
+  biometric
+  mobile
+}
+enum WorkoutGoal {
+  fat_loss
+  muscle_gain
+  strength
+  bodybuilding
+  powerlifting
+  functional_fitness
+  sports_performance
+  general_fitness
+}
+enum WorkoutSessionStatus {
+  planned
+  in_progress
+  completed
+  skipped
+  cancelled
+}
+enum MealType {
+  breakfast
+  lunch
+  dinner
+  snack
+}
+enum PostureSource {
+  mobile_camera
+  uploaded_video
+  trainer_capture
+}
+enum SeverityLevel {
+  low
+  medium
+  high
+  critical
+}
+enum ProductCategory {
+  apparel
+  footwear
+  accessory
+  equipment
+  supplement
+}
+enum OrderStatus {
+  draft
+  pending_payment
+  paid
+  processing
+  fulfilled
+  cancelled
+  refunded
+}
+enum PaymentStatus {
+  pending
+  authorized
+  paid
+  failed
+  refunded
+  cancelled
+}
+enum NotificationChannel {
+  push
+  email
+  sms
+  in_app
+}
+enum NotificationStatus {
+  pending
+  sent
+  delivered
+  read
+  failed
+}
+
+model Organization {
+  id           String       @id @default(uuid()) @db.Uuid
+  name         String       @db.VarChar(160)
+  slug         String       @unique @db.VarChar(120)
+  type         OrganizationType
+  status       RecordStatus @default(active)
+  billingEmail String?      @map("billing_email") @db.VarChar(255)
+  timezone     String       @default("UTC") @db.VarChar(64)
+  settings     Json         @default("{}")
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz
+  branches     Branch[]
+  users        User[]
+  roles        Role[]
+  @@map("organizations")
+}
+
+model Branch {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  name           String       @db.VarChar(160)
+  code           String       @db.VarChar(64)
+  status         RecordStatus @default(active)
+  addressLine1   String?      @map("address_line1") @db.VarChar(255)
+  city           String?      @db.VarChar(120)
+  state          String?      @db.VarChar(120)
+  country        String?      @db.Char(2)
+  postalCode     String?      @map("postal_code") @db.VarChar(24)
+  phone          String?      @db.VarChar(32)
+  email          String?      @db.VarChar(255)
+  timezone       String       @default("UTC") @db.VarChar(64)
+  metadata       Json         @default("{}")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime?    @map("deleted_at") @db.Timestamptz
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  access         UserBranchAccess[]
+  @@unique([organizationId, code])
+  @@index([organizationId, status])
+  @@map("branches")
+}
+
+model User {
+  id              String             @id @default(uuid()) @db.Uuid
+  organizationId  String?            @map("organization_id") @db.Uuid
+  email           String             @unique @db.VarChar(255)
+  phone           String?            @unique @db.VarChar(32)
+  firstName       String             @map("first_name") @db.VarChar(100)
+  lastName        String             @map("last_name") @db.VarChar(100)
+  status          UserStatus         @default(pending)
+  dateOfBirth     DateTime?          @map("date_of_birth") @db.Date
+  gender          String?            @db.VarChar(40)
+  profileImageUrl String?            @map("profile_image_url") @db.Text
+  lastLoginAt     DateTime?          @map("last_login_at") @db.Timestamptz
+  metadata        Json               @default("{}")
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime?          @map("deleted_at") @db.Timestamptz
+  organization    Organization?      @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  credential      UserCredential?
+  sessions        UserSession[]
+  roles           UserRole[]
+  branchAccess    UserBranchAccess[]
+  @@index([organizationId, status])
+  @@map("users")
+}
+
+model UserCredential {
+  id                 String    @id @default(uuid()) @db.Uuid
+  userId             String    @unique @map("user_id") @db.Uuid
+  passwordHash       String    @map("password_hash") @db.Text
+  passwordUpdatedAt  DateTime  @map("password_updated_at") @db.Timestamptz
+  mfaEnabled         Boolean   @default(false) @map("mfa_enabled")
+  mfaSecretEncrypted String?   @map("mfa_secret_encrypted") @db.Text
+  failedLoginCount   Int       @default(0) @map("failed_login_count")
+  lockedUntil        DateTime? @map("locked_until") @db.Timestamptz
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("user_credentials")
+}
+
+model Role {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String?          @map("organization_id") @db.Uuid
+  name           String           @db.VarChar(100)
+  systemKey      SystemRole?      @map("system_key")
+  description    String?          @db.Text
+  isSystem       Boolean          @default(false) @map("is_system")
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  permissions    RolePermission[]
+  users          UserRole[]
+  @@unique([organizationId, name])
+  @@unique([organizationId, systemKey])
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(uuid()) @db.Uuid
+  key         String           @unique @db.VarChar(120)
+  module      String           @db.VarChar(80)
+  description String?          @db.Text
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  roles       RolePermission[]
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String     @map("role_id") @db.Uuid
+  permissionId String     @map("permission_id") @db.Uuid
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  roleId         String   @map("role_id") @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  branchId       String?  @map("branch_id") @db.Uuid
+  createdBy      String?  @map("created_by") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  @@unique([userId, roleId, organizationId, branchId])
+  @@index([userId, organizationId])
+  @@map("user_roles")
+}
+
+model UserBranchAccess {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  branchId       String   @map("branch_id") @db.Uuid
+  isPrimary      Boolean  @default(false) @map("is_primary")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch         Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  @@unique([userId, branchId])
+  @@index([organizationId, branchId])
+  @@map("user_branch_access")
+}
+
+model UserSession {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  refreshTokenHash String    @map("refresh_token_hash") @db.Text
+  deviceId         String?   @map("device_id") @db.VarChar(160)
+  deviceName       String?   @map("device_name") @db.VarChar(160)
+  ipAddress        String?   @map("ip_address") @db.Inet
+  userAgent        String?   @map("user_agent") @db.Text
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, expiresAt])
+  @@map("user_sessions")
+}
+
+model MembershipPlan {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  branchId       String?      @map("branch_id") @db.Uuid
+  name           String       @db.VarChar(140)
+  description    String?      @db.Text
+  durationDays   Int          @map("duration_days")
+  priceMinor     Int          @map("price_minor")
+  currency       String       @db.Char(3)
+  features       Json         @default("{}")
+  status         RecordStatus @default(active)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime?    @map("deleted_at") @db.Timestamptz
+  memberships    Membership[]
+  @@index([organizationId, branchId, status])
+  @@map("membership_plans")
+}
+
+model Membership {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @map("organization_id") @db.Uuid
+  branchId       String           @map("branch_id") @db.Uuid
+  memberId       String           @map("member_id") @db.Uuid
+  planId         String           @map("plan_id") @db.Uuid
+  status         MembershipStatus @default(pending)
+  startDate      DateTime         @map("start_date") @db.Date
+  endDate        DateTime         @map("end_date") @db.Date
+  autoRenew      Boolean          @default(false) @map("auto_renew")
+  priceMinor     Int              @map("price_minor")
+  currency       String           @db.Char(3)
+  createdBy      String?          @map("created_by") @db.Uuid
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  cancelledAt    DateTime?        @map("cancelled_at") @db.Timestamptz
+  plan           MembershipPlan   @relation(fields: [planId], references: [id], onDelete: Restrict)
+  @@index([organizationId, branchId, status])
+  @@index([memberId, status])
+  @@map("memberships")
+}
+
+model AttendanceLog {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @map("organization_id") @db.Uuid
+  branchId       String           @map("branch_id") @db.Uuid
+  memberId       String           @map("member_id") @db.Uuid
+  method         AttendanceMethod
+  checkInAt      DateTime         @map("check_in_at") @db.Timestamptz
+  checkOutAt     DateTime?        @map("check_out_at") @db.Timestamptz
+  deviceId       String?          @map("device_id") @db.VarChar(160)
+  createdBy      String?          @map("created_by") @db.Uuid
+  metadata       Json             @default("{}")
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  @@index([organizationId, branchId, checkInAt])
+  @@index([memberId, checkInAt])
+  @@map("attendance_logs")
+}
+
+model Exercise {
+  id                    String       @id @default(uuid()) @db.Uuid
+  organizationId        String?      @map("organization_id") @db.Uuid
+  name                  String       @db.VarChar(160)
+  slug                  String       @db.VarChar(160)
+  description           String?      @db.Text
+  primaryMuscleGroup    String       @map("primary_muscle_group") @db.VarChar(80)
+  secondaryMuscleGroups String[]     @map("secondary_muscle_groups")
+  equipment             String[]
+  difficulty            String       @db.VarChar(40)
+  instructions          String       @db.Text
+  safetyInstructions    String?      @map("safety_instructions") @db.Text
+  commonMistakes        String?      @map("common_mistakes") @db.Text
+  coachingTips          String?      @map("coaching_tips") @db.Text
+  imageUrl              String?      @map("image_url") @db.Text
+  videoUrl              String?      @map("video_url") @db.Text
+  status                RecordStatus @default(active)
+  createdAt             DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+  @@unique([organizationId, slug])
+  @@index([primaryMuscleGroup, difficulty])
+  @@map("exercises")
+}
+
+model WorkoutPlan {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  branchId       String?      @map("branch_id") @db.Uuid
+  memberId       String       @map("member_id") @db.Uuid
+  trainerId      String?      @map("trainer_id") @db.Uuid
+  name           String       @db.VarChar(160)
+  goal           WorkoutGoal
+  description    String?      @db.Text
+  startDate      DateTime?    @map("start_date") @db.Date
+  endDate        DateTime?    @map("end_date") @db.Date
+  status         RecordStatus @default(active)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime?    @map("deleted_at") @db.Timestamptz
+  @@index([organizationId, branchId, status])
+  @@index([memberId, status])
+  @@map("workout_plans")
+}
+
+model WorkoutSession {
+  id                String               @id @default(uuid()) @db.Uuid
+  organizationId    String               @map("organization_id") @db.Uuid
+  branchId          String?              @map("branch_id") @db.Uuid
+  memberId          String               @map("member_id") @db.Uuid
+  workoutPlanId     String?              @map("workout_plan_id") @db.Uuid
+  status            WorkoutSessionStatus @default(planned)
+  startedAt         DateTime?            @map("started_at") @db.Timestamptz
+  completedAt       DateTime?            @map("completed_at") @db.Timestamptz
+  durationSeconds   Int?                 @map("duration_seconds")
+  caloriesEstimated Int?                 @map("calories_estimated")
+  notes             String?              @db.Text
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz
+  @@index([memberId, startedAt])
+  @@index([organizationId, branchId, status])
+  @@map("workout_sessions")
+}
+
+model NutritionPlan {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  branchId       String?      @map("branch_id") @db.Uuid
+  memberId       String       @map("member_id") @db.Uuid
+  coachId        String?      @map("coach_id") @db.Uuid
+  name           String       @db.VarChar(160)
+  calorieTarget  Int          @map("calorie_target")
+  proteinGrams   Int          @map("protein_grams")
+  carbsGrams     Int          @map("carbs_grams")
+  fatGrams       Int          @map("fat_grams")
+  dietType       String?      @map("diet_type") @db.VarChar(80)
+  allergies      String[]
+  startDate      DateTime?    @map("start_date") @db.Date
+  endDate        DateTime?    @map("end_date") @db.Date
+  status         RecordStatus @default(active)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+  @@index([memberId, status])
+  @@index([organizationId, branchId, status])
+  @@map("nutrition_plans")
+}
+
+model FoodLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  branchId       String?  @map("branch_id") @db.Uuid
+  memberId       String   @map("member_id") @db.Uuid
+  mealType       MealType @map("meal_type")
+  foodName       String   @map("food_name") @db.VarChar(160)
+  calories       Int      @default(0)
+  protein        Decimal  @default(0) @db.Decimal(8, 2)
+  carbs          Decimal  @default(0) @db.Decimal(8, 2)
+  fat            Decimal  @default(0) @db.Decimal(8, 2)
+  loggedAt       DateTime @map("logged_at") @db.Timestamptz
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@index([memberId, loggedAt])
+  @@map("food_logs")
+}
+
+model ProgressEntry {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  branchId       String?  @map("branch_id") @db.Uuid
+  memberId       String   @map("member_id") @db.Uuid
+  weightKg       Decimal? @map("weight_kg") @db.Decimal(6, 2)
+  bodyFatPercent Decimal? @map("body_fat_percent") @db.Decimal(5, 2)
+  measurements   Json     @default("{}")
+  notes          String?  @db.Text
+  recordedAt     DateTime @map("recorded_at") @db.Timestamptz
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@index([memberId, recordedAt])
+  @@map("progress_entries")
+}
+
+model PostureSession {
+  id               String        @id @default(uuid()) @db.Uuid
+  organizationId   String        @map("organization_id") @db.Uuid
+  branchId         String?       @map("branch_id") @db.Uuid
+  memberId         String        @map("member_id") @db.Uuid
+  capturedBy       String?       @map("captured_by") @db.Uuid
+  source           PostureSource
+  analysisType     String        @map("analysis_type") @db.VarChar(80)
+  overallRiskScore Decimal       @map("overall_risk_score") @db.Decimal(5, 2)
+  confidenceScore  Decimal       @map("confidence_score") @db.Decimal(5, 2)
+  summary          String?       @db.Text
+  mediaUrl         String?       @map("media_url") @db.Text
+  reportUrl        String?       @map("report_url") @db.Text
+  modelVersion     String        @map("model_version") @db.VarChar(80)
+  consentSnapshot  Json          @default("{}") @map("consent_snapshot")
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  @@index([memberId, createdAt])
+  @@index([organizationId, branchId, createdAt])
+  @@map("posture_sessions")
+}
+
+model PostureFinding {
+  id                      String        @id @default(uuid()) @db.Uuid
+  postureSessionId        String        @map("posture_session_id") @db.Uuid
+  findingType             String        @map("finding_type") @db.VarChar(100)
+  severity                SeverityLevel
+  riskScore               Decimal       @map("risk_score") @db.Decimal(5, 2)
+  confidenceScore         Decimal       @map("confidence_score") @db.Decimal(5, 2)
+  observations            String?       @db.Text
+  correctiveExercises     Json          @default("[]") @map("corrective_exercises")
+  mobilityRecommendations Json          @default("[]") @map("mobility_recommendations")
+  createdAt               DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  @@index([postureSessionId])
+  @@map("posture_findings")
+}
+
+model Product {
+  id             String          @id @default(uuid()) @db.Uuid
+  organizationId String?         @map("organization_id") @db.Uuid
+  vendorId       String?         @map("vendor_id") @db.Uuid
+  name           String          @db.VarChar(180)
+  slug           String          @db.VarChar(180)
+  category       ProductCategory
+  description    String?         @db.Text
+  brand          String?         @db.VarChar(120)
+  basePriceMinor Int             @map("base_price_minor")
+  currency       String          @db.Char(3)
+  images         String[]
+  attributes     Json            @default("{}")
+  status         RecordStatus    @default(active)
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime?       @map("deleted_at") @db.Timestamptz
+  @@unique([organizationId, slug])
+  @@index([category, status])
+  @@map("products")
+}
+
+model InventoryItem {
+  id                String   @id @default(uuid()) @db.Uuid
+  organizationId    String   @map("organization_id") @db.Uuid
+  branchId          String   @map("branch_id") @db.Uuid
+  productId         String   @map("product_id") @db.Uuid
+  sku               String   @db.VarChar(100)
+  quantityAvailable Int      @default(0) @map("quantity_available")
+  quantityReserved  Int      @default(0) @map("quantity_reserved")
+  reorderThreshold  Int      @default(0) @map("reorder_threshold")
+  warehouseLocation String?  @map("warehouse_location") @db.VarChar(120)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  @@unique([branchId, sku])
+  @@index([organizationId, branchId])
+  @@map("inventory_items")
+}
+
+model Order {
+  id              String      @id @default(uuid()) @db.Uuid
+  organizationId  String?     @map("organization_id") @db.Uuid
+  branchId        String?     @map("branch_id") @db.Uuid
+  userId          String      @map("user_id") @db.Uuid
+  orderNumber     String      @map("order_number") @db.VarChar(80)
+  status          OrderStatus @default(draft)
+  subtotalMinor   Int         @map("subtotal_minor")
+  taxMinor        Int         @default(0) @map("tax_minor")
+  discountMinor   Int         @default(0) @map("discount_minor")
+  shippingMinor   Int         @default(0) @map("shipping_minor")
+  totalMinor      Int         @map("total_minor")
+  currency        String      @db.Char(3)
+  shippingAddress Json?       @map("shipping_address")
+  billingAddress  Json?       @map("billing_address")
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+  @@unique([organizationId, orderNumber])
+  @@index([userId, createdAt])
+  @@index([organizationId, branchId, status])
+  @@map("orders")
+}
+
+model Payment {
+  id                String        @id @default(uuid()) @db.Uuid
+  organizationId    String        @map("organization_id") @db.Uuid
+  branchId          String?       @map("branch_id") @db.Uuid
+  orderId           String?       @map("order_id") @db.Uuid
+  provider          String        @db.VarChar(40)
+  providerPaymentId String?       @map("provider_payment_id") @db.VarChar(160)
+  idempotencyKey    String        @map("idempotency_key") @db.VarChar(160)
+  status            PaymentStatus @default(pending)
+  amountMinor       Int           @map("amount_minor")
+  currency          String        @db.Char(3)
+  failureReason     String?       @map("failure_reason") @db.Text
+  metadata          Json          @default("{}")
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  @@unique([organizationId, idempotencyKey])
+  @@index([organizationId, branchId, status])
+  @@map("payments")
+}
+
+model Notification {
+  id             String             @id @default(uuid()) @db.Uuid
+  organizationId String?            @map("organization_id") @db.Uuid
+  branchId       String?            @map("branch_id") @db.Uuid
+  userId         String             @map("user_id") @db.Uuid
+  channel        NotificationChannel
+  status         NotificationStatus @default(pending)
+  title          String?            @db.VarChar(180)
+  body           String             @db.Text
+  payload        Json               @default("{}")
+  scheduledAt    DateTime?          @map("scheduled_at") @db.Timestamptz
+  sentAt         DateTime?          @map("sent_at") @db.Timestamptz
+  readAt         DateTime?          @map("read_at") @db.Timestamptz
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  @@index([userId, status, createdAt])
+  @@index([organizationId, branchId, createdAt])
+  @@map("notifications")
+}
+
+model AnalyticsEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  branchId       String?  @map("branch_id") @db.Uuid
+  userId         String?  @map("user_id") @db.Uuid
+  eventName      String   @map("event_name") @db.VarChar(120)
+  entityType     String?  @map("entity_type") @db.VarChar(80)
+  entityId       String?  @map("entity_id") @db.Uuid
+  properties     Json     @default("{}")
+  occurredAt     DateTime @map("occurred_at") @db.Timestamptz
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@index([organizationId, branchId, eventName, occurredAt])
+  @@index([userId, occurredAt])
+  @@map("analytics_events")
+}
+
+model AuditLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  branchId       String?  @map("branch_id") @db.Uuid
+  actorUserId    String?  @map("actor_user_id") @db.Uuid
+  actorRole      String?  @map("actor_role") @db.VarChar(80)
+  action         String   @db.VarChar(120)
+  entityType     String   @map("entity_type") @db.VarChar(100)
+  entityId       String?  @map("entity_id") @db.Uuid
+  beforeData     Json?    @map("before_data")
+  afterData      Json?    @map("after_data")
+  ipAddress      String?  @map("ip_address") @db.Inet
+  userAgent      String?  @map("user_agent") @db.Text
+  requestId      String?  @map("request_id") @db.VarChar(120)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@index([organizationId, branchId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
