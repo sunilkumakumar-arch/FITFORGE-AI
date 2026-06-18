@@ -1,0 +1,312 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserStatus { pending active inactive blocked deleted }
+enum RoleKey { super_admin admin franchise_owner gym_owner branch_manager fitness_manager trainer receptionist member vendor }
+enum MembershipStatus { pending active expired paused cancelled }
+enum AttendanceMethod { qr manual biometric mobile }
+enum WorkoutGoal { fat_loss muscle_gain strength bodybuilding powerlifting functional_fitness general_fitness }
+enum OrderStatus { draft pending_payment paid processing fulfilled cancelled refunded }
+enum PaymentStatus { pending authorized paid failed refunded cancelled }
+enum ProductCategory { apparel footwear accessory equipment supplement }
+enum NotificationChannel { whatsapp email sms push in_app }
+enum NotificationStatus { pending sent delivered read failed }
+
+model Organization {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  branches  Branch[]
+  users     User[]
+  roles     Role[]
+}
+
+model Branch {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  name           String
+  code           String
+  city           String?
+  status         String   @default("active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  memberships    Membership[]
+  attendanceLogs AttendanceLog[]
+  qrTokens       QrAttendanceToken[]
+  inventoryItems InventoryItem[]
+  @@unique([organizationId, code])
+}
+
+model User {
+  id             String     @id @default(uuid()) @db.Uuid
+  organizationId String?    @db.Uuid
+  email          String     @unique
+  phone          String?    @unique
+  firstName      String
+  lastName       String
+  status         UserStatus @default(active)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  credential     UserCredential?
+  sessions       RefreshSession[]
+  roles          UserRole[]
+  memberships    Membership[]
+}
+
+model UserCredential {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @unique @db.Uuid
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RefreshSession {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @db.Uuid
+  refreshTokenHash String
+  deviceId         String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Role {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @db.Uuid
+  name           String
+  key            RoleKey
+  createdAt      DateTime @default(now())
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  users          UserRole[]
+  permissions    RolePermission[]
+  @@unique([organizationId, key])
+}
+
+model Permission {
+  id          String @id @default(uuid()) @db.Uuid
+  key         String @unique
+  description String?
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  roleId       String @db.Uuid
+  permissionId String @db.Uuid
+  role         Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  @@id([roleId, permissionId])
+}
+
+model UserRole {
+  id       String @id @default(uuid()) @db.Uuid
+  userId   String @db.Uuid
+  roleId   String @db.Uuid
+  branchId String? @db.Uuid
+  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+}
+
+model MembershipPlan {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  branchId       String? @db.Uuid
+  name           String
+  durationDays   Int
+  priceMinor     Int
+  currency       String @default("INR")
+  isActive       Boolean @default(true)
+  memberships    Membership[]
+}
+
+model Membership {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  branchId       String @db.Uuid
+  memberId       String @db.Uuid
+  planId         String @db.Uuid
+  status         MembershipStatus @default(pending)
+  startDate      DateTime
+  endDate        DateTime
+  autoRenew      Boolean @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  member         User @relation(fields: [memberId], references: [id])
+  branch         Branch @relation(fields: [branchId], references: [id])
+  plan           MembershipPlan @relation(fields: [planId], references: [id])
+}
+
+model AttendanceLog {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  branchId       String @db.Uuid
+  memberId       String @db.Uuid
+  method         AttendanceMethod
+  checkInAt      DateTime @default(now())
+  checkOutAt     DateTime?
+  metadata       Json @default("{}")
+  branch         Branch @relation(fields: [branchId], references: [id])
+}
+
+model QrAttendanceToken {
+  id        String @id @default(uuid()) @db.Uuid
+  branchId  String @db.Uuid
+  tokenHash String @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  branch    Branch @relation(fields: [branchId], references: [id])
+}
+
+model Exercise {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String? @db.Uuid
+  name           String
+  slug           String
+  muscleGroups   String[]
+  difficulty     String
+  instructions   String
+  videoUrl       String?
+  createdAt      DateTime @default(now())
+  @@unique([organizationId, slug])
+}
+
+model WorkoutProgram {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  branchId       String? @db.Uuid
+  memberId       String @db.Uuid
+  trainerId      String? @db.Uuid
+  name           String
+  goal           WorkoutGoal
+  exercises      Json @default("[]")
+  createdAt      DateTime @default(now())
+}
+
+model NutritionPlan {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  branchId       String? @db.Uuid
+  memberId       String @db.Uuid
+  coachId        String? @db.Uuid
+  name           String
+  calories       Int
+  proteinGrams   Int
+  carbsGrams     Int
+  fatGrams       Int
+  meals          Json @default("[]")
+  createdAt      DateTime @default(now())
+}
+
+model Product {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String? @db.Uuid
+  name           String
+  slug           String
+  category       ProductCategory
+  priceMinor     Int
+  currency       String @default("INR")
+  isActive       Boolean @default(true)
+  createdAt      DateTime @default(now())
+  inventoryItems InventoryItem[]
+  @@unique([organizationId, slug])
+}
+
+model InventoryItem {
+  id                String @id @default(uuid()) @db.Uuid
+  organizationId    String @db.Uuid
+  branchId          String @db.Uuid
+  productId         String @db.Uuid
+  sku               String
+  quantityAvailable Int @default(0)
+  reorderThreshold  Int @default(0)
+  branch            Branch @relation(fields: [branchId], references: [id])
+  product           Product @relation(fields: [productId], references: [id])
+  @@unique([branchId, sku])
+}
+
+model Order {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  branchId       String? @db.Uuid
+  userId         String @db.Uuid
+  orderNumber    String
+  status         OrderStatus @default(draft)
+  items          Json @default("[]")
+  totalMinor     Int
+  currency       String @default("INR")
+  createdAt      DateTime @default(now())
+  payments       Payment[]
+  @@unique([organizationId, orderNumber])
+}
+
+model Payment {
+  id                String @id @default(uuid()) @db.Uuid
+  organizationId    String @db.Uuid
+  branchId          String? @db.Uuid
+  orderId           String? @db.Uuid
+  purpose           String
+  provider          String @default("razorpay")
+  providerOrderId   String?
+  providerPaymentId String?
+  idempotencyKey    String
+  status            PaymentStatus @default(pending)
+  amountMinor       Int
+  currency          String @default("INR")
+  metadata          Json @default("{}")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  order             Order? @relation(fields: [orderId], references: [id])
+  @@unique([organizationId, idempotencyKey])
+}
+
+model TrainerBooking {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  branchId       String @db.Uuid
+  trainerId      String @db.Uuid
+  memberId       String @db.Uuid
+  startsAt       DateTime
+  endsAt         DateTime
+  status         String @default("requested")
+  paymentId      String? @db.Uuid
+  createdAt      DateTime @default(now())
+}
+
+model Notification {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String? @db.Uuid
+  branchId       String? @db.Uuid
+  userId         String? @db.Uuid
+  channel        NotificationChannel
+  status         NotificationStatus @default(pending)
+  to             String
+  template       String?
+  body           String
+  providerId     String?
+  createdAt      DateTime @default(now())
+}
+
+model AuditLog {
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String? @db.Uuid
+  branchId       String? @db.Uuid
+  actorUserId    String? @db.Uuid
+  action         String
+  entityType     String
+  entityId       String?
+  beforeData     Json?
+  afterData      Json?
+  createdAt      DateTime @default(now())
+}

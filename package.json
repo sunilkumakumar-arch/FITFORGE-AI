@@ -1,0 +1,15 @@
+{
+  "name": "fitforge-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FITFORGE AI production implementation",
+  "workspaces": ["services/api", "apps/admin-web"],
+  "scripts": {
+    "api:build": "npm run build --workspace services/api",
+    "api:test": "npm run test --workspace services/api",
+    "api:prisma:validate": "npm run prisma:validate --workspace services/api",
+    "web:build": "npm run build --workspace apps/admin-web",
+    "web:typecheck": "npm run typecheck --workspace apps/admin-web"
+  },
+  "license": "UNLICENSED"
+}

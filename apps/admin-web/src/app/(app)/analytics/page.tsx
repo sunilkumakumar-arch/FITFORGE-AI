@@ -1,0 +1,2 @@
+import { Card } from '@/components/ui';
+export default function Page() { return <section className='space-y-6 p-8'><h2 className='text-4xl font-bold'>Revenue Analytics</h2><Card><p className='text-zinc-300'>Monitor payment revenue, attendance, renewals, and product sales.</p><p className='mt-4 text-sm text-zinc-500'>This page is wired to the Phase 8 backend API client and ready for form integration.</p></Card></section>; }

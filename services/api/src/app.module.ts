@@ -1,0 +1,36 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthGuard } from './auth/auth.guard';
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
+import { RbacGuard } from './auth/rbac.guard';
+import { PrismaService } from './core/prisma.service';
+import { AuditService } from './core/audit.service';
+import { ResourceController } from './resources/resource.controller';
+import { ResourceService } from './resources/resource.service';
+import { AttendanceController } from './attendance/attendance.controller';
+import { AttendanceService } from './attendance/attendance.service';
+import { PaymentsController } from './payments/payments.controller';
+import { PaymentsService } from './payments/payments.service';
+import { WhatsappController } from './whatsapp/whatsapp.controller';
+import { WhatsappService } from './whatsapp/whatsapp.service';
+import { AnalyticsController } from './analytics/analytics.controller';
+
+@Module({
+  imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.example'] }), JwtModule.register({})],
+  controllers: [AuthController, AttendanceController, PaymentsController, WhatsappController, AnalyticsController, ResourceController],
+  providers: [
+    PrismaService,
+    AuditService,
+    AuthService,
+    ResourceService,
+    AttendanceService,
+    PaymentsService,
+    WhatsappService,
+    { provide: APP_GUARD, useClass: AuthGuard },
+    { provide: APP_GUARD, useClass: RbacGuard },
+  ],
+})
+export class AppModule {}
