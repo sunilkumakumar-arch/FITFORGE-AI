@@ -1,0 +1,599 @@
+# FITFORGE AI - Project Status
+
+Status date: June 18, 2026
+
+Current active branch:
+
+- `cursor/phase8-production-implementation-dcf2`
+
+This document summarizes the current state of the FITFORGE AI repository after Phase 8 implementation work.
+
+---
+
+## 1. Completed Phases
+
+### Phase 1 - Product Requirements Document
+
+Completed:
+
+- Executive summary
+- Product vision, mission, value proposition
+- User personas
+- Business goals
+- Functional and non-functional requirements
+- Monetization strategy
+- Subscription plans
+- Success metrics
+
+### Phase 2 - System Architecture
+
+Completed:
+
+- Enterprise architecture overview
+- AWS deployment architecture
+- Backend, mobile, web, AI, analytics, security, and DevOps components
+- PostgreSQL, Redis, Docker, JWT, and RBAC architecture direction
+- High-level API and folder structure
+
+### Phase 3 - PostgreSQL Database Schema
+
+Completed:
+
+- Multi-tenant PostgreSQL schema design
+- Organization and branch model
+- RBAC model
+- Membership, attendance, workouts, nutrition, inventory, e-commerce, payments, notifications, analytics, and audit models
+- Prisma-oriented schema strategy
+- Indexes, constraints, relationships, migration strategy
+
+### Phase 4 - Backend Development
+
+Completed:
+
+- Initial NestJS backend scaffold
+- Prisma schema
+- JWT authentication
+- Refresh token handling
+- RBAC guards
+- Multi-tenant request context
+- Core module controllers, DTOs, services, and repositories
+- Basic tests and validation
+
+### Phase 5 - Frontend and Mobile Applications
+
+Completed:
+
+- Next.js 15 admin dashboard architecture
+- Flutter mobile app source architecture
+- Admin, branch, fitness manager, trainer, and reception dashboard surfaces
+- Member and trainer mobile app surfaces
+- API client patterns and reusable UI structures
+
+### Phase 6 - AI Posture Analysis and Computer Vision System
+
+Completed:
+
+- AI posture and computer vision architecture
+- MediaPipe Pose and MoveNet fallback strategy
+- TensorFlow Lite plan
+- Flutter and web camera integration design
+- Exercise analysis model for squat, deadlift, bench press, shoulder press, lunge, and plank
+- Storage, privacy, and deployment strategy
+
+### Phase 7 - Production Deployment, Security, Payments, and Commercial Readiness
+
+Completed:
+
+- Production deployment architecture
+- Security architecture
+- OWASP review checklist
+- Razorpay payment architecture
+- AWS architecture
+- CI/CD strategy
+- Monitoring, logging, backup, and disaster recovery plan
+- Commercial readiness checklist
+
+### Phase 8 - Full Production Implementation
+
+Completed:
+
+- Runnable monorepo workspace
+- NestJS backend implementation
+- Prisma models
+- Next.js admin dashboard implementation
+- Flutter mobile source implementation
+- QR attendance implementation
+- Razorpay integration implementation
+- WhatsApp integration implementation
+- Revenue analytics endpoint
+- Build and validation fixes
+
+---
+
+## 2. Generated Code Files
+
+### Root
+
+- `.gitignore`
+- `README.md`
+- `package.json`
+- `package-lock.json`
+- `PROJECT_STATUS.md`
+
+### Backend
+
+Located in:
+
+- `services/api`
+
+Generated files include:
+
+- `services/api/package.json`
+- `services/api/Dockerfile`
+- `services/api/.env.example`
+- `services/api/nest-cli.json`
+- `services/api/tsconfig.json`
+- `services/api/tsconfig.build.json`
+- `services/api/jest.config.js`
+- `services/api/prisma.config.ts`
+- `services/api/prisma/schema.prisma`
+- `services/api/src/main.ts`
+- `services/api/src/app.module.ts`
+- `services/api/src/core/prisma.service.ts`
+- `services/api/src/core/audit.service.ts`
+- `services/api/src/auth/*`
+- `services/api/src/resources/*`
+- `services/api/src/attendance/*`
+- `services/api/src/payments/*`
+- `services/api/src/whatsapp/*`
+- `services/api/src/analytics/*`
+
+### Frontend
+
+Located in:
+
+- `apps/admin-web`
+
+Generated files include:
+
+- `apps/admin-web/package.json`
+- `apps/admin-web/next.config.ts`
+- `apps/admin-web/postcss.config.mjs`
+- `apps/admin-web/tsconfig.json`
+- `apps/admin-web/.env.example`
+- `apps/admin-web/src/app/*`
+- `apps/admin-web/src/components/*`
+- `apps/admin-web/src/lib/api.ts`
+- `apps/admin-web/src/stores/auth.ts`
+- `apps/admin-web/src/types/styles.d.ts`
+
+### Mobile
+
+Located in:
+
+- `apps/mobile`
+
+Generated files include:
+
+- `apps/mobile/pubspec.yaml`
+- `apps/mobile/README.md`
+- `apps/mobile/android/.gitkeep`
+- `apps/mobile/ios/.gitkeep`
+- `apps/mobile/lib/main.dart`
+- `apps/mobile/lib/src/app.dart`
+- `apps/mobile/lib/src/state/app_state.dart`
+- `apps/mobile/lib/src/services/api_client.dart`
+- `apps/mobile/lib/src/screens/login_screen.dart`
+- `apps/mobile/lib/src/screens/home_screen.dart`
+- `apps/mobile/lib/src/screens/module_screen.dart`
+
+---
+
+## 3. Backend Modules Completed
+
+Implemented in code:
+
+- NestJS application bootstrap
+- Swagger/OpenAPI setup
+- Prisma service
+- Prisma schema
+- JWT authentication
+- Refresh token storage and rotation
+- RBAC guard
+- Public route decorator
+- Current user decorator
+- Audit service
+- Generic resource controller and service
+- Organization resource support
+- Branch resource support
+- User resource support
+- Role and permission resource support
+- Membership plan resource support
+- Membership resource support
+- Exercise resource support
+- Workout program resource support
+- Nutrition plan resource support
+- Product resource support
+- Inventory resource support
+- Order resource support
+- Trainer booking resource support
+- Notification resource support
+- Audit log resource support
+- QR attendance token generation
+- QR attendance check-in
+- Attendance check-out
+- Razorpay order creation
+- Razorpay webhook signature verification
+- Payment state update from Razorpay webhook
+- WhatsApp template send integration
+- Revenue analytics endpoint
+- Dashboard analytics endpoint
+- Basic backend unit test
+
+Backend validation completed:
+
+- `npm run api:prisma:validate`
+- `npm run api:build`
+- `npm run api:test`
+
+---
+
+## 4. Frontend Modules Completed
+
+Implemented in code:
+
+- Next.js 15 app router setup
+- Global styling with Tailwind CSS
+- API client
+- Zustand auth store
+- React Query provider
+- Reusable shell layout
+- Reusable card, button, and input components
+- Generic resource management page
+- Login page
+- Dashboard page
+- Memberships page
+- Attendance page
+- Workout programs page
+- Exercises page
+- Nutrition plans page
+- Inventory page
+- Products page
+- Orders page
+- Trainer bookings page
+- QR attendance page
+- Payments page
+- WhatsApp page
+- Analytics page
+
+Frontend validation completed:
+
+- `npm run web:build`
+- `npm run web:typecheck` after Next route types are generated
+
+---
+
+## 5. Mobile Modules Completed
+
+Implemented in Flutter source:
+
+- Flutter app entrypoint
+- App theme
+- App state
+- API client
+- Login screen
+- Member role selection
+- Trainer role selection
+- Member home screen
+- Trainer home screen
+- Generic module screen
+- QR attendance feature surface
+- Membership feature surface
+- Workout feature surface
+- Nutrition feature surface
+- Store feature surface
+- Payment feature surface
+- WhatsApp feature surface
+- Trainer booking feature surface
+- Client workout feature surface
+- Client nutrition feature surface
+- Progress feature surface
+
+Mobile validation status:
+
+- Flutter SDK is not installed in the current environment.
+- `flutter analyze`, `flutter test`, Android build, and iOS build still need to be run in a Flutter-enabled environment.
+
+---
+
+## 6. AI Modules Completed
+
+Completed as architecture and implementation surface:
+
+- AI posture analysis architecture
+- Computer vision data flow
+- MediaPipe Pose primary model plan
+- MoveNet fallback plan
+- TensorFlow Lite runtime plan
+- Flutter camera integration plan
+- Web camera integration plan
+- Squat analysis rules
+- Deadlift analysis rules
+- Bench press analysis rules
+- Shoulder press analysis rules
+- Lunge analysis rules
+- Plank analysis rules
+- Joint angle calculation strategy
+- Rep counting strategy
+- Injury risk scoring strategy
+- AI coaching feedback strategy
+- Privacy and consent strategy
+
+Implemented in runnable code:
+
+- Backend posture-specific module is not yet fully implemented in Phase 8 code.
+- Frontend and mobile expose feature surfaces for AI/posture, but real camera inference is not yet implemented.
+
+---
+
+## 7. Missing Production Features
+
+The current implementation is runnable but not yet commercially production-complete.
+
+Missing or incomplete:
+
+- Full database migrations with seeded roles and permissions
+- Production-grade tenant isolation enforcement in every query
+- Fine-grained RBAC permission decorators on every endpoint
+- Complete DTO validation for all backend APIs
+- API-level integration tests
+- End-to-end tests
+- Razorpay live-mode reconciliation jobs
+- Razorpay refund workflow
+- Razorpay subscription billing automation
+- Membership auto-renewal scheduler
+- PT package credit accounting
+- Product cart flow
+- Inventory reservation and release flow
+- Order fulfillment workflow
+- WhatsApp opt-in and opt-out management
+- WhatsApp delivery webhook handling
+- QR code rotation job and branch display UI
+- Biometric attendance integration
+- Full trainer calendar and availability engine
+- Franchise royalty calculations
+- Advanced revenue analytics aggregation
+- Production audit log immutability controls
+- Object storage integration for media and documents
+- AI posture real-time MediaPipe implementation
+- MoveNet fallback implementation
+- TensorFlow Lite model bundling
+- Flutter camera integration
+- Web camera integration
+- Progress photo upload
+- Body measurement tracking UI and APIs
+- Admin user invitation flow
+- Password reset flow
+- MFA
+- Email/SMS notification providers
+- Docker Compose for full local stack
+- Terraform or IaC for AWS
+- GitHub Actions CI/CD workflows
+- Production monitoring dashboards
+- Backup automation scripts
+- Disaster recovery runbooks in executable form
+- Security headers and WAF deployment configuration
+- OWASP penetration test execution
+
+---
+
+## 8. Remaining Development Tasks
+
+Recommended task groups:
+
+### Backend
+
+1. Add complete DTOs with `class-validator`.
+2. Add permission decorators to each protected endpoint.
+3. Add tenant-scoped Prisma query helpers.
+4. Add seed script for roles, permissions, plans, demo branches, and admin user.
+5. Add migration generation and deployment workflow.
+6. Add integration tests with a test PostgreSQL database.
+7. Add Razorpay reconciliation and refund workflows.
+8. Add WhatsApp webhook receiver and delivery status updates.
+9. Add membership renewal scheduler.
+10. Add PT package credit ledger.
+11. Add inventory reservation service.
+12. Add cart and checkout services.
+13. Add posture analysis APIs and persistence models.
+
+### Frontend
+
+1. Replace generic JSON editors with production forms.
+2. Add route guards for authenticated users.
+3. Add role-aware navigation.
+4. Add real dashboard charts.
+5. Add tables with pagination, filtering, and search.
+6. Add Razorpay checkout client integration.
+7. Add QR code rendering and scanner workflows.
+8. Add WhatsApp notification composer.
+9. Add trainer booking calendar.
+10. Add franchise reporting dashboards.
+
+### Mobile
+
+1. Run `flutter create` to generate Android and iOS platform runners.
+2. Add secure token storage.
+3. Add QR scanner package and check-in flow.
+4. Add Razorpay Flutter checkout.
+5. Add camera integration for AI posture.
+6. Add offline caching.
+7. Add push notifications.
+8. Add production navigation and feature screens.
+9. Add mobile tests.
+10. Build Android and iOS release artifacts.
+
+### DevOps
+
+1. Add Docker Compose for local PostgreSQL, Redis, API, and web.
+2. Add GitHub Actions workflows.
+3. Add ECS deployment manifests or Terraform.
+4. Add database backup job.
+5. Add monitoring and alerting dashboards.
+6. Add secret management guide.
+7. Add production smoke tests.
+
+---
+
+## 9. Deployment Readiness Percentage
+
+Current estimated deployment readiness:
+
+```text
+42%
+```
+
+Reasoning:
+
+- Core monorepo structure exists.
+- Backend builds and tests pass.
+- Prisma schema validates.
+- Web dashboard builds and typechecks.
+- Flutter source exists but has not been validated in this environment.
+- Payment and WhatsApp integrations are implemented as first working adapters but need live sandbox verification.
+- Security controls are partially implemented but require hardening.
+- CI/CD, IaC, monitoring, backup automation, and production operational controls are not yet implemented.
+
+Readiness by area:
+
+| Area | Readiness |
+|---|---:|
+| Backend API foundation | 60% |
+| Database schema | 65% |
+| Authentication | 55% |
+| RBAC | 40% |
+| Memberships and attendance | 50% |
+| Payments | 40% |
+| WhatsApp notifications | 35% |
+| Admin web | 45% |
+| Mobile app | 30% |
+| AI/computer vision | 20% |
+| DevOps/deployment | 15% |
+| Security hardening | 30% |
+| Commercial readiness | 35% |
+
+---
+
+## 10. Recommended Phase 9 Roadmap
+
+### Phase 9A - Backend Hardening and Data Integrity
+
+Goals:
+
+- Convert generic APIs into explicit, typed domain modules.
+- Add full DTO validation.
+- Enforce tenant scoping consistently.
+- Seed permissions and roles.
+- Add production migrations.
+- Add integration tests.
+
+Deliverables:
+
+- Explicit controllers/services for memberships, attendance, workouts, nutrition, inventory, orders, products, trainer bookings, notifications, and analytics.
+- Test database integration suite.
+- Seed command.
+- Role permission matrix in code.
+
+### Phase 9B - Payments and Commercial Workflow Completion
+
+Goals:
+
+- Make all revenue workflows production-safe.
+
+Deliverables:
+
+- Razorpay sandbox verification.
+- Webhook replay protection.
+- Payment reconciliation job.
+- Refund flow.
+- Membership renewal automation.
+- PT package credit ledger.
+- Inventory reservation.
+- Checkout and order fulfillment flow.
+
+### Phase 9C - Admin Dashboard Production UI
+
+Goals:
+
+- Replace prototype JSON editors with production forms and tables.
+
+Deliverables:
+
+- Role-aware navigation.
+- Auth route protection.
+- CRUD forms.
+- Paginated data tables.
+- Revenue charts.
+- QR attendance dashboard.
+- WhatsApp notification composer.
+- Trainer booking calendar.
+
+### Phase 9D - Mobile App Production Integration
+
+Goals:
+
+- Turn Flutter source into buildable Android/iOS apps.
+
+Deliverables:
+
+- Flutter platform runner generation.
+- Secure token storage.
+- QR scanning.
+- Razorpay mobile checkout.
+- Push notifications.
+- Member and trainer dashboards.
+- Mobile test suite.
+
+### Phase 9E - AI Posture MVP
+
+Goals:
+
+- Deliver first real AI posture feature.
+
+Recommended MVP:
+
+- Flutter camera stream.
+- MediaPipe Pose integration.
+- Squat angle calculation.
+- Rep counting.
+- Basic risk score.
+- Backend session storage.
+- Member report screen.
+- Trainer review screen.
+
+### Phase 9F - Deployment and Operations
+
+Goals:
+
+- Prepare a staging deployment.
+
+Deliverables:
+
+- Docker Compose local stack.
+- GitHub Actions CI.
+- AWS ECS deployment plan converted into IaC.
+- RDS and Redis provisioning.
+- Secrets Manager integration.
+- CloudWatch logs and alarms.
+- Backup and restore test.
+- Production smoke test suite.
+
+### Recommended Phase 9 Priority Order
+
+1. Backend hardening and seed data.
+2. Payment and renewal correctness.
+3. Admin dashboard production forms.
+4. Local Docker Compose and CI.
+5. Mobile QR attendance and Razorpay checkout.
+6. AI posture MVP.
+7. AWS staging deployment.
