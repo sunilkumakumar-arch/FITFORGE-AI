@@ -1,0 +1,19 @@
+name: Deploy Staging
+on:
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run api:prisma:validate
+      - run: npm run api:build
+      - run: npm run web:build
+      - name: Deployment placeholder
+        run: echo "Build artifacts validated. Configure AWS OIDC role and ECS service names to enable deployment."

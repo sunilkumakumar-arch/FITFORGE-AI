@@ -1,0 +1,2 @@
+import { ResourcePage } from '@/components/resource-page';
+export default function Page() { return <ResourcePage resource="memberships" sample={{"organizationId": "00000000-0000-0000-0000-000000000001", "branchId": "00000000-0000-0000-0000-000000000002", "memberId": "00000000-0000-0000-0000-000000000003", "planId": "00000000-0000-0000-0000-000000000004", "startDate": "2026-06-18T00:00:00.000Z", "endDate": "2026-07-18T00:00:00.000Z", "status": "active"}} />; }

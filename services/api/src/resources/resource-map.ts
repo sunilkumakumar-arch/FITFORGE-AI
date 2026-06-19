@@ -1,0 +1,18 @@
+export const resourceMap: Record<string, { model: string; createPermission: string; readPermission: string; updatePermission: string; deletePermission: string }> = {
+  organizations: { model: 'organization', createPermission: 'organizations.manage', readPermission: 'organizations.read', updatePermission: 'organizations.manage', deletePermission: 'organizations.manage' },
+  branches: { model: 'branch', createPermission: 'branches.manage', readPermission: 'branches.read', updatePermission: 'branches.manage', deletePermission: 'branches.manage' },
+  users: { model: 'user', createPermission: 'users.manage', readPermission: 'users.read', updatePermission: 'users.manage', deletePermission: 'users.manage' },
+  roles: { model: 'role', createPermission: 'roles.manage', readPermission: 'roles.read', updatePermission: 'roles.manage', deletePermission: 'roles.manage' },
+  permissions: { model: 'permission', createPermission: 'roles.manage', readPermission: 'roles.read', updatePermission: 'roles.manage', deletePermission: 'roles.manage' },
+  'membership-plans': { model: 'membershipPlan', createPermission: 'memberships.manage', readPermission: 'memberships.read', updatePermission: 'memberships.manage', deletePermission: 'memberships.manage' },
+  memberships: { model: 'membership', createPermission: 'memberships.manage', readPermission: 'memberships.read', updatePermission: 'memberships.manage', deletePermission: 'memberships.manage' },
+  exercises: { model: 'exercise', createPermission: 'workouts.manage', readPermission: 'workouts.read', updatePermission: 'workouts.manage', deletePermission: 'workouts.manage' },
+  'workout-programs': { model: 'workoutProgram', createPermission: 'workouts.manage', readPermission: 'workouts.read', updatePermission: 'workouts.manage', deletePermission: 'workouts.manage' },
+  'nutrition-plans': { model: 'nutritionPlan', createPermission: 'nutrition.manage', readPermission: 'nutrition.read', updatePermission: 'nutrition.manage', deletePermission: 'nutrition.manage' },
+  products: { model: 'product', createPermission: 'products.manage', readPermission: 'products.read', updatePermission: 'products.manage', deletePermission: 'products.manage' },
+  inventory: { model: 'inventoryItem', createPermission: 'inventory.manage', readPermission: 'inventory.read', updatePermission: 'inventory.manage', deletePermission: 'inventory.manage' },
+  orders: { model: 'order', createPermission: 'orders.manage', readPermission: 'orders.read', updatePermission: 'orders.manage', deletePermission: 'orders.manage' },
+  'trainer-bookings': { model: 'trainerBooking', createPermission: 'bookings.manage', readPermission: 'bookings.read', updatePermission: 'bookings.manage', deletePermission: 'bookings.manage' },
+  notifications: { model: 'notification', createPermission: 'notifications.manage', readPermission: 'notifications.read', updatePermission: 'notifications.manage', deletePermission: 'notifications.manage' },
+  'audit-logs': { model: 'auditLog', createPermission: 'audit.read', readPermission: 'audit.read', updatePermission: 'audit.read', deletePermission: 'audit.read' },
+};

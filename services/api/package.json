@@ -1,0 +1,52 @@
+{
+  "name": "@fitforge/api",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "prisma generate && nest build",
+    "start": "node dist/main.js",
+    "start:dev": "nest start --watch",
+    "test": "jest --config jest.config.js",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@nestjs/common": "latest",
+    "@nestjs/config": "latest",
+    "@nestjs/core": "latest",
+    "@nestjs/jwt": "latest",
+    "@nestjs/passport": "latest",
+    "@nestjs/platform-express": "latest",
+    "@nestjs/swagger": "latest",
+    "@prisma/client": "latest",
+    "bcryptjs": "latest",
+    "class-transformer": "latest",
+    "class-validator": "latest",
+    "helmet": "latest",
+    "passport": "latest",
+    "passport-jwt": "latest",
+    "razorpay": "latest",
+    "reflect-metadata": "latest",
+    "rxjs": "latest"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "latest",
+    "@nestjs/testing": "latest",
+    "@types/bcryptjs": "latest",
+    "@types/jest": "latest",
+    "@types/node": "latest",
+    "@types/passport-jwt": "latest",
+    "jest": "latest",
+    "prisma": "latest",
+    "ts-jest": "latest",
+    "ts-node": "^10.9.2",
+    "typescript": "latest"
+  }
+}
