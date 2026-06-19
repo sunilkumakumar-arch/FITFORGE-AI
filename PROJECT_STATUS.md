@@ -161,6 +161,26 @@ Completed:
 - Staging deployment workflow
 - Unit tests for production jobs and rate limiting
 
+### Phase 12 - Commercial UI, Mobile Integration, and Auth Recovery
+
+Completed:
+
+- Personal training package API
+- PT credit ledger
+- PT package purchase activation after paid payment verification
+- PT credit consumption on completed booking
+- PT credit balance endpoint
+- Password reset request endpoint
+- Password reset completion endpoint
+- Hashed password reset tokens
+- Refresh session revocation after password reset
+- Admin dashboard production forms for QR attendance, Razorpay, WhatsApp, and trainer bookings
+- Flutter QR attendance screen
+- Flutter Razorpay order creation screen
+- Flutter AI posture demo-frame analysis screen
+- Mobile navigation to concrete feature screens
+- Unit tests for PT credits and password reset
+
 ---
 
 ## 2. Generated Code Files
@@ -239,6 +259,9 @@ Generated files include:
 - `apps/mobile/lib/src/screens/login_screen.dart`
 - `apps/mobile/lib/src/screens/home_screen.dart`
 - `apps/mobile/lib/src/screens/module_screen.dart`
+- `apps/mobile/lib/src/screens/qr_attendance_screen.dart`
+- `apps/mobile/lib/src/screens/razorpay_checkout_screen.dart`
+- `apps/mobile/lib/src/screens/posture_capture_screen.dart`
 
 ---
 
@@ -311,6 +334,10 @@ Implemented in code:
 - CloudWatch dashboard scaffold
 - RDS backup script
 - Staging deployment workflow
+- PT package and credit ledger module
+- Password reset security flow
+- Admin dashboard action forms
+- Concrete mobile screens for QR attendance, Razorpay checkout, and posture analysis
 
 Backend validation completed:
 
@@ -347,6 +374,10 @@ Implemented in code:
 - Payments page
 - WhatsApp page
 - Analytics page
+- QR attendance production form
+- Razorpay order creation form
+- WhatsApp template send form
+- Trainer booking form
 
 Frontend validation completed:
 
@@ -380,6 +411,9 @@ Implemented in Flutter source:
 - Client workout feature surface
 - Client nutrition feature surface
 - Progress feature surface
+- Concrete QR attendance check-in screen
+- Concrete Razorpay order creation screen
+- Concrete AI posture demo-frame analysis screen
 
 Mobile validation status:
 
@@ -436,13 +470,13 @@ Missing or incomplete:
 - Razorpay subscription billing automation
 - Membership auto-renewal scheduler
 - EventBridge or worker scheduling for membership renewal scans
-- PT package credit accounting
-- Product cart frontend production forms
+- PT package live-provider verification
+- Product cart frontend production forms beyond operational action forms
 - Inventory reservation timeout release scheduled job
 - EventBridge or worker scheduling for reservation release
 - Order fulfillment warehouse UI
 - WhatsApp webhook signature verification, if supported by selected provider
-- QR code rotation job and branch display UI
+- QR code rotation job and branch display UI beyond admin generation form
 - Biometric attendance integration
 - Full trainer calendar frontend UI
 - Franchise royalty calculations
@@ -458,7 +492,7 @@ Missing or incomplete:
 - Progress photo upload
 - Body measurement tracking UI
 - Admin user invitation flow
-- Password reset flow
+- Password reset email provider delivery
 - MFA
 - Email/SMS notification providers
 - Production Docker hardening and image scanning
@@ -484,31 +518,30 @@ Recommended task groups:
 4. Add integration tests with a test PostgreSQL database.
 5. Add Razorpay reconciliation provider integration tests.
 6. Add EventBridge schedules for renewal and reservation jobs.
-7. Add PT package credit ledger.
-8. Add PT package credit ledger.
-9. Add posture analysis integration tests.
-10. Add object storage for media and documents.
+7. Add PT package provider verification tests.
+8. Add posture analysis integration tests.
+9. Add object storage for media and documents.
 
 ### Frontend
 
-1. Replace generic JSON editors with production forms.
+1. Replace remaining generic JSON editors with production forms.
 2. Add route guards for authenticated users.
 3. Add role-aware navigation.
 4. Add real dashboard charts.
 5. Add tables with pagination, filtering, and search.
 6. Add Razorpay checkout client integration.
-7. Add QR code rendering and scanner workflows.
-8. Add WhatsApp notification composer.
-9. Add trainer booking calendar.
+7. Add QR code rendering and scanner workflows beyond token generation.
+8. Add advanced WhatsApp template composer.
+9. Add full trainer booking calendar UI.
 10. Add franchise reporting dashboards.
 
 ### Mobile
 
 1. Run `flutter create` to generate Android and iOS platform runners.
 2. Add secure token storage.
-3. Add QR scanner package and check-in flow.
-4. Add Razorpay Flutter checkout.
-5. Add camera integration for AI posture.
+3. Add QR scanner package integration.
+4. Add Razorpay Flutter SDK checkout completion.
+5. Add real camera integration for AI posture.
 6. Add offline caching.
 7. Add push notifications.
 8. Add production navigation and feature screens.
@@ -531,7 +564,7 @@ Recommended task groups:
 Current estimated deployment readiness:
 
 ```text
-70%
+78%
 ```
 
 Reasoning:
@@ -545,6 +578,7 @@ Reasoning:
 - Inventory, cart, checkout, fulfillment, trainer booking, and AI posture MVP backend now exist.
 - Seed, migration SQL, Docker Compose, and CI now exist.
 - Production job endpoints, rate limiting, analytics rollups, Terraform scaffold, monitoring scaffold, backup script, and staging deployment workflow now exist.
+- PT credit ledger, password reset flow, admin operational forms, and concrete mobile screens now exist.
 - Security controls are partially implemented but require hardening.
 - IaC, monitoring, backup automation, and production operational controls are not yet fully implemented.
 
@@ -554,17 +588,17 @@ Readiness by area:
 |---|---:|
 | Backend API foundation | 78% |
 | Database schema | 82% |
-| Authentication | 55% |
+| Authentication | 68% |
 | RBAC | 40% |
 | Memberships and attendance | 65% |
-| Payments | 62% |
+| Payments | 68% |
 | WhatsApp notifications | 50% |
-| Admin web | 48% |
-| Mobile app | 30% |
-| AI/computer vision | 35% |
+| Admin web | 58% |
+| Mobile app | 42% |
+| AI/computer vision | 42% |
 | DevOps/deployment | 55% |
-| Security hardening | 42% |
-| Commercial readiness | 62% |
+| Security hardening | 50% |
+| Commercial readiness | 70% |
 
 ---
 

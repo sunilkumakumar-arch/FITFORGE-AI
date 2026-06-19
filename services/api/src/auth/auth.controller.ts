@@ -12,5 +12,7 @@ export class AuthController {
   @Public() @Post('register') register(@Body() dto: any) { return this.auth.register(dto); }
   @Public() @Post('login') login(@Body() dto: any) { return this.auth.login(dto); }
   @Public() @Post('refresh-token') refresh(@Body('refreshToken') token: string) { return this.auth.refresh(token); }
+  @Public() @Post('forgot-password') forgotPassword(@Body('email') email: string) { return this.auth.requestPasswordReset(email); }
+  @Public() @Post('reset-password') resetPassword(@Body('token') token: string, @Body('password') password: string) { return this.auth.resetPassword(token, password); }
   @ApiBearerAuth() @Get('me') me(@CurrentUser() user: AuthUser) { return this.auth.me(user.sub); }
 }

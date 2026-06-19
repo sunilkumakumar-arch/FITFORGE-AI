@@ -32,6 +32,8 @@ import { PostureController } from './posture/posture.controller';
 import { PostureService } from './posture/posture.service';
 import { JobsController } from './jobs/jobs.controller';
 import { JobsService } from './jobs/jobs.service';
+import { PtController } from './pt/pt.controller';
+import { PtService } from './pt/pt.service';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.example'] }), JwtModule.register({})],
@@ -45,6 +47,7 @@ import { JobsService } from './jobs/jobs.service';
     TrainersController,
     PostureController,
     JobsController,
+    PtController,
     PaymentsController,
     WhatsappController,
     AnalyticsController,
@@ -63,6 +66,7 @@ import { JobsService } from './jobs/jobs.service';
     TrainersService,
     PostureService,
     JobsService,
+    PtService,
     PaymentsService,
     WhatsappService,
     { provide: APP_GUARD, useClass: AuthGuard },
