@@ -128,6 +128,7 @@ model User {
   organization   Organization? @relation(fields: [organizationId], references: [id])
   credential     UserCredential?
   sessions       RefreshSession[]
+  resetTokens    PasswordResetToken[]
   roles          UserRole[]
   memberships    Membership[]
 }
@@ -150,6 +151,16 @@ model RefreshSession {
   revokedAt        DateTime?
   createdAt        DateTime  @default(now())
   user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Role {
@@ -399,6 +410,34 @@ model TrainerBooking {
   endsAt         DateTime
   status         String @default("requested")
   paymentId      String? @db.Uuid
+  createdAt      DateTime @default(now())
+}
+
+model PtPackage {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  branchId       String?  @db.Uuid
+  name           String
+  sessionCredits Int
+  validityDays   Int
+  priceMinor     Int
+  currency       String   @default("INR")
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+}
+
+model PtCreditLedger {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  branchId       String?  @db.Uuid
+  memberId       String   @db.Uuid
+  trainerId      String?  @db.Uuid
+  packageId      String?  @db.Uuid
+  bookingId      String?  @db.Uuid
+  paymentId      String?  @db.Uuid
+  creditsDelta   Int
+  reason         String
+  expiresAt      DateTime?
   createdAt      DateTime @default(now())
 }
 

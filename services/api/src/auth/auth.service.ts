@@ -2,6 +2,7 @@ import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/co
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../core/prisma.service';
 import { AuditService } from '../core/audit.service';
 
@@ -34,6 +35,28 @@ export class AuthService {
 
   async me(userId: string) { return (this.prisma as any).user.findUnique({ where: { id: userId }, include: { roles: { include: { role: true } }, memberships: true } }); }
 
+  async requestPasswordReset(email: string) {
+    const user = await (this.prisma as any).user.findUnique({ where: { email } });
+    if (!user) return { success: true };
+    const token = randomBytes(32).toString('hex');
+    await (this.prisma as any).passwordResetToken.create({ data: { userId: user.id, tokenHash: this.hash(token), expiresAt: new Date(Date.now() + 15 * 60 * 1000) } });
+    await this.audit.log({ action: 'auth.password_reset_request', entityType: 'user', entityId: user.id, organizationId: user.organizationId });
+    return { success: true, resetToken: token };
+  }
+
+  async resetPassword(token: string, password: string) {
+    const reset = await (this.prisma as any).passwordResetToken.findUnique({ where: { tokenHash: this.hash(token) }, include: { user: true } });
+    if (!reset || reset.usedAt || reset.expiresAt < new Date()) throw new UnauthorizedException('Invalid or expired reset token');
+    const passwordHash = await bcrypt.hash(password, 12);
+    await (this.prisma as any).$transaction(async (tx: any) => {
+      await tx.userCredential.upsert({ where: { userId: reset.userId }, create: { userId: reset.userId, passwordHash }, update: { passwordHash } });
+      await tx.passwordResetToken.update({ where: { id: reset.id }, data: { usedAt: new Date() } });
+      await tx.refreshSession.updateMany({ where: { userId: reset.userId, revokedAt: null }, data: { revokedAt: new Date() } });
+    });
+    await this.audit.log({ action: 'auth.password_reset_complete', entityType: 'user', entityId: reset.userId, organizationId: reset.user.organizationId });
+    return { success: true };
+  }
+
   private async issueTokens(userId: string, deviceId?: string) {
     const user = await (this.prisma as any).user.findUnique({ where: { id: userId }, include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } } });
     const roles = (user.roles ?? []).map((r: any) => r.role.key);
@@ -44,5 +67,9 @@ export class AuthService {
     const refreshToken = await this.jwt.signAsync({ sub: user.id, sid: session.id }, { secret: this.config.get<string>('JWT_REFRESH_SECRET') ?? 'change-me-refresh', expiresIn: (this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '30d') as any });
     await (this.prisma as any).refreshSession.update({ where: { id: session.id }, data: { refreshTokenHash: await bcrypt.hash(refreshToken, 12) } });
     return { accessToken, refreshToken, tokenType: 'Bearer' };
+  }
+
+  private hash(value: string) {
+    return createHash('sha256').update(value).digest('hex');
   }
 }

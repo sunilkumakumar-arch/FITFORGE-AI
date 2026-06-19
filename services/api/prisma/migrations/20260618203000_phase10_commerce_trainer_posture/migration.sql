@@ -97,6 +97,18 @@ CREATE TABLE "RefreshSession" (
 );
 
 -- CreateTable
+CREATE TABLE "PasswordResetToken" (
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "tokenHash" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "usedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PasswordResetToken_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Role" (
     "id" UUID NOT NULL,
     "organizationId" UUID,
@@ -373,6 +385,40 @@ CREATE TABLE "TrainerBooking" (
 );
 
 -- CreateTable
+CREATE TABLE "PtPackage" (
+    "id" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "branchId" UUID,
+    "name" TEXT NOT NULL,
+    "sessionCredits" INTEGER NOT NULL,
+    "validityDays" INTEGER NOT NULL,
+    "priceMinor" INTEGER NOT NULL,
+    "currency" TEXT NOT NULL DEFAULT 'INR',
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PtPackage_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PtCreditLedger" (
+    "id" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "branchId" UUID,
+    "memberId" UUID NOT NULL,
+    "trainerId" UUID,
+    "packageId" UUID,
+    "bookingId" UUID,
+    "paymentId" UUID,
+    "creditsDelta" INTEGER NOT NULL,
+    "reason" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PtCreditLedger_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "TrainerAvailability" (
     "id" UUID NOT NULL,
     "organizationId" UUID NOT NULL,
@@ -528,6 +574,9 @@ CREATE UNIQUE INDEX "User_phone_key" ON "User"("phone");
 CREATE UNIQUE INDEX "UserCredential_userId_key" ON "UserCredential"("userId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "PasswordResetToken_tokenHash_key" ON "PasswordResetToken"("tokenHash");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Role_organizationId_key_key" ON "Role"("organizationId", "key");
 
 -- CreateIndex
@@ -577,6 +626,9 @@ ALTER TABLE "UserCredential" ADD CONSTRAINT "UserCredential_userId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "RefreshSession" ADD CONSTRAINT "RefreshSession_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PasswordResetToken" ADD CONSTRAINT "PasswordResetToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Role" ADD CONSTRAINT "Role_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE SET NULL ON UPDATE CASCADE;

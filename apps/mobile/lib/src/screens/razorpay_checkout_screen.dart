@@ -1,0 +1,5 @@
+import 'package:flutter/material.dart';
+import '../app.dart';
+
+class RazorpayCheckoutScreen extends StatefulWidget { const RazorpayCheckoutScreen({super.key}); @override State<RazorpayCheckoutScreen> createState()=>_RazorpayCheckoutScreenState(); }
+class _RazorpayCheckoutScreenState extends State<RazorpayCheckoutScreen>{ final organizationId=TextEditingController(); String result=''; @override Widget build(BuildContext context){ final api=AppScope.of(context).api; return Scaffold(appBar: AppBar(title: const Text('Razorpay Checkout')), body: ListView(padding: const EdgeInsets.all(16), children:[TextField(controller: organizationId, decoration: const InputDecoration(labelText:'Organization ID')), const SizedBox(height:16), FilledButton(onPressed:() async { final response=await api.post('/payments/razorpay/orders', {'organizationId':organizationId.text,'purpose':'membership_renewal','amountMinor':299900,'currency':'INR','idempotencyKey':'mobile-${DateTime.now().millisecondsSinceEpoch}'}); setState(()=>result=response.toString()); }, child: const Text('Create Payment Order')), Text(result)])); }}
