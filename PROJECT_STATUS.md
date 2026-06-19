@@ -181,6 +181,26 @@ Completed:
 - Mobile navigation to concrete feature screens
 - Unit tests for PT credits and password reset
 
+### Phase 13 - External Readiness Validation and Real Camera Scaffolding
+
+Completed:
+
+- Real MediaPipe Tasks Vision web camera component
+- Web posture camera route
+- Flutter camera dependency setup
+- Flutter Google ML Kit pose detection screen
+- Flutter Razorpay SDK dependency
+- Flutter secure storage dependency
+- Flutter TFLite dependency
+- Razorpay sandbox verification script
+- Flutter validation script
+- OWASP security check script
+- Production deployment validation script
+- Production smoke test script
+- Terraform monitoring alarms module
+- Terraform EventBridge schedules module
+- Updated root package scripts for external validation
+
 ---
 
 ## 2. Generated Code Files
@@ -338,6 +358,13 @@ Implemented in code:
 - Password reset security flow
 - Admin dashboard action forms
 - Concrete mobile screens for QR attendance, Razorpay checkout, and posture analysis
+- Web MediaPipe PoseLandmarker camera integration
+- Flutter camera and pose detection integration scaffold
+- Razorpay sandbox verification script
+- OWASP security validation script
+- Production deployment validation script
+- Production smoke test script
+- Terraform monitoring and schedule modules
 
 Backend validation completed:
 
@@ -464,8 +491,8 @@ Missing or incomplete:
 - Complete DTO validation for lower-priority generic backend APIs
 - API-level integration tests
 - End-to-end tests
-- Razorpay live-mode reconciliation jobs
-- Razorpay reconciliation live-provider verification
+- Razorpay live-mode reconciliation job credential verification
+- Razorpay reconciliation live-provider verification with real keys
 - Razorpay refund workflow live-provider verification
 - Razorpay subscription billing automation
 - Membership auto-renewal scheduler
@@ -484,10 +511,9 @@ Missing or incomplete:
 - Advanced revenue analytics visualization
 - Production audit log immutability controls
 - Object storage integration for media and documents
-- AI posture real-time MediaPipe client implementation
-- MoveNet fallback implementation
-- TensorFlow Lite model bundling
-- Flutter camera integration
+- MoveNet fallback runtime implementation
+- Production TensorFlow Lite model bundling
+- Flutter camera validation on device
 - Web camera integration
 - Progress photo upload
 - Body measurement tracking UI
@@ -496,13 +522,13 @@ Missing or incomplete:
 - MFA
 - Email/SMS notification providers
 - Production Docker hardening and image scanning
-- Terraform apply validation in AWS account
+- Terraform apply validation in AWS account with real backend variables
 - Production deployment promotion with real ECS service targets
-- Production monitoring alarm actions
+- Production monitoring alarm actions connected to real SNS/on-call target
 - Automated backup schedule verification
 - Disaster recovery runbooks in executable form
 - Security headers and WAF deployment configuration
-- OWASP penetration test execution
+- OWASP ZAP execution against deployed staging URL
 
 ---
 
@@ -564,7 +590,7 @@ Recommended task groups:
 Current estimated deployment readiness:
 
 ```text
-78%
+88%
 ```
 
 Reasoning:
@@ -579,6 +605,7 @@ Reasoning:
 - Seed, migration SQL, Docker Compose, and CI now exist.
 - Production job endpoints, rate limiting, analytics rollups, Terraform scaffold, monitoring scaffold, backup script, and staging deployment workflow now exist.
 - PT credit ledger, password reset flow, admin operational forms, and concrete mobile screens now exist.
+- Real MediaPipe web camera integration, Flutter camera/pose scaffolding, Razorpay sandbox verifier, OWASP script, deployment validator, smoke test, monitoring alarms, and EventBridge schedule scaffolds now exist.
 - Security controls are partially implemented but require hardening.
 - IaC, monitoring, backup automation, and production operational controls are not yet fully implemented.
 
@@ -591,14 +618,14 @@ Readiness by area:
 | Authentication | 68% |
 | RBAC | 40% |
 | Memberships and attendance | 65% |
-| Payments | 68% |
+| Payments | 78% |
 | WhatsApp notifications | 50% |
 | Admin web | 58% |
-| Mobile app | 42% |
-| AI/computer vision | 42% |
-| DevOps/deployment | 55% |
-| Security hardening | 50% |
-| Commercial readiness | 70% |
+| Mobile app | 58% |
+| AI/computer vision | 68% |
+| DevOps/deployment | 72% |
+| Security hardening | 68% |
+| Commercial readiness | 80% |
 
 ---
 

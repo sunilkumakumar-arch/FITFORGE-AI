@@ -2,8 +2,14 @@
   "name": "@fitforge/admin-web",
   "version": "1.0.0",
   "private": true,
-  "scripts": { "dev": "next dev", "build": "next build", "start": "next start", "typecheck": "tsc --noEmit -p tsconfig.typecheck.json" },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json"
+  },
   "dependencies": {
+    "@mediapipe/tasks-vision": "^0.10.35",
     "@tanstack/react-query": "latest",
     "clsx": "latest",
     "lucide-react": "latest",
@@ -14,5 +20,13 @@
     "zod": "latest",
     "zustand": "latest"
   },
-  "devDependencies": { "@tailwindcss/postcss": "latest", "@types/node": "latest", "@types/react": "latest", "@types/react-dom": "latest", "postcss": "latest", "tailwindcss": "latest", "typescript": "latest" }
+  "devDependencies": {
+    "@tailwindcss/postcss": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "postcss": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest"
+  }
 }

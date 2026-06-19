@@ -9,7 +9,11 @@
     "api:test": "npm run test --workspace services/api",
     "api:prisma:validate": "npm run prisma:validate --workspace services/api",
     "web:build": "npm run build --workspace apps/admin-web",
-    "web:typecheck": "npm run typecheck --workspace apps/admin-web"
+    "web:typecheck": "npm run typecheck --workspace apps/admin-web",
+    "mobile:validate": "scripts/validate-flutter.sh",
+    "payments:verify:razorpay": "scripts/verify-razorpay-sandbox.js",
+    "security:owasp": "scripts/owasp-security-check.sh",
+    "deploy:validate": "scripts/validate-production-deployment.sh"
   },
   "license": "UNLICENSED"
 }

@@ -1,3 +1,3 @@
 import Link from 'next/link';
-const nav = ['dashboard','memberships','attendance','workouts','exercises','nutrition','inventory','products','orders','qr-attendance','payments','whatsapp','analytics','trainer-bookings'];
+const nav = ['dashboard','memberships','attendance','workouts','exercises','nutrition','inventory','products','orders','qr-attendance','payments','whatsapp','analytics','trainer-bookings','posture-camera'];
 export function Shell({ children }: { children: React.ReactNode }) { return <div className="grid min-h-screen grid-cols-[280px_1fr]"><aside className="border-r border-white/10 p-6"><h1 className="mb-8 text-2xl font-black text-yellow-400">FITFORGE AI</h1><nav className="grid gap-2">{nav.map((item) => <Link className="rounded-xl px-3 py-2 hover:bg-white/10" key={item} href={`/${item}`}>{item.replaceAll('-', ' ')}</Link>)}</nav></aside><main>{children}</main></div>; }
