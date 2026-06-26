@@ -1,148 +1,223 @@
 from django.db import models
 
-from django.utils import timezone
 
-class UserProfile(models.Model):
-    full_name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=20)
-
-    age = models.IntegerField()
+class Member(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=15)
+    email = models.EmailField(blank=True)
     gender = models.CharField(max_length=10)
+    date_of_birth = models.DateField()
 
-    height = models.FloatField()
-    weight = models.FloatField()
-
-    goal = models.CharField(max_length=100)
-
-    membership_start = models.DateField()
-    membership_end = models.DateField()
-
-    emergency_contact = models.CharField(max_length=20)
-
-    created_at = models.DateTimeField(default=timezone.now)
+    joining_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.full_name
-
-class Trainer(models.Model):
-    name = models.CharField(max_length=100)
-    specialization = models.CharField(max_length=100)
-    experience_years = models.IntegerField()
-    phone = models.CharField(max_length=20)
-    email = models.EmailField()
-
-    def __str__(self):
-        return self.name
-
-
-class Membership(models.Model):
-    member = models.ForeignKey(
-        UserProfile,
-        on_delete=models.CASCADE
-    )
-
-    plan_name = models.CharField(max_length=100)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-
-    start_date = models.DateField()
-    end_date = models.DateField()
-
-    active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return f"{self.member.full_name} - {self.plan_name}"
+        return f"{self.first_name} {self.last_name}"
     
-class Payment(models.Model):
-    member = models.ForeignKey(
-        UserProfile,
-        on_delete=models.CASCADE
+
+class MemberProfile(models.Model):
+    member = models.OneToOneField(
+        Member,
+        on_delete=models.CASCADE,
+        related_name="profile"
     )
 
-    amount = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
+    member_code = models.CharField(max_length=30, unique=True)
+
+    address = models.TextField(blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
+    country = models.CharField(max_length=100, default="India")
+    pin_code = models.CharField(max_length=10, blank=True)
+
+    occupation = models.CharField(max_length=100, blank=True)
+
+    profile_photo = models.ImageField(
+        upload_to="members/profile_photos/",
+        blank=True,
+        null=True
     )
 
-    payment_date = models.DateField()
-
-    payment_method = models.CharField(
-        max_length=50
+    qr_code = models.ImageField(
+        upload_to="members/qr_codes/",
+        blank=True,
+        null=True
     )
 
-    transaction_id = models.CharField(
-        max_length=100
-    )
-
-    status = models.CharField(
-        max_length=20,
-        default="Paid"
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.member.full_name} - {self.amount}"
-
-class Attendance(models.Model):
-    member = models.ForeignKey(
-        UserProfile,
-        on_delete=models.CASCADE
+        return f"{self.member} Profile"
+    
+class EmergencyContact(models.Model):
+    member = models.OneToOneField(
+        Member,
+        on_delete=models.CASCADE,
+        related_name="emergency_contact"
     )
 
-    check_in = models.DateTimeField(
-        auto_now_add=True
+    contact_name = models.CharField(max_length=100)
+
+    relationship = models.CharField(max_length=50)
+
+    phone = models.CharField(max_length=15)
+
+    alternate_phone = models.CharField(
+        max_length=15,
+        blank=True
     )
 
-    status = models.CharField(
-        max_length=20,
-        default="Present"
-    )
+    address = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.member.full_name} - {self.check_in.date()}"    
-
-class WorkoutPlan(models.Model):
-    member = models.ForeignKey(
-        UserProfile,
-        on_delete=models.CASCADE
+        return f"{self.member} - {self.contact_name}"
+    
+class MedicalProfile(models.Model):
+    member = models.OneToOneField(
+        Member,
+        on_delete=models.CASCADE,
+        related_name="medical_profile"
     )
 
-    trainer = models.ForeignKey(
-        Trainer,
-        on_delete=models.CASCADE
+    blood_group = models.CharField(max_length=5, blank=True)
+
+    medical_conditions = models.TextField(blank=True)
+
+    allergies = models.TextField(blank=True)
+
+    medications = models.TextField(blank=True)
+
+    previous_injuries = models.TextField(blank=True)
+
+    surgeries = models.TextField(blank=True)
+
+    doctor_name = models.CharField(
+        max_length=100,
+        blank=True
     )
 
-    title = models.CharField(max_length=100)
-
-    description = models.TextField()
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
+    doctor_phone = models.CharField(
+        max_length=15,
+        blank=True
     )
+
+    emergency_notes = models.TextField(blank=True)
+
+    parq_completed = models.BooleanField(default=False)
+
+    medical_clearance = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.member.full_name} - {self.title}"
+        return f"{self.member} Medical Profile"    
+    
 
-class DietPlan(models.Model):
-    member = models.ForeignKey(
-        UserProfile,
-        on_delete=models.CASCADE
+class FitnessGoal(models.Model):
+    GOAL_CHOICES = [
+        ("weight_loss", "Weight Loss"),
+        ("muscle_gain", "Muscle Gain"),
+        ("fat_loss", "Fat Loss"),
+        ("general_fitness", "General Fitness"),
+        ("strength", "Strength"),
+        ("sports_performance", "Sports Performance"),
+        ("rehabilitation", "Rehabilitation"),
+        ("competition", "Competition"),
+    ]
+
+    member = models.OneToOneField(
+        Member,
+        on_delete=models.CASCADE,
+        related_name="fitness_goal"
     )
 
-    trainer = models.ForeignKey(
-        Trainer,
-        on_delete=models.CASCADE
+    primary_goal = models.CharField(
+        max_length=50,
+        choices=GOAL_CHOICES
     )
 
-    title = models.CharField(max_length=100)
-
-    breakfast = models.TextField()
-    lunch = models.TextField()
-    dinner = models.TextField()
-    snacks = models.TextField()
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
+    target_weight = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True
     )
+
+    target_body_fat = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    target_date = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    trainer_notes = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.member.full_name} - {self.title}"        
+        return f"{self.member} - {self.primary_goal}"    
+    
+class BodyAssessment(models.Model):
+    member = models.ForeignKey(
+        Member,
+        on_delete=models.CASCADE,
+        related_name="body_assessments"
+    )
+
+    assessment_date = models.DateField()
+
+    height = models.DecimalField(max_digits=5, decimal_places=2)
+
+    weight = models.DecimalField(max_digits=5, decimal_places=2)
+
+    bmi = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    body_fat_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    skeletal_muscle = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    chest = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    waist = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    hips = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    left_arm = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    right_arm = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    left_thigh = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    right_thigh = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    left_calf = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    right_calf = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    notes = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.member} - {self.assessment_date}"    
