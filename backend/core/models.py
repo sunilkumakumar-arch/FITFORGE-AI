@@ -18,7 +18,6 @@ class Branch(models.Model):
         Organization,
         on_delete=models.CASCADE,
         related_name="branches"
-        
     )
 
     name = models.CharField(max_length=200)
@@ -27,15 +26,16 @@ class Branch(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-class Meta:
-    verbose_name = "Branch"
-    verbose_name_plural = "Branches"
+    class Meta:
+        verbose_name = "Branch"
+        verbose_name_plural = "Branches"
 
     def __str__(self):
         return f"{self.organization.name} - {self.name}"
 
 
 class Role(models.Model):
+
     ROLE_CHOICES = [
         ("SUPER_ADMIN", "Super Admin"),
         ("ORG_OWNER", "Organization Owner"),
@@ -48,14 +48,38 @@ class Role(models.Model):
         ("MEMBER", "Gym Member"),
         ("ONLINE_MEMBER", "Online Member"),
         ("ACCOUNTANT", "Accountant"),
-        ("HR", "HR"),
+        ("HR", "Human Resources"),
     ]
 
     name = models.CharField(
         max_length=50,
         choices=ROLE_CHOICES,
-        unique=True
+        unique=True,
     )
+
+    description = models.TextField(blank=True)
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.get_name_display()
+    
+
+class Department(models.Model):
+
+    name = models.CharField(max_length=100, unique=True)
+
+    description = models.TextField(blank=True)
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name    

@@ -1,21 +1,42 @@
-from django.urls import path, include
+from django.urls import include, path
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
 
-    path(
-        "memberships/",
-        include("memberships.urls"),
+   path(
+       "token/",
+        TokenObtainPairView.as_view(),
+        name="token_obtain_pair",
     ),
 
-]
-
-from django.urls import path, include
-
-urlpatterns = [
-
-    path(
-        "accounts/",
-        include("accounts.urls"),
+    path( 
+        "token/refresh/",
+         TokenRefreshView.as_view(),
+         name="token_refresh",
     ),
 
+    path(
+    "trainer-assignments/",
+    include("trainer_assignments.urls")
+    ),
+    path("trainers/", include("trainers.urls")),
+    path("accounts/", include("accounts.urls")),
+    path("memberships/", include("memberships.urls")),
+    path("employees/", include("employees.urls")),
+    path("attendance/", include("attendance.urls")),
+    path("trainers/", include("trainers.urls")),
+    path("billing/", include("billing.urls")),
+    path("workouts/", include("workouts.urls")),
+    path("nutrition/", include("nutrition.urls")),
+    path("reports/", include("reports.urls")),
+    path("notifications/", include("notifications.urls")),
+    path("dashboard/", include("dashboard.urls")),
+     path("ai-coach/", include("ai_coach.urls")),
+    
+
+    
 ]

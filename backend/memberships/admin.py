@@ -4,6 +4,7 @@ from .models import MembershipPlan, MemberMembership
 
 @admin.register(MembershipPlan)
 class MembershipPlanAdmin(admin.ModelAdmin):
+
     list_display = (
         "name",
         "duration_days",
@@ -22,12 +23,14 @@ class MembershipPlanAdmin(admin.ModelAdmin):
 
 @admin.register(MemberMembership)
 class MemberMembershipAdmin(admin.ModelAdmin):
+
     list_display = (
         "member",
         "plan",
         "status",
         "start_date",
         "end_date",
+        "remaining_days_display",
         "amount_paid",
     )
 
@@ -41,3 +44,12 @@ class MemberMembershipAdmin(admin.ModelAdmin):
         "member__last_name",
         "member__phone",
     )
+
+    readonly_fields = (
+        "remaining_days_display",
+    )
+
+    def remaining_days_display(self, obj):
+        return obj.remaining_days
+
+    remaining_days_display.short_description = "Days Left"

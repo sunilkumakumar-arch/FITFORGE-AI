@@ -12,6 +12,13 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv(BASE_DIR / ".env")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,10 +27,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-nx115+c-fqe^q2ha(4%8p4uum*)%i744oqda8lys_rg2lxvmx_'
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "fitforge-dev-fallback-key"
+)
+
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -31,6 +43,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+
+    "corsheaders",
+    "drf_spectacular",
     
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,6 +58,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'rest_framework_simplejwt.token_blacklist',
+    'audit',
+    # Third-party apps
+
+    'rest_framework_simplejwt',
+
+    
 
 
     'users',
@@ -55,11 +76,23 @@ INSTALLED_APPS = [
     'gym_management',
     'dashboard',
     'memberships',
+    'employees',
+    'common',
+    "billing",
+    "workouts",
+    "reports",
+    "notifications",
+    "roles",
+    'trainer_assignments',
 
      'django_bootstrap5',
 ]
 
 MIDDLEWARE = [
+
+    
+
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -93,16 +126,15 @@ WSGI_APPLICATION = 'fitforge_backend.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'fitforge_db',
-        'USER': 'postgres',
-        'PASSWORD': 'Sunil@8686',
-        'HOST': 'localhost',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
     }
 }
-
 # Password validation 
 
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -149,11 +181,33 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+        
+    
+}
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "FitForge API",
+    "DESCRIPTION": "FitForge Commercial Fitness Platform",
+    "VERSION": "1.0.0",
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
+
+    "UPDATE_LAST_LOGIN": True,
+
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
