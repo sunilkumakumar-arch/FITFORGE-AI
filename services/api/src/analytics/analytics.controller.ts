@@ -14,13 +14,33 @@ export class AnalyticsController {
     return { revenueMinor, payments: payments.length, currency: payments[0]?.currency ?? 'INR' };
   }
   @Get('dashboard') async dashboard(@Query('organizationId') organizationId?: string, @Query('branchId') branchId?: string) {
-    const scoped: any = {}; if (organizationId) scoped.organizationId = organizationId; if (branchId) scoped.branchId = branchId;
-    const [memberships, attendance, orders, payments] = await Promise.all([
-      (this.prisma as any).membership.count({ where: scoped }),
+    const scoped: any = {};
+    if (organizationId) scoped.organizationId = organizationId;
+    if (branchId) scoped.branchId = branchId;
+
+    const roleScope: any = {};
+    if (organizationId) roleScope.organizationId = organizationId;
+
+    const planWhere: any = { isActive: true };
+    if (organizationId) planWhere.organizationId = organizationId;
+    if (branchId) planWhere.branchId = branchId;
+
+    const [attendance, paidPayments, membershipPlans, members, trainers] = await Promise.all([
       (this.prisma as any).attendanceLog.count({ where: scoped }),
-      (this.prisma as any).order.count({ where: scoped }),
-      (this.prisma as any).payment.count({ where: { ...scoped, status: 'paid' } }),
+      (this.prisma as any).payment.findMany({ where: { ...scoped, status: 'paid' } }),
+      (this.prisma as any).membershipPlan.findMany({ where: planWhere, orderBy: { name: 'asc' } }),
+      (this.prisma as any).userRole.count({ where: { role: { key: 'member', ...roleScope } } }),
+      (this.prisma as any).userRole.count({ where: { role: { key: 'trainer', ...roleScope } } }),
     ]);
-    return { memberships, attendance, orders, paidPayments: payments };
+
+    const revenueMinor = paidPayments.reduce((sum: number, payment: { amountMinor: number }) => sum + payment.amountMinor, 0);
+    return {
+      members,
+      trainers,
+      revenueMinor,
+      currency: paidPayments[0]?.currency ?? 'INR',
+      attendance,
+      membershipPlans,
+    };
   }
 }
