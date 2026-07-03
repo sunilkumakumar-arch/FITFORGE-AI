@@ -84,6 +84,8 @@ INSTALLED_APPS = [
     "notifications",
     "roles",
     'trainer_assignments',
+    "pt_packages",
+    "leads",
 
      'django_bootstrap5',
 ]

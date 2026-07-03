@@ -1,11 +1,16 @@
 from django.contrib import admin
+
 from .models import Attendance
 
 
 @admin.register(Attendance)
-class AttendanceAdmin(admin.ModelAdmin):
+class AttendanceAdmin(
+    admin.ModelAdmin
+):
+
     list_display = (
         "member",
+        "trainer",
         "branch",
         "attendance_date",
         "check_in",
@@ -27,6 +32,11 @@ class AttendanceAdmin(admin.ModelAdmin):
         "member__phone",
     )
 
-    date_hierarchy = "attendance_date"
+    date_hierarchy = (
+        "attendance_date"
+    )
 
-    ordering = ("-attendance_date", "-check_in")
+    ordering = (
+        "-attendance_date",
+        "-check_in",
+    )

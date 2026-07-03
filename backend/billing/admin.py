@@ -6,8 +6,9 @@ from .models import Payment
 class PaymentAdmin(admin.ModelAdmin):
 
     list_display = (
-        "invoice_number",
-        "membership",
+        "id",
+        "member",
+        "membership_plan",
         "amount",
         "payment_method",
         "payment_status",
@@ -20,8 +21,8 @@ class PaymentAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
-        "invoice_number",
-        "transaction_reference",
+        "member__first_name",
+        "member__last_name",
     )
 
     ordering = (

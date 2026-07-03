@@ -23,7 +23,7 @@ urlpatterns = [
     "trainer-assignments/",
     include("trainer_assignments.urls")
     ),
-    path("trainers/", include("trainers.urls")),
+    
     path("accounts/", include("accounts.urls")),
     path("memberships/", include("memberships.urls")),
     path("employees/", include("employees.urls")),
@@ -35,7 +35,14 @@ urlpatterns = [
     path("reports/", include("reports.urls")),
     path("notifications/", include("notifications.urls")),
     path("dashboard/", include("dashboard.urls")),
-     path("ai-coach/", include("ai_coach.urls")),
+    path("ai-coach/", include("ai_coach.urls")),
+    path("billing/",include("billing.urls")),
+    path("pt-packages/",include("pt_packages.urls")),
+    path("leads/", include("leads.urls")),
+    
+   
+    
+    
     
 
     

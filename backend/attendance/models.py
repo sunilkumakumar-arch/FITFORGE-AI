@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+
 from accounts.models import Member
 from trainers.models import Trainer
 from core.models import Branch
@@ -21,10 +22,10 @@ class Attendance(models.Model):
     ]
 
     member = models.ForeignKey(
-    Member,
-    on_delete=models.CASCADE,
-    related_name="attendance_records"
-)
+        Member,
+        on_delete=models.CASCADE,
+        related_name="attendance_records"
+    )
 
     trainer = models.ForeignKey(
         Trainer,
@@ -68,16 +69,30 @@ class Attendance(models.Model):
         blank=True
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
 
     class Meta:
-        ordering = ["-attendance_date", "-check_in"]
-        unique_together = ("member", "attendance_date")
+        ordering = [
+            "-attendance_date",
+            "-check_in"
+        ]
+
+        unique_together = (
+            "member",
+            "attendance_date"
+        )
 
     def clean(self):
-        if self.check_out and self.check_out < self.check_in:
+        if (
+            self.check_out and
+            self.check_out < self.check_in
+        ):
             raise ValidationError(
                 "Check-out cannot be earlier than check-in."
             )
@@ -85,8 +100,16 @@ class Attendance(models.Model):
     @property
     def workout_duration(self):
         if self.check_out:
-            return self.check_out - self.check_in
+            return (
+                self.check_out -
+                self.check_in
+            )
+
         return None
 
     def __str__(self):
-        return f"{self.member} - {self.attendance_date}"
+        return (
+            f"{self.member.first_name} "
+            f"{self.member.last_name} - "
+            f"{self.attendance_date}"
+        )
