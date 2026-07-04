@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'membership_service.dart';
 import 'add_membership_plan_screen.dart';
+import 'edit_membership_plan_screen.dart';
 
 class MembershipScreen extends StatefulWidget {
   const MembershipScreen({super.key});
@@ -63,6 +64,98 @@ class _MembershipScreenState
 
     if (result == true) {
       loadMembershipPlans();
+    }
+  }
+
+  Future<void> openEditPlanScreen(
+    Map<String, dynamic> plan,
+  ) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            EditMembershipPlanScreen(
+          plan: plan,
+        ),
+      ),
+    );
+
+    if (result == true) {
+      loadMembershipPlans();
+    }
+  }
+
+  Future<void> deactivatePlan(
+    Map<String, dynamic> plan,
+  ) async {
+    final confirmed =
+        await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title:
+              const Text('Deactivate Plan'),
+          content: Text(
+            'Are you sure you want to deactivate "${plan['name']}"?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(
+                  context,
+                  false,
+                );
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(
+                  context,
+                  true,
+                );
+              },
+              child: const Text(
+                'Deactivate',
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    final success =
+        await MembershipService
+            .deactivateMembershipPlan(
+      plan['id'],
+    );
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        SnackBar(
+          content: Text(
+            '${plan['name']} deactivated',
+          ),
+        ),
+      );
+
+      loadMembershipPlans();
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Failed to deactivate plan',
+          ),
+        ),
+      );
     }
   }
 
@@ -162,13 +255,47 @@ class _MembershipScreenState
                   ),
               ],
             ),
-            trailing: Text(
-              '₹${plan['price'] ?? 0}',
-              style: const TextStyle(
-                fontWeight:
-                    FontWeight.bold,
-                fontSize: 16,
-              ),
+            trailing: Row(
+              mainAxisSize:
+                  MainAxisSize.min,
+              children: [
+                Text(
+                  '₹${plan['price'] ?? 0}',
+                  style: const TextStyle(
+                    fontWeight:
+                        FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      openEditPlanScreen(
+                        plan,
+                      );
+                    }
+
+                    if (value ==
+                        'deactivate') {
+                      deactivatePlan(
+                        plan,
+                      );
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Text('Edit'),
+                    ),
+                    const PopupMenuItem(
+                      value:
+                          'deactivate',
+                      child:
+                          Text('Deactivate'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         );
