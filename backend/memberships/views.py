@@ -14,8 +14,14 @@ from .serializers import (
 
 class MembershipPlanViewSet(viewsets.ModelViewSet):
     queryset = MembershipPlan.objects.all()
+
     serializer_class = MembershipPlanSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return MembershipPlan.objects.filter(
+            is_active=True
+        ).order_by("name")
 
 
 class MemberMembershipViewSet(viewsets.ModelViewSet):
