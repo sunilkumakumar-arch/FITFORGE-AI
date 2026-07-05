@@ -7,8 +7,7 @@ class TrainerAssignmentService {
   static const String baseUrl =
       'http://127.0.0.1:8000/api/v1/trainer-assignments/';
 
-  static Future<List<dynamic>>
-      getAssignments() async {
+  static Future<List<dynamic>> getAssignments() async {
     final token =
         await AuthService.getToken();
 
@@ -22,21 +21,8 @@ class TrainerAssignmentService {
       },
     );
 
-    print(
-      'ASSIGNMENTS STATUS: ${response.statusCode}',
-    );
-
-    print(
-      'ASSIGNMENTS BODY: ${response.body}',
-    );
-
     if (response.statusCode == 200) {
-      final data =
-          jsonDecode(response.body);
-
-      print(data);
-
-      return data;
+      return jsonDecode(response.body);
     }
 
     return [];
@@ -53,6 +39,26 @@ class TrainerAssignmentService {
       return item['trainer'] ==
           trainerId;
     }).toList();
+  }
+
+  static Future<Map<String, dynamic>?>
+      getMemberTrainer(
+    int memberId,
+  ) async {
+    final assignments =
+        await getAssignments();
+
+    try {
+      return assignments.firstWhere(
+        (item) =>
+            item['member'] ==
+                memberId &&
+            item['is_active'] ==
+                true,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   static Future<bool> assignMember({
@@ -81,14 +87,6 @@ class TrainerAssignmentService {
         'sessions_per_week': 3,
         'is_active': true,
       }),
-    );
-
-    print(
-      'ASSIGN MEMBER STATUS: ${response.statusCode}',
-    );
-
-    print(
-      'ASSIGN MEMBER BODY: ${response.body}',
     );
 
     return response.statusCode == 201;

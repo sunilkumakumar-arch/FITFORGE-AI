@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'edit_member_screen.dart';
 import 'member_service.dart';
+
 import '../memberships/assign_membership_screen.dart';
 import '../memberships/membership_service.dart';
+
+import '../trainers/trainer_assignment_service.dart';
 
 class MemberDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> member;
@@ -22,17 +25,24 @@ class _MemberDetailsScreenState
     extends State<MemberDetailsScreen> {
   Map<String, dynamic>? membership;
 
+  Map<String, dynamic>? trainerAssignment;
+
   bool isLoadingMembership = true;
+
+  bool isLoadingTrainer = true;
 
   @override
   void initState() {
     super.initState();
+
     loadMembership();
+    loadTrainer();
   }
 
   Future<void> loadMembership() async {
     final data =
-        await MembershipService.getMemberMembership(
+        await MembershipService
+            .getMemberMembership(
       widget.member['id'],
     );
 
@@ -44,17 +54,31 @@ class _MemberDetailsScreenState
     });
   }
 
+  Future<void> loadTrainer() async {
+    final data =
+        await TrainerAssignmentService
+            .getMemberTrainer(
+      widget.member['id'],
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      trainerAssignment = data;
+      isLoadingTrainer = false;
+    });
+  }
+
   Future<void> deleteMember() async {
     final confirm =
         await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text(
-            'Delete Member',
-          ),
+          title:
+              const Text('Delete Member'),
           content: Text(
-            'Are you sure you want to delete\n\n${widget.member['first_name']} ${widget.member['last_name']}?\n\nThis action cannot be undone.',
+            'Are you sure you want to delete\n\n${widget.member['first_name']} ${widget.member['last_name']}?',
           ),
           actions: [
             TextButton(
@@ -64,9 +88,8 @@ class _MemberDetailsScreenState
                   false,
                 );
               },
-              child: const Text(
-                'Cancel',
-              ),
+              child:
+                  const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -75,9 +98,8 @@ class _MemberDetailsScreenState
                   true,
                 );
               },
-              child: const Text(
-                'Delete',
-              ),
+              child:
+                  const Text('Delete'),
             ),
           ],
         );
@@ -94,19 +116,7 @@ class _MemberDetailsScreenState
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Member Deleted Successfully',
-          ),
-        ),
-      );
-
-      Navigator.pop(
-        context,
-        true,
-      );
+      Navigator.pop(context, true);
     }
   }
 
@@ -130,9 +140,8 @@ class _MemberDetailsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Member Profile',
-        ),
+        title:
+            const Text('Member Profile'),
       ),
       body: SingleChildScrollView(
         padding:
@@ -145,9 +154,13 @@ class _MemberDetailsScreenState
               child: CircleAvatar(
                 radius: 50,
                 child: Text(
-                  widget.member['first_name']
+                  widget.member[
+                              'first_name']
                           ?.toString()
-                          .substring(0, 1)
+                          .substring(
+                            0,
+                            1,
+                          )
                           .toUpperCase() ??
                       '?',
                   style:
@@ -171,7 +184,7 @@ class _MemberDetailsScreenState
 
             buildInfoTile(
               'Name',
-              '${widget.member['first_name'] ?? ''} ${widget.member['last_name'] ?? ''}',
+              '${widget.member['first_name']} ${widget.member['last_name']}',
             ),
 
             buildInfoTile(
@@ -191,13 +204,15 @@ class _MemberDetailsScreenState
 
             buildInfoTile(
               'Date Of Birth',
-              widget.member['date_of_birth'] ??
+              widget.member[
+                      'date_of_birth'] ??
                   '',
             ),
 
             buildInfoTile(
               'Joining Date',
-              widget.member['joining_date'] ??
+              widget.member[
+                      'joining_date'] ??
                   '',
             ),
 
@@ -209,7 +224,8 @@ class _MemberDetailsScreenState
             else ...[
               buildInfoTile(
                 'Membership Plan',
-                membership?['plan_name'] ??
+                membership?[
+                        'plan_name'] ??
                     'Not Assigned',
               ),
 
@@ -221,17 +237,32 @@ class _MemberDetailsScreenState
 
               buildInfoTile(
                 'Remaining Days',
-                membership?['remaining_days']
+                membership?[
+                            'remaining_days']
                         ?.toString() ??
                     '-',
               ),
 
               buildInfoTile(
                 'Expiry Date',
-                membership?['end_date'] ??
+                membership?[
+                        'end_date'] ??
                     '-',
               ),
             ],
+
+            if (isLoadingTrainer)
+              const Center(
+                child:
+                    CircularProgressIndicator(),
+              )
+            else
+              buildInfoTile(
+                'Assigned Trainer',
+                trainerAssignment?[
+                        'trainer_name'] ??
+                    'Not Assigned',
+              ),
 
             const SizedBox(height: 30),
 
@@ -297,9 +328,7 @@ class _MemberDetailsScreenState
               width: double.infinity,
               child:
                   ElevatedButton.icon(
-                onPressed: () {
-                  deleteMember();
-                },
+                onPressed: deleteMember,
                 icon:
                     const Icon(Icons.delete),
                 label: const Text(

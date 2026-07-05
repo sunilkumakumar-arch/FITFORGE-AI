@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
+
 import 'core/theme/app_theme.dart';
+
 import 'features/auth/login_screen.dart';
+
 import 'features/members/members_screen.dart';
 import 'features/members/member_service.dart';
-import 'features/trainers/trainer_service.dart';
-import 'features/memberships/membership_service.dart';
-import 'features/memberships/membership_screen.dart';
+
 import 'features/trainers/trainers_screen.dart';
+import 'features/trainers/trainer_service.dart';
+
+import 'features/memberships/membership_screen.dart';
+import 'features/memberships/membership_service.dart';
+
 import 'features/payments/payments_screen.dart';
-import 'features/attendance/attendance_screen.dart';
 import 'features/payments/revenue_service.dart';
+
+import 'features/attendance/attendance_screen.dart';
+
+import 'features/pt_packages/pt_package_screen.dart';
+import 'features/pt_packages/pt_package_service.dart';
 
 void main() {
   runApp(const FitForgeApp());
@@ -29,10 +39,16 @@ class FitForgeApp extends StatelessWidget {
         '/': (context) => const LoginScreen(),
         '/dashboard': (context) => const DashboardScreen(),
         '/members': (context) => const MembersScreen(),
-        '/memberships': (context) => const MembershipScreen(),
-        '/trainers': (context) => const TrainersScreen(),
-        '/payments': (context) => const PaymentsScreen(),
-        '/attendance': (context) => const AttendanceScreen(),
+        '/memberships': (context) =>
+            const MembershipScreen(),
+        '/trainers': (context) =>
+            const TrainersScreen(),
+        '/payments': (context) =>
+            const PaymentsScreen(),
+        '/attendance': (context) =>
+            const AttendanceScreen(),
+        '/pt-packages': (context) =>
+            const PTPackageScreen(),
       },
     );
   }
@@ -51,6 +67,8 @@ class _DashboardScreenState
   int memberCount = 0;
   int trainerCount = 0;
   int membershipPlanCount = 0;
+  int ptPackageCount = 0;
+
   double totalRevenue = 0;
 
   @override
@@ -70,12 +88,17 @@ class _DashboardScreenState
       final plans =
           await MembershipService
               .getMembershipPlanCount();
+
       final revenue =
-           await RevenueService.getRevenue();        
+          await RevenueService.getRevenue();
+
+      final ptPackages =
+          await PTPackageService.getPackageCount();
 
       print('MEMBERS: $members');
       print('TRAINERS: $trainers');
       print('PLANS: $plans');
+      print('PT PACKAGES: $ptPackages');
 
       if (!mounted) return;
 
@@ -84,6 +107,7 @@ class _DashboardScreenState
         trainerCount = trainers;
         membershipPlanCount = plans;
         totalRevenue = revenue;
+        ptPackageCount = ptPackages;
       });
     } catch (e) {
       print('DASHBOARD ERROR: $e');
@@ -105,7 +129,8 @@ class _DashboardScreenState
       body: RefreshIndicator(
         onRefresh: loadData,
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding:
+              const EdgeInsets.all(20),
           child: GridView.count(
             crossAxisCount: 2,
             childAspectRatio: 2.5,
@@ -174,28 +199,48 @@ class _DashboardScreenState
                     '/payments',
                   );
                 },
-                child:  DashboardCard(
+                child: DashboardCard(
                   title: "Revenue",
-                  value: "₹${totalRevenue.toStringAsFixed(0)}",
-                  icon: Icons.currency_rupee,
+                  value:
+                      "₹${totalRevenue.toStringAsFixed(0)}",
+                  icon:
+                      Icons.currency_rupee,
                 ),
-                  
-                
               ),
 
               GestureDetector(
-               onTap: () async {
-                await Navigator.pushNamed(
-                 context,
-                  '/attendance',
-                );
-              },
-              child: const DashboardCard(
-                title: "Attendance",
-                value: "0",
-                icon: Icons.check_circle,
+                onTap: () async {
+                  await Navigator.pushNamed(
+                    context,
+                    '/attendance',
+                  );
+                },
+                child: const DashboardCard(
+                  title: "Attendance",
+                  value: "0",
+                  icon:
+                      Icons.check_circle,
+                ),
               ),
-            ),
+
+              GestureDetector(
+                onTap: () async {
+                  await Navigator.pushNamed(
+                    context,
+                    '/pt-packages',
+                  );
+
+                  loadData();
+                },
+                child: DashboardCard(
+                  title: "PT Packages",
+                  value:
+                      ptPackageCount
+                          .toString(),
+                  icon:
+                      Icons.workspace_premium,
+                ),
+              ),
             ],
           ),
         ),
