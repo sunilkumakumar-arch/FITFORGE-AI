@@ -22,7 +22,7 @@
     "@nestjs/passport": "latest",
     "@nestjs/platform-express": "latest",
     "@nestjs/swagger": "latest",
-    "@prisma/client": "latest",
+    "@prisma/client": "^6.19.3",
     "bcryptjs": "latest",
     "class-transformer": "latest",
     "class-validator": "latest",
@@ -44,7 +44,7 @@
     "@types/node": "latest",
     "@types/passport-jwt": "latest",
     "jest": "latest",
-    "prisma": "latest",
+    "prisma": "^6.19.3",
     "ts-jest": "latest",
     "ts-node": "^10.9.2",
     "typescript": "latest"
