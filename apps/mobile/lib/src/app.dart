@@ -6,6 +6,7 @@ import 'screens/module_screen.dart';
 import 'screens/qr_attendance_screen.dart';
 import 'screens/razorpay_checkout_screen.dart';
 import 'screens/posture_capture_screen.dart';
+import 'screens/member_details_screen.dart';
 
 class FitforgeApp extends StatefulWidget { const FitforgeApp({super.key}); @override State<FitforgeApp> createState()=>_FitforgeAppState(); }
 class _FitforgeAppState extends State<FitforgeApp> {
@@ -19,6 +20,10 @@ class _FitforgeAppState extends State<FitforgeApp> {
       '/qr-attendance': (_) => const QrAttendanceScreen(),
       '/razorpay-checkout': (_) => const RazorpayCheckoutScreen(),
       '/posture-capture': (_) => const PostureCaptureScreen(),
+      '/member-details': (context) {
+        final args = ModalRoute.of(context)?.settings.arguments;
+        return MemberDetailsScreen(memberId: args is String ? args : null);
+      },
     },
     onGenerateRoute: (settings) => MaterialPageRoute(builder: (_) => ModuleScreen(title: settings.arguments as String? ?? 'Module')),
   ));
