@@ -1,57 +1,74 @@
-from datetime import timedelta
+from django.db import transaction
 from django.utils import timezone
 
-from accounts.models import Member
-from employees.models import Employee
-from trainers.models import Trainer
-from memberships.models import MemberMembership
-from attendance.models import Attendance
+from .models import MemberMembership
+from billing.services import PaymentService
 
 
-class DashboardService:
+class MembershipPurchaseService:
+    """
+    Handles the complete membership purchase workflow.
+    """
 
     @staticmethod
-    def get_summary():
+    @transaction.atomic
+    def purchase_membership(
+        *,
+        member,
+        plan,
+        start_date,
+        amount_paid,
+        payment_method="Cash",
+        transaction_id="",
+        notes="Membership Purchase",
+    ):
+        
+        print("\n========== PURCHASE MEMBERSHIP ==========")
+        print(f"Member: {member.id}")
+        print(f"Plan: {plan.id}")
+        print(f"Start Date: {start_date}")
+        print(f"Amount Paid: {amount_paid}")
 
-        today = timezone.now().date()
+        active_membership = (
+            MemberMembership.objects
+            .filter(
+                member=member,
+                status="Active"
+            )
+            .order_by("-end_date")
+            .first()
+        )
 
-        next_7_days = today + timedelta(days=7)
+        if active_membership:
 
-        return {
-            "total_members":
-                Member.objects.count(),
+            remaining_days = (
+                active_membership.end_date -
+                timezone.now().date()
+            ).days
 
-            "total_employees":
-                Employee.objects.count(),
+            if remaining_days > 15:
+                raise ValueError(
+                    f"Member already has an active membership. Remaining days: {remaining_days}"
+                )
 
-            "total_trainers":
-                Trainer.objects.count(),
+        membership = MemberMembership.objects.create(
+            member=member,
+            plan=plan,
+            start_date=start_date,
+            amount_paid=amount_paid,
+            payment_reference=transaction_id,
+            status="Active",
+        )
+        print(f"Saved Membership ID: {membership.id}")
 
-            "active_memberships":
-                MemberMembership.objects.filter(
-                    status="Active"
-                ).count(),
+        PaymentService.create_payment(
+            member=member,
+            membership_plan=plan,
+            amount=amount_paid,
+            payment_method=payment_method,
+            payment_status="Paid",
+            transaction_id=transaction_id,
+            notes=notes,
+        )
 
-            "expired_memberships":
-                MemberMembership.objects.filter(
-                    status="Expired"
-                ).count(),
-
-            "expiring_next_7_days":
-                MemberMembership.objects.filter(
-                    end_date__gte=today,
-                    end_date__lte=next_7_days,
-                    status="Active"
-                ).count(),
-
-            "today_attendance":
-                Attendance.objects.filter(
-                    attendance_date=today
-                ).count(),
-
-            "new_members_this_month":
-                Member.objects.filter(
-                    joining_date__month=today.month,
-                    joining_date__year=today.year
-                ).count(),
-        }
+        return membership

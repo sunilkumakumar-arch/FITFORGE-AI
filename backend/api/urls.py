@@ -18,6 +18,10 @@ urlpatterns = [
          TokenRefreshView.as_view(),
          name="token_refresh",
     ),
+    path(
+        "auth/",
+        include("authentication.urls"),
+    ),
 
     path(
     "trainer-assignments/",
@@ -39,11 +43,7 @@ urlpatterns = [
     path("billing/",include("billing.urls")),
     path("pt-packages/",include("pt_packages.urls")),
     path("leads/", include("leads.urls")),
-    
-   
-    
-    
-    
+    path("certifications/",include("certifications.urls")),
+    path("roles/",include("roles.urls")),
 
-    
-]
+]    

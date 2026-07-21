@@ -3,11 +3,77 @@ from django.db import transaction
 from .models import Employee
 from audit.services import AuditService
 
+import secrets
+import string
+
+from django.contrib.auth import get_user_model
+from django.db import transaction
+
+from .models import Employee
+from audit.services import AuditService
+
+User = get_user_model()
+
 
 class EmployeeService:
     """
     Business logic for Employee Management.
     """
+
+    @staticmethod
+    def generate_temporary_password(length=12):
+            """
+            Generate a secure temporary password for new employees.
+            """
+
+            alphabet = (
+                string.ascii_letters +
+                string.digits +
+                "!@#$%^&*"
+            )
+
+            while True:
+                password = "".join(
+                    secrets.choice(alphabet)
+                    for _ in range(length)
+                )
+
+                if (
+                    any(c.islower() for c in password)
+                    and any(c.isupper() for c in password)
+                    and any(c.isdigit() for c in password)
+                    and any(c in "!@#$%^&*" for c in password)
+                ):
+                    return password
+
+
+    @staticmethod
+    def create_login_account(
+        employee_code,
+        first_name,
+        last_name,
+        email,
+    ):
+        """
+        Create the Django login account for a new employee.
+        """
+
+        if User.objects.filter(username=employee_code).exists():
+            raise ValueError(
+                f"Username '{employee_code}' already exists."
+            )
+
+        temporary_password = EmployeeService.generate_temporary_password()
+
+        user = User.objects.create_user(
+            username=employee_code,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=temporary_password,
+        )
+
+        return user, temporary_password              
 
     @staticmethod
     def generate_employee_code():
@@ -32,12 +98,23 @@ class EmployeeService:
     @transaction.atomic
     def create_employee(validated_data):
 
+        employee_code = EmployeeService.generate_employee_code()
+
+        user, temporary_password = EmployeeService.create_login_account(
+            employee_code=employee_code,
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+            email=validated_data["email"],
+        )
+
         employee = Employee.objects.create(
-            **validated_data
+            user=user,
+            employee_code=employee_code,
+            **validated_data,
         )
 
         AuditService.log(
-            user=None,
+            user=user,
             action="CREATE",
             module="EMPLOYEE",
             object_id=str(employee.id),
@@ -45,4 +122,7 @@ class EmployeeService:
             description=f"Employee {employee.employee_code} created successfully",
         )
 
-        return employee
+        return {
+            "employee": employee,
+            "temporary_password": temporary_password,
+        }

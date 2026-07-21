@@ -1,14 +1,14 @@
 from django.db.models import Sum
 
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from memberships.models import MemberMembership
-
 from .models import Payment
 from .serializers import PaymentSerializer
+
+
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
@@ -24,19 +24,27 @@ class PaymentViewSet(viewsets.ModelViewSet):
         IsAuthenticated
     ]
 
-    @action(
-        detail=False,
-        methods=["get"]
-    )
-    def total_revenue(self, request):
+    def create(self, request, *args, **kwargs):
 
-        revenue = (
-            MemberMembership.objects.aggregate(
-                total=Sum("amount_paid")
-            )["total"]
-            or 0
+        serializer = self.get_serializer(
+            data=request.data
         )
 
-        return Response({
-            "total_revenue": revenue
-        })
+        if not serializer.is_valid():
+
+            print("PAYMENT ERRORS:")
+            print(serializer.errors)
+
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        payment = serializer.save()
+
+        
+
+        return Response(
+            PaymentSerializer(payment).data,
+            status=status.HTTP_201_CREATED
+        )

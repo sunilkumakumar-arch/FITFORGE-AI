@@ -10,19 +10,22 @@ class EmployeeAdmin(admin.ModelAdmin):
         "employee_code",
         "first_name",
         "last_name",
-        "email",
-        "phone",
+        "employee_classification",
+        "designation",
         "branch",
-        "role",
+        "employment_type",
         "employment_status",
         "joining_date",
     )
 
     list_filter = (
-        "employment_status",
         "organization",
         "branch",
         "department",
+        "designation",
+        "employee_classification",
+        "employment_type",
+        "employment_status",
         "role",
     )
 
@@ -64,6 +67,7 @@ class EmployeeAdmin(admin.ModelAdmin):
                     "organization",
                     "branch",
                     "department",
+                    "designation",
                     "role",
                 )
             },
@@ -72,7 +76,11 @@ class EmployeeAdmin(admin.ModelAdmin):
             "Employment",
             {
                 "fields": (
+                    "employment_type",
+                    "employee_classification",
                     "joining_date",
+                    "confirmation_date",
+                    "relieving_date",
                     "employment_status",
                 )
             },

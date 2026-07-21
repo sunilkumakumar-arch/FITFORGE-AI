@@ -1,18 +1,62 @@
 from django.db import models
 
-
 class Member(models.Model):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=15)
-    email = models.EmailField(blank=True)
-    gender = models.CharField(max_length=10)
+
+    first_name = models.CharField(
+        max_length=100
+    )
+
+    last_name = models.CharField(
+        max_length=100
+    )
+
+    phone = models.CharField(
+        max_length=15,
+        unique=True
+    )
+
+    email = models.EmailField(
+        blank=True,
+        unique=True
+    )
+
+    gender = models.CharField(
+        max_length=10
+    )
+
     date_of_birth = models.DateField()
 
-    joining_date = models.DateField(auto_now_add=True)
+    joining_date = models.DateField(
+        auto_now_add=True
+    )
+
+    # =====================================
+    # TRAINER ASSIGNMENT PROFILE
+    # =====================================
+
+    preferred_slot = models.CharField(
+        max_length=20,
+        blank=True,
+        default=""
+    )
+
+    experience_level = models.CharField(
+        max_length=20,
+        blank=True,
+        default=""
+    )
+
+    trainer_preference = models.CharField(
+        max_length=20,
+        blank=True,
+        default=""
+    )
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return (
+            f"{self.first_name} "
+            f"{self.last_name}"
+        )
     
 
 class MemberProfile(models.Model):

@@ -2,14 +2,8 @@ class OrganizationFilterMixin:
     """
     Multi-tenant data isolation.
 
-    Super Admin:
-        Can see everything.
-
-    Organization Owner:
-        Can see only their organization.
-
-    Branch Manager:
-        Can see only their branch.
+    RBAC decides IF a user can access a module.
+    This mixin decides WHICH records they can see.
     """
 
     def get_queryset(self):
@@ -26,14 +20,29 @@ class OrganizationFilterMixin:
 
         employee = user.employee_profile
 
+        if not employee.organization:
+            return queryset.none()
+
         role = employee.role.name if employee.role else None
 
-        if role == "ORG_OWNER":
+        # Organization-wide access
+        organization_roles = {
+            "ORG_OWNER",
+            "HR",
+            "OPERATIONS_MANAGER",
+        }
+
+        if role in organization_roles:
             return queryset.filter(
                 organization=employee.organization
             )
 
-        if role == "BRANCH_MANAGER":
+        # Branch-only access
+        branch_roles = {
+            "BRANCH_MANAGER",
+        }
+
+        if role in branch_roles:
             return queryset.filter(
                 branch=employee.branch
             )

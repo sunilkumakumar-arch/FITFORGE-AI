@@ -32,41 +32,80 @@ class MemberPTPackageService {
 
     return [];
   }
+  static Future<Map<String, dynamic>?>
+      getMemberActivePackage(
+    int memberId,
+  ) async {
+
+    final packages =
+        await getMemberPackages();
+
+    try {
+      return packages.firstWhere(
+        (package) =>
+            package['member'] ==
+                memberId &&
+            package['is_active'] ==
+                true,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+
 
   static Future<bool> assignPackage({
-    required int memberId,
-    required int trainerAssignmentId,
-    required int packageId,
-    required String purchaseDate,
-    required String expiryDate,
-  }) async {
-    final token =
-        await AuthService.getToken();
+  required int memberId,
+  required int trainerAssignmentId,
+  required int packageId,
+  required String purchaseDate,
+  required String expiryDate,
+}) async {
 
-    final response = await http.post(
-      Uri.parse(
-        '$baseUrl/member-packages/',
-      ),
-      headers: {
-        'Content-Type':
-            'application/json',
-        'Authorization':
-            'Bearer $token',
-      },
-      body: jsonEncode({
-        'member': memberId,
-        'trainer_assignment':
-            trainerAssignmentId,
-        'package': packageId,
-        'purchase_date':
-            purchaseDate,
-        'expiry_date':
-            expiryDate,
-        'sessions_used': 0,
-        'is_active': true,
-      }),
-    );
+  final token =
+      await AuthService.getToken();
 
-    return response.statusCode == 201;
-  }
+  final response = await http.post(
+    Uri.parse(
+      '$baseUrl/member-packages/',
+    ),
+    headers: {
+      'Content-Type':
+          'application/json',
+      'Authorization':
+          'Bearer $token',
+    },
+    body: jsonEncode({
+      'member': memberId,
+      'trainer_assignment':
+          trainerAssignmentId,
+      'package': packageId,
+      'purchase_date':
+          purchaseDate,
+      'expiry_date':
+          expiryDate,
+      'sessions_used': 0,
+      'is_active': true,
+    }),
+  );
+
+  print(
+    '==============================',
+  );
+
+  print(
+    'PT PACKAGE STATUS: ${response.statusCode}',
+  );
+
+  print(
+    'PT PACKAGE BODY: ${response.body}',
+  );
+
+  print(
+    '==============================',
+  );
+
+  return response.statusCode == 201;
+}
 }

@@ -5,8 +5,10 @@ from core.models import (
     Organization,
     Branch,
     Department,
-    Role,
+    
 )
+
+from roles.models import Role
 
 
 class Employee(models.Model):
@@ -16,6 +18,29 @@ class Employee(models.Model):
         ("ON_LEAVE", "On Leave"),
         ("SUSPENDED", "Suspended"),
         ("TERMINATED", "Terminated"),
+    ]
+
+    EMPLOYMENT_TYPE_CHOICES = [
+        ("FULL_TIME", "Full Time"),
+        ("PART_TIME", "Part Time"),
+        ("FREELANCE", "Freelance"),
+        ("CONTRACT", "Contract"),
+        ("CONSULTANT", "Consultant"),
+        ("INTERN", "Intern"),
+    ]
+
+    EMPLOYEE_CLASSIFICATION_CHOICES = [
+        ("TRAINER", "Trainer"),
+        ("SALES_EXECUTIVE", "Sales Executive"),
+        ("CENTER_MANAGER", "Center Manager"),
+        ("HOUSEKEEPING", "Housekeeping"),
+        ("NUTRITIONIST", "Nutritionist"),
+        ("PHYSIOTHERAPIST", "Physiotherapist"),
+        ("YOGA_INSTRUCTOR", "Yoga Instructor"),
+        ("ZUMBA_INSTRUCTOR", "Zumba Instructor"),
+        ("OPERATIONS_MANAGER", "Operations Manager"),
+        ("HR", "Human Resources"),
+        ("ADMIN", "Administrator"),
     ]
 
     employee_code = models.CharField(
@@ -60,6 +85,14 @@ class Employee(models.Model):
         related_name="employees",
     )
 
+    designation = models.ForeignKey(
+        "core.Designation",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="employees",
+    )
+
     role = models.ForeignKey(
         Role,
         on_delete=models.SET_NULL,
@@ -70,11 +103,33 @@ class Employee(models.Model):
 
     joining_date = models.DateField()
 
+    confirmation_date = models.DateField(
+        null=True,
+        blank=True,
+    )
+
+    relieving_date = models.DateField(
+        null=True,
+        blank=True,
+    )
+
     employment_status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default="ACTIVE",
     )
+
+    employment_type = models.CharField(
+        max_length=20,
+        choices=EMPLOYMENT_TYPE_CHOICES,
+        default="FULL_TIME",
+    ) 
+
+    employee_classification = models.CharField(
+        max_length=30,
+        choices=EMPLOYEE_CLASSIFICATION_CHOICES,
+        default="TRAINER",
+    ) 
 
     profile_photo = models.ImageField(
         upload_to="employees/profile_photos/",

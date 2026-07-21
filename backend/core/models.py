@@ -83,3 +83,110 @@ class Department(models.Model):
 
     def __str__(self):
         return self.name    
+    
+class Designation(models.Model):
+
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.CASCADE,
+        related_name="designations",
+    )
+
+    name = models.CharField(
+        max_length=100,
+    )
+
+    description = models.TextField(
+        blank=True,
+    )
+
+    hierarchy_level = models.PositiveIntegerField(
+        default=1,
+        help_text="Lower number indicates higher designation level.",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = ["department", "hierarchy_level", "name"]
+        unique_together = ("department", "name")
+
+    def __str__(self):
+        return f"{self.department.name} - {self.name}"    
+
+
+class Shift(models.Model):
+    SHIFT_TYPE_CHOICES = [
+        ("GENERAL", "General"),
+        ("MORNING", "Morning"),
+        ("EVENING", "Evening"),
+        ("NIGHT", "Night"),
+        ("FLEXIBLE", "Flexible"),
+        ("SPLIT", "Split"),
+    ]
+
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+
+    code = models.CharField(
+        max_length=20,
+        unique=True,
+    )
+
+    shift_type = models.CharField(
+        max_length=20,
+        choices=SHIFT_TYPE_CHOICES,
+        default="GENERAL",
+    )
+
+    start_time = models.TimeField()
+
+    end_time = models.TimeField()
+
+    grace_period_minutes = models.PositiveIntegerField(
+        default=15,
+    )
+
+    break_duration_minutes = models.PositiveIntegerField(
+        default=30,
+    )
+
+    minimum_working_hours = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        default=8.00,
+    )
+
+    weekly_working_days = models.PositiveSmallIntegerField(
+        default=6,
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.code})"

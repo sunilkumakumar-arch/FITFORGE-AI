@@ -62,11 +62,14 @@ INSTALLED_APPS = [
     # Third-party apps
 
     'rest_framework_simplejwt',
+    'django_filters',
 
     
 
 
-    'users',
+    'users.apps.UsersConfig',
+    "authentication",
+    "authorization",
     'accounts',
     'core',
     'attendance',
@@ -86,6 +89,10 @@ INSTALLED_APPS = [
     'trainer_assignments',
     "pt_packages",
     "leads",
+    'certifications',
+    
+    
+
 
      'django_bootstrap5',
 ]
@@ -176,17 +183,7 @@ STATIC_URL = 'static/'
 
 from datetime import timedelta
 
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
-    ),
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-        
-    
-}
+
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -212,4 +209,29 @@ SIMPLE_JWT = {
     "SIGNING_KEY": SECRET_KEY,
 
     "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+
+    "DEFAULT_SCHEMA_CLASS": (
+        "drf_spectacular.openapi.AutoSchema"
+    ),
+
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ),
+
+    "DEFAULT_PAGINATION_CLASS":
+        "rest_framework.pagination.PageNumberPagination",
+
+    "PAGE_SIZE": 20,
 }
