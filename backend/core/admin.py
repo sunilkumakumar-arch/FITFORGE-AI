@@ -5,7 +5,6 @@ from .models import (
     Branch,
     Department,
     Designation,
-    Role,
     Shift,
 )
 
@@ -108,24 +107,7 @@ class DesignationAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Role)
-class RoleAdmin(admin.ModelAdmin):
-    list_display = (
-        "name",
-        "is_active",
-    )
 
-    list_filter = (
-        "is_active",
-    )
-
-    search_fields = (
-        "name",
-    )
-
-    ordering = (
-        "name",
-    )
 
 
 @admin.register(Shift)
