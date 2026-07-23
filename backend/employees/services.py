@@ -1,16 +1,11 @@
-from django.db import transaction
-
-from .models import Employee
-from audit.services import AuditService
-
 import secrets
 import string
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
-from .models import Employee
 from audit.services import AuditService
+from .models import Employee
 
 User = get_user_model()
 
@@ -100,12 +95,19 @@ class EmployeeService:
 
         employee_code = EmployeeService.generate_employee_code()
 
+        print("=" * 60)
+        print("Generated Employee Code :", employee_code)
+        print("Validated Data :", validated_data)
+        print("=" * 60)
+        
+
         user, temporary_password = EmployeeService.create_login_account(
             employee_code=employee_code,
             first_name=validated_data["first_name"],
             last_name=validated_data["last_name"],
             email=validated_data["email"],
         )
+        print("Saved Employee Code :", employee.employee_code)
 
         employee = Employee.objects.create(
             user=user,

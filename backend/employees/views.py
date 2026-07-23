@@ -8,6 +8,7 @@ from .permissions import EmployeePermission
 from common.mixins import RolePermissionMixin
 from common.filters import OrganizationFilterMixin
 from common.constants import ROLE_LEVELS
+from roles.permissions import RolePermission
 
 class EmployeeViewSet(
     OrganizationFilterMixin,
@@ -15,18 +16,18 @@ class EmployeeViewSet(
     viewsets.ModelViewSet,
 ):
     
-    permission_classes = [EmployeePermission]
+    permission_classes = [RolePermission]
 
     minimum_role_level = ROLE_LEVELS["BRANCH_MANAGER"]
 
-    required_permission = "employee.view"
+    required_permission = "employee.create"
     """
     API endpoints for Employee Management.
     """
 
     queryset = Employee.objects.all().order_by("employee_code")
     serializer_class = EmployeeSerializer
-    permission_classes = [EmployeePermission]
+    
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

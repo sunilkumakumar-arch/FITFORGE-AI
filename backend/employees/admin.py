@@ -52,11 +52,15 @@ class EmployeeAdmin(admin.ModelAdmin):
             "Employee Information",
             {
                 "fields": (
-                    
+                    "employee_code",
                     "first_name",
                     "last_name",
+                    "date_of_birth",
+                    "gender",
                     "email",
                     "phone",
+                    "alternate_phone",
+                    "profile_photo",
                 )
             },
         ),
@@ -95,10 +99,42 @@ class EmployeeAdmin(admin.ModelAdmin):
             },
         ),
         (
+            "Government & Documents",
+            {
+                "fields": (
+                    "aadhaar_number",
+                    "aadhaar_document",
+                    "pan_number",
+                    "pan_document",
+                    "resume",
+                    "appointment_letter",
+                )
+            },
+        ),
+        (
+            "Address",
+            {
+                "fields": (
+                    "address",
+                    "city",
+                    "state",
+                    "pincode",
+                    "blood_group",
+                )
+            },
+        ),
+        (
+            "Payroll",
+            {
+                "fields": (
+                    "salary",
+                )
+            },
+        ),
+        (
             "Additional Information",
             {
                 "fields": (
-                    "profile_photo",
                     "notes",
                 )
             },

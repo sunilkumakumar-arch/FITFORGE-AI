@@ -1,5 +1,5 @@
 from django.db import models
-
+from employees.models import Employee
 
 
 class Trainer(models.Model):
@@ -363,4 +363,119 @@ class TrainerWeeklyOff(models.Model):
         return (
             f"{self.trainer.first_name} - "
             f"{self.off_day}"
-        )    
+        )   
+
+
+
+
+
+class TrainerProfile(models.Model):
+
+    TRAINER_STATUS = [
+        ("On Duty", "On Duty"),
+        ("On Break", "On Break"),
+        ("Off Duty", "Off Duty"),
+        ("Leave", "Leave"),
+    ]
+
+    SHIFT_CHOICES = [
+        ("SHIFT_1", "6AM-10:30AM & 5PM-9:30PM"),
+        ("SHIFT_2", "6AM-10:30AM & 5:30PM-10PM"),
+        ("SHIFT_3", "6AM-3PM"),
+        ("SHIFT_4", "1PM-10PM"),
+        ("SHIFT_5", "5:30AM-2:30PM"),
+        ("SHIFT_6", "12PM-9PM"),
+    ]
+
+    TRAINER_LEVELS = [
+        ("LEVEL_1", "Level 1"),
+        ("LEVEL_2", "Level 2"),
+        ("LEVEL_3", "Level 3"),
+        ("LEVEL_4", "Level 4"),
+    ]
+
+    employee = models.OneToOneField(
+        Employee,
+        on_delete=models.CASCADE,
+        related_name="trainer_profile",
+    )
+
+    trainer_level = models.CharField(
+        max_length=10,
+        choices=TRAINER_LEVELS,
+        default="LEVEL_1",
+    )
+
+    specialization = models.CharField(
+        max_length=200,
+        blank=True,
+    )
+
+    experience_years = models.PositiveIntegerField(
+        default=0,
+    )
+
+    trainer_capacity = models.PositiveIntegerField(
+        default=40,
+    )
+
+    trainer_status = models.CharField(
+        max_length=20,
+        choices=TRAINER_STATUS,
+        default="Off Duty",
+    )
+
+    shift_type = models.CharField(
+        max_length=20,
+        choices=SHIFT_CHOICES,
+        default="SHIFT_3",
+    )
+
+    commission_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+    )
+
+    active_clients = models.PositiveIntegerField(
+        default=0,
+    )
+
+    total_clients_trained = models.PositiveIntegerField(
+        default=0,
+    )
+
+    rating = models.DecimalField(
+        max_digits=3,
+        decimal_places=2,
+        default=0,
+    )
+
+    available_for_pt = models.BooleanField(
+        default=True,
+    )
+
+    notes = models.TextField(
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = ["employee__employee_code"]
+
+    def __str__(self):
+        return (
+            f"{self.employee.employee_code} - "
+            f"{self.employee.first_name} "
+            f"{self.employee.last_name}"
+        )     
+    
+
+    

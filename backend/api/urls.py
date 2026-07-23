@@ -40,7 +40,6 @@ urlpatterns = [
     path("notifications/", include("notifications.urls")),
     path("dashboard/", include("dashboard.urls")),
     path("ai-coach/", include("ai_coach.urls")),
-    path("billing/",include("billing.urls")),
     path("pt-packages/",include("pt_packages.urls")),
     path("leads/", include("leads.urls")),
     path("certifications/",include("certifications.urls")),

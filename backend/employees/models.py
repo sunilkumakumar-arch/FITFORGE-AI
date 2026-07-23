@@ -65,6 +65,36 @@ class Employee(models.Model):
 
     phone = models.CharField(max_length=15)
 
+    date_of_birth = models.DateField(
+        null=True,
+        blank=True,
+    )
+
+    gender = models.CharField(
+        max_length=10,
+        choices=[
+            ("Male", "Male"),
+            ("Female", "Female"),
+            ("Other", "Other"),
+        ],
+        blank=True,
+    )
+
+    alternate_phone = models.CharField(
+        max_length=15,
+        blank=True,
+    )
+
+    aadhaar_number = models.CharField(
+        max_length=12,
+        blank=True,
+    )
+
+    pan_number = models.CharField(
+        max_length=10,
+        blank=True,
+    )
+
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
@@ -149,6 +179,60 @@ class Employee(models.Model):
 
     notes = models.TextField(blank=True)
 
+    address = models.TextField(
+        blank=True,
+    )
+
+    city = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
+    state = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
+    pincode = models.CharField(
+        max_length=10,
+        blank=True,
+    )
+
+    blood_group = models.CharField(
+        max_length=5,
+        blank=True,
+    )
+
+    salary = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+
+    aadhaar_document = models.FileField(
+        upload_to="employees/documents/aadhaar/",
+        blank=True,
+        null=True,
+    )
+
+    pan_document = models.FileField(
+        upload_to="employees/documents/pan/",
+        blank=True,
+        null=True,
+    )
+
+    resume = models.FileField(
+        upload_to="employees/documents/resume/",
+        blank=True,
+        null=True,
+    )
+
+    appointment_letter = models.FileField(
+        upload_to="employees/documents/appointment_letters/",
+        blank=True,
+        null=True,
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     updated_at = models.DateTimeField(auto_now=True)
@@ -156,26 +240,7 @@ class Employee(models.Model):
     class Meta:
         ordering = ["employee_code"]
 
-    def save(self, *args, **kwargs):
-
-        if not self.employee_code:
-
-            last_employee = (
-                Employee.objects
-                .filter(employee_code__startswith="EMP")
-                .order_by("-employee_code")
-                .first()
-            )
-
-            if last_employee:
-                last_number = int(
-                    last_employee.employee_code.replace("EMP", "")
-                )
-                self.employee_code = f"EMP{last_number + 1:06d}"
-            else:
-                self.employee_code = "EMP000001"
-
-        super().save(*args, **kwargs)
+    
 
     def __str__(self):
         return f"{self.employee_code} - {self.first_name} {self.last_name}"

@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import (
     Trainer,
+    TrainerProfile,
     TrainerCertification,
     TrainerWeeklyOff,
 )
@@ -60,6 +61,45 @@ class TrainerAdmin(admin.ModelAdmin):
         TrainerCertificationInline,
         TrainerWeeklyOffInline,
     ]
+
+
+@admin.register(TrainerProfile)
+class TrainerProfileAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "employee",
+        "trainer_level",
+        "specialization",
+        "experience_years",
+        "trainer_capacity",
+        "trainer_status",
+        "available_for_pt",
+    )
+
+    list_filter = (
+        "trainer_level",
+        "trainer_status",
+        "available_for_pt",
+        "shift_type",
+    )
+
+    search_fields = (
+        "employee__employee_code",
+        "employee__first_name",
+        "employee__last_name",
+        "employee__phone",
+        "specialization",
+    )
+
+    autocomplete_fields = (
+        "employee",
+    )
+
+    ordering = (
+        "employee",
+    )
+
+    list_per_page = 25
 
 
 @admin.register(TrainerCertification)

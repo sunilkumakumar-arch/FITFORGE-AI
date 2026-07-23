@@ -22,12 +22,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
-urlpatterns = [
-    path("admin/", admin.site.urls),
 
-    # FitForge API Version 1
-    path("api/v1/", include("api.urls")),
-]
 
 urlpatterns = [
 

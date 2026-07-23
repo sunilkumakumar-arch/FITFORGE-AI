@@ -1,8 +1,11 @@
-from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import ValidationError
 
 from .services import MembershipPurchaseService
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+
+from .purchase_serializer import PurchaseMembershipSerializer
 
 from .models import (
     MembershipPlan,
@@ -14,8 +17,9 @@ from .serializers import (
     MemberMembershipSerializer,
 )
 
+from rest_framework import viewsets
 
-class MembershipPlanViewSet(viewsets.ModelViewSet):
+class MembershipPlanViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = MembershipPlan.objects.all()
 
@@ -50,29 +54,35 @@ class MemberMembershipViewSet(viewsets.ModelViewSet):
         IsAuthenticated
     ]
 
-    def perform_create(self, serializer):
-
-        try:
-            membership = MembershipPurchaseService.purchase_membership(
-                member=serializer.validated_data["member"],
-                plan=serializer.validated_data["plan"],
-                start_date=serializer.validated_data["start_date"],
-                amount_paid=serializer.validated_data["amount_paid"],
-                payment_method="Cash",
-                transaction_id="",
-                notes="Membership Purchase",
-            )
-
-            print(f"Membership Created ID: {membership.id}")
-            print(f"Member ID: {membership.member.id}")
-            print(f"Plan ID: {membership.plan.id}")
+    
 
 
-            serializer.instance = membership
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="purchase",
+    )
+    def purchase(self, request):
 
-        except ValueError as e:
-            raise ValidationError(
-                {
-                    "error": str(e)
-                }
-            )
+        serializer = PurchaseMembershipSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+
+        membership = MembershipPurchaseService.purchase_membership(
+            member=data["member"],
+            plan=data["plan"],
+            start_date=data["start_date"],
+            amount_paid=data["amount_paid"],
+            payment_method=data["payment_method"],
+            transaction_id=data.get("transaction_id", ""),
+            notes=data.get("notes", ""),
+        )
+
+        return Response(
+            MemberMembershipSerializer(membership).data,
+            status=status.HTTP_201_CREATED,
+        )    

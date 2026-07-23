@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from .purchase_views import MembershipPurchaseView
 
 from .views import (
     MembershipPlanViewSet,
@@ -19,5 +20,14 @@ router.register(
 )
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path(
+        "purchase/",
+        MembershipPurchaseView.as_view(),
+        name="membership-purchase",
+    ),
+
+    path(
+        "",
+        include(router.urls),
+    ),
 ]
