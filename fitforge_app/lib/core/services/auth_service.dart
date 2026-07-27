@@ -21,8 +21,10 @@ class AuthService {
       }),
     );
 
-    print("STATUS: ${response.statusCode}");
-    print("BODY: ${response.body}");
+    print("LOGIN STATUS: ${response.statusCode}");
+    print("LOGIN BODY: ${response.body}");
+
+    
 
     final data = jsonDecode(response.body);
 
@@ -36,16 +38,21 @@ class AuthService {
         data['access'],
       );
 
-      print("TOKEN SAVED");
+      print("TOKEN SAVED: ${data['access']}");
+
+      
     }
 
     return data;
   }
 
   static Future<String?> getToken() async {
-    final prefs =
-        await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
 
-    return prefs.getString('access_token');
+    final token = prefs.getString('access_token');
+
+    print("GET TOKEN: $token");
+
+    return token;
   }
-}
+}  

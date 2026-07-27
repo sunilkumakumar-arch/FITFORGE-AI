@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'edit_member_screen.dart';
 import 'member_service.dart';
 
-import '../memberships/assign_membership_screen.dart';
 import '../memberships/membership_service.dart';
 
 import '../trainers/trainer_assignment_service.dart';
+import '../payments/add_payment_screen.dart';
+import '../pt_packages/purchase_pt_package_screen.dart';
+import '../pt_packages/member_pt_package_service.dart';
 
 class MemberDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> member;
@@ -31,12 +33,55 @@ class _MemberDetailsScreenState
 
   bool isLoadingTrainer = true;
 
+  Map<String, dynamic>? activePTPackage;
+
+  bool isLoadingPTPackage = true;
+
+  bool get hasActiveMembership {
+  if (membership == null) {
+    return false;
+  }
+
+  return membership!['status'] == 'Active';
+}
+
+bool get canRenewMembership {
+  if (membership == null) {
+    return true;
+  }
+
+  final remainingDays =
+      membership!['remaining_days'] ?? 0;
+
+  return remainingDays <= 15;
+}
+
+bool get canPurchasePTPackage {
+  if (membership == null) {
+    return false;
+  }
+
+  return membership!['status'] == 'Active';
+}
+
+bool get hasActivePTPackage {
+
+  if (activePTPackage == null) {
+    return false;
+  }
+
+  return activePTPackage![
+          'is_active'] ==
+      true;
+}
+
   @override
   void initState() {
     super.initState();
 
     loadMembership();
     loadTrainer();
+    loadPTPackage();
   }
 
   Future<void> loadMembership() async {
@@ -66,6 +111,22 @@ class _MemberDetailsScreenState
     setState(() {
       trainerAssignment = data;
       isLoadingTrainer = false;
+    });
+  }
+  
+  Future<void> loadPTPackage() async {
+
+    final data =
+        await MemberPTPackageService
+            .getMemberActivePackage(
+      widget.member['id'],
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      activePTPackage = data;
+      isLoadingPTPackage = false;
     });
   }
 
@@ -264,79 +325,139 @@ class _MemberDetailsScreenState
                     'Not Assigned',
               ),
 
+if (isLoadingPTPackage)
+  const Center(
+    child:
+        CircularProgressIndicator(),
+  )
+else if (activePTPackage != null) ...[
+
+  buildInfoTile(
+    'PT Package',
+    activePTPackage![
+            'package_name'] ??
+        '-',
+  ),
+
+  buildInfoTile(
+    'PT Status',
+    'Active',
+  ),
+
+  buildInfoTile(
+    'PT Expiry Date',
+    activePTPackage![
+            'expiry_date'] ??
+        '-',
+  ),
+
+  buildInfoTile(
+    'Sessions Used',
+    activePTPackage![
+            'sessions_used']
+        .toString(),
+  ),
+],              
+
             const SizedBox(height: 30),
 
-            SizedBox(
-              width: double.infinity,
-              child:
-                  ElevatedButton.icon(
-                onPressed: () async {
-                  final result =
-                      await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          AssignMembershipScreen(
-                        member:
-                            widget.member,
-                      ),
-                    ),
-                  );
-
-                  if (result == true) {
-                    loadMembership();
-                  }
-                },
-                icon: const Icon(
-                  Icons.card_membership,
-                ),
-                label: const Text(
-                  'ASSIGN MEMBERSHIP',
-                ),
-              ),
+if (!hasActiveMembership || canRenewMembership)
+  SizedBox(
+    width: double.infinity,
+    child: ElevatedButton.icon(
+      onPressed: () async {
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AddPaymentScreen(
+              member: widget.member,
             ),
+          ),
+        );
 
-            const SizedBox(height: 15),
+        if (result == true) {
+          loadMembership();
+          loadTrainer();
+          loadPTPackage();
+        }
+      },
+      icon: const Icon(
+        Icons.card_membership,
+      ),
+      label: Text(
+        membership == null
+            ? 'PURCHASE MEMBERSHIP'
+            : 'RENEW MEMBERSHIP',
+      ),
+    ),
+  ),
 
-            SizedBox(
-              width: double.infinity,
-              child:
-                  ElevatedButton.icon(
-                onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          EditMemberScreen(
-                        member:
-                            widget.member,
-                      ),
-                    ),
-                  );
-                },
-                icon:
-                    const Icon(Icons.edit),
-                label: const Text(
-                  'EDIT MEMBER',
-                ),
-              ),
+if (!hasActiveMembership || canRenewMembership)
+  const SizedBox(height: 15),
+
+if (
+    canPurchasePTPackage &&
+    !hasActivePTPackage
+)
+  SizedBox(
+    width: double.infinity,
+    child: ElevatedButton.icon(
+      onPressed: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                PurchasePTPackageScreen(
+              member: widget.member,
             ),
+          ),
+        );
+      },
+      icon: const Icon(
+        Icons.fitness_center,
+      ),
+      label: const Text(
+        'PURCHASE PT PACKAGE',
+      ),
+    ),
+  ),
 
-            const SizedBox(height: 15),
+if (canPurchasePTPackage)
+  const SizedBox(height: 15),
 
-            SizedBox(
-              width: double.infinity,
-              child:
-                  ElevatedButton.icon(
-                onPressed: deleteMember,
-                icon:
-                    const Icon(Icons.delete),
-                label: const Text(
-                  'DELETE MEMBER',
-                ),
-              ),
-            ),
-          ],
+SizedBox(
+  width: double.infinity,
+  child: ElevatedButton.icon(
+    onPressed: () async {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              EditMemberScreen(
+            member: widget.member,
+          ),
+        ),
+      );
+    },
+    icon: const Icon(Icons.edit),
+    label: const Text(
+      'EDIT MEMBER',
+    ),
+  ),
+),
+
+const SizedBox(height: 15),
+
+SizedBox(
+  width: double.infinity,
+  child: ElevatedButton.icon(
+    onPressed: deleteMember,
+    icon: const Icon(Icons.delete),
+    label: const Text(
+      'DELETE MEMBER',
+    ),
+  ),
+),         ],
         ),
       ),
     );

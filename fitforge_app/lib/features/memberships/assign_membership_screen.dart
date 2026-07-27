@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'membership_service.dart';
+import '../trainers/membership_trainer_assignment_screen.dart';
 
-class AssignMembershipScreen
-    extends StatefulWidget {
+class AssignMembershipScreen extends StatefulWidget {
   final Map<String, dynamic> member;
 
   const AssignMembershipScreen({
@@ -12,14 +12,12 @@ class AssignMembershipScreen
   });
 
   @override
-  State<AssignMembershipScreen>
-      createState() =>
-          _AssignMembershipScreenState();
+  State<AssignMembershipScreen> createState() =>
+      _AssignMembershipScreenState();
 }
 
 class _AssignMembershipScreenState
-    extends State<
-        AssignMembershipScreen> {
+    extends State<AssignMembershipScreen> {
   List<dynamic> plans = [];
 
   dynamic selectedPlan;
@@ -36,8 +34,7 @@ class _AssignMembershipScreenState
 
   Future<void> loadPlans() async {
     final data =
-        await MembershipService
-            .getMembershipPlans();
+        await MembershipService.getMembershipPlans();
 
     setState(() {
       plans = data;
@@ -60,16 +57,13 @@ class _AssignMembershipScreenState
     });
 
     final success =
-        await MembershipService
-            .assignMembership(
+        await MembershipService.assignMembership(
       memberId: widget.member['id'],
       planId: selectedPlan['id'],
-      startDate: DateTime.now()
-          .toString()
-          .split(' ')[0],
+      startDate:
+          DateTime.now().toString().split(' ')[0],
       amountPaid: double.parse(
-        selectedPlan['price']
-            .toString(),
+        selectedPlan['price'].toString(),
       ),
     );
 
@@ -80,19 +74,34 @@ class _AssignMembershipScreenState
     });
 
     if (success) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Membership Assigned Successfully',
+      final trainerAssigned =
+          await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              MembershipTrainerAssignmentScreen(
+            member: widget.member,
           ),
         ),
       );
 
-      Navigator.pop(
-        context,
-        true,
-      );
+      if (!mounted) return;
+
+      if (trainerAssigned == true) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Membership & Trainer Assigned Successfully',
+            ),
+          ),
+        );
+
+        Navigator.pop(
+          context,
+          true,
+        );
+      }
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(
@@ -115,14 +124,11 @@ class _AssignMembershipScreenState
       ),
       body: isLoading
           ? const Center(
-              child:
-                  CircularProgressIndicator(),
+              child: CircularProgressIndicator(),
             )
           : Padding(
               padding:
-                  const EdgeInsets.all(
-                20,
-              ),
+                  const EdgeInsets.all(20),
               child: Column(
                 children: [
                   Card(
@@ -131,18 +137,14 @@ class _AssignMembershipScreenState
                         '${widget.member['first_name']} ${widget.member['last_name']}',
                       ),
                       subtitle: Text(
-                        widget.member['email'] ??
-                            '',
+                        widget.member['email'] ?? '',
                       ),
                     ),
                   ),
 
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
 
-                  DropdownButtonFormField<
-                      dynamic>(
+                  DropdownButtonFormField<dynamic>(
                     value: selectedPlan,
                     decoration:
                         const InputDecoration(
@@ -151,35 +153,28 @@ class _AssignMembershipScreenState
                       border:
                           OutlineInputBorder(),
                     ),
-                    items: plans.map(
-                      (plan) {
-                        return DropdownMenuItem(
-                          value: plan,
-                          child: Text(
-                            '${plan['name']} - ₹${plan['price']}',
-                          ),
-                        );
-                      },
-                    ).toList(),
+                    items: plans.map((plan) {
+                      return DropdownMenuItem(
+                        value: plan,
+                        child: Text(
+                          '${plan['name']} - ₹${plan['price']}',
+                        ),
+                      );
+                    }).toList(),
                     onChanged: (value) {
                       setState(() {
-                        selectedPlan =
-                            value;
+                        selectedPlan = value;
                       });
                     },
                   ),
 
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
 
-                  if (selectedPlan !=
-                      null)
+                  if (selectedPlan != null)
                     Card(
                       child: ListTile(
                         title: Text(
-                          selectedPlan[
-                              'name'],
+                          selectedPlan['name'],
                         ),
                         subtitle: Text(
                           'Duration: ${selectedPlan['duration_days']} Days',
@@ -193,15 +188,12 @@ class _AssignMembershipScreenState
                   const Spacer(),
 
                   SizedBox(
-                    width:
-                        double.infinity,
+                    width: double.infinity,
                     height: 50,
-                    child:
-                        ElevatedButton(
-                      onPressed:
-                          isSaving
-                              ? null
-                              : saveMembership,
+                    child: ElevatedButton(
+                      onPressed: isSaving
+                          ? null
+                          : saveMembership,
                       child: isSaving
                           ? const CircularProgressIndicator()
                           : const Text(

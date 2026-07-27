@@ -26,13 +26,43 @@ class MemberPTPackageService {
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(
-        response.body,
-      );
+
+      final data = jsonDecode(response.body);
+
+      if (data is List) {
+        return data;
+      }
+
+      if (data is Map<String, dynamic>) {
+        return data['results'] ?? [];
+      }
+
+      return [];
     }
 
     return [];
   }
+
+  static Future<Map<String, dynamic>?>
+    getMemberActivePackage(
+  int memberId,
+) async {
+
+  final packages =
+      await getMemberPackages();
+
+  try {
+    return packages.firstWhere(
+      (package) =>
+          package['member'] ==
+              memberId &&
+          package['is_active'] ==
+              true,
+    );
+  } catch (_) {
+    return null;
+  }
+} 
 
   static Future<bool> assignPackage({
     required int memberId,

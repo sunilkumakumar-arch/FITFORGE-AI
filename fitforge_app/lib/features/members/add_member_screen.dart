@@ -116,7 +116,7 @@ class _AddMemberScreenState
       isSaving = true;
     });
 
-    final success =
+    final error =
         await MemberService.createMember(
       firstName: firstName,
       lastName: lastName,
@@ -126,28 +126,24 @@ class _AddMemberScreenState
       dob: dob,
     );
 
-    if (!mounted) return;
-
     setState(() {
       isSaving = false;
     });
 
-    if (success) {
+    if (error == null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(
+         .showSnackBar(
         const SnackBar(
-          content: Text(
-            'Member Created Successfully',
+         content: Text(
+           'Member Created Successfully',
           ),
         ),
       );
 
-      Navigator.pop(context, true);
-    } else {
-      showError(
-        'Failed To Create Member',
-      );
-    }
+  Navigator.pop(context, true);
+} else {
+  showError(error);
+}
   }
 
   Future<void> selectDate() async {

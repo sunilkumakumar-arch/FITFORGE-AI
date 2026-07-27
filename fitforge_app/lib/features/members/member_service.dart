@@ -19,7 +19,7 @@ class MemberService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return data.length;
+      return data['count'] ?? 0;
     }
 
     return 0;
@@ -36,19 +36,39 @@ class MemberService {
       },
     );
 
-    print(
-        'GET MEMBERS STATUS: ${response.statusCode}');
-    print(
-        'GET MEMBERS BODY: ${response.body}');
+    print('GET MEMBERS STATUS: ${response.statusCode}');
+    print('GET MEMBERS BODY: ${response.body}');
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final data = jsonDecode(response.body);
+
+      if (data is Map<String, dynamic>) {
+        return List<dynamic>.from(data['results'] ?? []);
+      }
+
+      if (data is List) {
+        return List<dynamic>.from(data);
+      }
     }
 
     return [];
   }
 
-  static Future<bool> createMember({
+  static Future<Map<String, dynamic>?> getMemberById(
+    int memberId,
+  ) async {
+    final members = await getMembers();
+
+    try {
+      return members.firstWhere(
+        (member) => member['id'] == memberId,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<String?> createMember({
     required String firstName,
     required String lastName,
     required String phone,
@@ -76,12 +96,30 @@ class MemberService {
       }),
     );
 
-    print(
-        'CREATE MEMBER STATUS: ${response.statusCode}');
-    print(
-        'CREATE MEMBER BODY: ${response.body}');
+    print('CREATE MEMBER STATUS: ${response.statusCode}');
+    print('CREATE MEMBER BODY: ${response.body}');
 
-    return response.statusCode == 201;
+    if (response.statusCode == 201) {
+      return null;
+    }
+
+    try {
+      final errorData = jsonDecode(response.body);
+
+      if (errorData['phone'] != null) {
+        return errorData['phone'][0];
+      }
+
+      if (errorData['email'] != null) {
+        return errorData['email'][0];
+      }
+
+      if (errorData['detail'] != null) {
+        return errorData['detail'];
+      }
+    } catch (_) {}
+
+    return 'Unable to create member';
   }
 
   static Future<bool> updateMember({
@@ -111,10 +149,40 @@ class MemberService {
       }),
     );
 
+    print('UPDATE MEMBER STATUS: ${response.statusCode}');
+    print('UPDATE MEMBER BODY: ${response.body}');
+
+    return response.statusCode == 200;
+  }
+
+  static Future<bool> updateMemberPreferences({
+    required int memberId,
+    required String preferredSlot,
+    required String experienceLevel,
+    required String trainerPreference,
+  }) async {
+    final token = await AuthService.getToken();
+
+    final response = await http.patch(
+      Uri.parse('$baseUrl/members/$memberId/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'preferred_slot': preferredSlot,
+        'experience_level': experienceLevel,
+        'trainer_preference': trainerPreference,
+      }),
+    );
+
     print(
-        'UPDATE MEMBER STATUS: ${response.statusCode}');
+      'UPDATE MEMBER PREF STATUS: ${response.statusCode}',
+    );
+
     print(
-        'UPDATE MEMBER BODY: ${response.body}');
+      'UPDATE MEMBER PREF BODY: ${response.body}',
+    );
 
     return response.statusCode == 200;
   }
@@ -133,7 +201,8 @@ class MemberService {
     );
 
     print(
-        'DELETE MEMBER STATUS: ${response.statusCode}');
+      'DELETE MEMBER STATUS: ${response.statusCode}',
+    );
 
     return response.statusCode == 204;
   }

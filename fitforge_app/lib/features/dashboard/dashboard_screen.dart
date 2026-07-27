@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../members/member_service.dart';
 import '../members/members_screen.dart';
-
 import '../memberships/membership_screen.dart';
-import '../memberships/membership_service.dart';
+import '../trainers/trainers_screen.dart';
 
-import '../trainers/trainer_service.dart';
-
-import '../attendance/attendance_service.dart';
+import 'dashboard_model.dart';
+import 'dashboard_service.dart';
 
 
 class DashboardScreen extends StatefulWidget {
@@ -21,10 +18,9 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState
     extends State<DashboardScreen> {
-  int memberCount = 0;
-  int trainerCount = 0;
-  int membershipPlanCount = 0;
-  int attendanceCount = 0;
+  DashboardModel? dashboard;
+
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -34,42 +30,26 @@ class _DashboardScreenState
 
   Future<void> loadDashboard() async {
     try {
-      final members =
-          await MemberService.getMemberCount();
-
-      final trainers =
-          await TrainerService.getTrainerCount();
-
-      final plans =
-          await MembershipService
-              .getMembershipPlanCount();
-      print('BEFORE ATTENDANCE');        
-
-      final attendance =
-          await AttendanceService
-              .getAttendanceCount();
-      print('AFTER ATTENDANCE');
-        
-
-      print('====================');
-      print('MEMBERS: $members');
-      print('TRAINERS: $trainers');
-      print('PLANS: $plans');
-      print('ATTENDANCE: $attendance');
-      print('====================');
+      final data =
+          await DashboardService
+              .getDashboardSummary();
 
       if (!mounted) return;
 
       setState(() {
-        memberCount = members;
-        trainerCount = trainers;
-        membershipPlanCount = plans;
-        attendanceCount = attendance;
+        dashboard = data;
+        isLoading = false;
       });
     } catch (e) {
-      print(
+     debugPrint( 
         'DASHBOARD ERROR: $e',
       );
+
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -92,7 +72,9 @@ class _DashboardScreenState
                 icon,
                 size: 60,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(
+                height: 20,
+              ),
               Text(
                 value,
                 style: const TextStyle(
@@ -101,12 +83,16 @@ class _DashboardScreenState
                       FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(
+                height: 10,
+              ),
               Text(
                 title,
                 style: const TextStyle(
                   fontSize: 18,
                 ),
+                textAlign:
+                    TextAlign.center,
               ),
             ],
           ),
@@ -116,11 +102,13 @@ class _DashboardScreenState
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'FITFORGE TEST',
+          'FITFORGE',
           style: TextStyle(
             fontWeight:
                 FontWeight.bold,
@@ -129,81 +117,142 @@ class _DashboardScreenState
         ),
         centerTitle: true,
       ),
-      body: RefreshIndicator(
-        onRefresh: loadDashboard,
-        child: Padding(
-          padding:
-              const EdgeInsets.all(20),
-          child: GridView.count(
-            crossAxisCount: 2,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-            childAspectRatio: 1.2,
-            children: [
-              buildCard(
-                icon: Icons.people,
-                value:
-                    memberCount.toString(),
-                title: 'Members',
-                onTap: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          const MembersScreen(),
+      body: isLoading
+          ? const Center(
+              child:
+                  CircularProgressIndicator(),
+            )
+          : RefreshIndicator(
+              onRefresh:
+                  loadDashboard,
+              child: Padding(
+                padding:
+                    const EdgeInsets.all(
+                  20,
+                ),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing:
+                      20,
+                  mainAxisSpacing:
+                      20,
+                  childAspectRatio:
+                      1.2,
+                  children: [
+                    buildCard(
+                      icon:
+                          Icons.people,
+                      value: dashboard!
+                          .totalMembers
+                          .toString(),
+                      title:
+                          'Members',
+                      onTap:
+                          () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) =>
+                                    const MembersScreen(),
+                          ),
+                        );
+
+                        loadDashboard();
+                      },
                     ),
-                  );
 
-                  loadDashboard();
-                },
-              ),
+                    buildCard(
+                      icon: Icons.fitness_center,
+                      value: dashboard!
+                          .totalTrainers
+                          .toString(),
+                      title: 'Trainers',
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const TrainersScreen(),
+                          ),
+                        );
 
-              buildCard(
-                icon:
-                    Icons.fitness_center,
-                value:
-                    trainerCount.toString(),
-                title: 'Trainers',
-              ),
-
-              buildCard(
-                icon:
-                    Icons.card_membership,
-                value:
-                    membershipPlanCount
-                        .toString(),
-                title:
-                    'Membership Plans',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          const MembershipScreen(),
+                        loadDashboard();
+                      },
                     ),
-                  );
-                },
-              ),
 
-              buildCard(
-                icon:
-                    Icons.currency_rupee,
-                value: '₹0',
-                title: 'Revenue',
-              ),
+                    buildCard(
+                      icon: Icons
+                          .card_membership,
+                      value: dashboard!
+                          .activeMemberships
+                          .toString(),
+                      title:
+                          'Active Memberships',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) =>
+                                    const MembershipScreen(),
+                          ),
+                        );
+                      },
+                    ),
 
-              buildCard(
-                icon:
-                    Icons.check_circle,
-                value:
-                    attendanceCount
-                        .toString(),
-                title: 'Attendance',
+                    buildCard(
+                      icon: Icons
+                          .currency_rupee,
+                      value:
+                          '₹${dashboard!.totalRevenue.toStringAsFixed(0)}',
+                      title:
+                          'Revenue',
+                    ),
+
+                    buildCard(
+                      icon: Icons
+                          .check_circle,
+                      value: dashboard!
+                          .todayAttendance
+                          .toString(),
+                      title:
+                          'Attendance',
+                    ),
+
+                    buildCard(
+                      icon: Icons
+                          .payments,
+                      value: dashboard!
+                          .totalPayments
+                          .toString(),
+                      title:
+                          'Payments',
+                    ),
+
+                    buildCard(
+                      icon: Icons
+                          .pending_actions,
+                      value: dashboard!
+                          .pendingPayments
+                          .toString(),
+                      title:
+                          'Pending Payments',
+                    ),
+
+                    buildCard(
+                      icon: Icons
+                          .event_busy,
+                      value: dashboard!
+                          .expiredMemberships
+                          .toString(),
+                      title:
+                          'Expired Memberships',
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../core/services/auth_service.dart';
+import '../../core/services/api_response_parser.dart';
 
 class MembershipService {
   static const String baseUrl =
@@ -13,16 +14,18 @@ class MembershipService {
     final response = await http.get(
       Uri.parse('$baseUrl/membership-plans/'),
       headers: {
-        'Content-Type': 'application/json',
+      'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
     );
 
     print('PLANS STATUS: ${response.statusCode}');
     print('PLANS BODY: ${response.body}');
-
+  
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return ApiResponseParser.parseList(
+        response.body,
+      );
     }
 
     return [];
@@ -30,7 +33,7 @@ class MembershipService {
 
   static Future<int> getMembershipPlanCount() async {
     final token = await AuthService.getToken();
-
+ 
     final response = await http.get(
       Uri.parse('$baseUrl/membership-plans/'),
       headers: {
@@ -40,8 +43,9 @@ class MembershipService {
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data.length;
+      return ApiResponseParser.parseCount(
+        response.body,
+      );
     }
 
     return 0;
@@ -93,13 +97,15 @@ class MembershipService {
     print('MEMBERSHIP BODY: ${response.body}');
 
     if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
+      final data = ApiResponseParser.parseList(
+        response.body,
+      );
 
       try {
         return data.firstWhere(
           (item) => item['member'] == memberId,
         );
-      } catch (e) {
+      } catch (_) {
         return null;
       }
     }
@@ -167,7 +173,7 @@ class MembershipService {
     return response.statusCode == 200;
   }
 
-  static Future<bool> deactivateMembershipPlan(
+    static Future<bool> deactivateMembershipPlan(
     int id,
   ) async {
     final token = await AuthService.getToken();
@@ -187,5 +193,37 @@ class MembershipService {
     print('DEACTIVATE PLAN BODY: ${response.body}');
 
     return response.statusCode == 200;
+  }
+
+  static Future<bool> purchaseMembership({
+    required int memberId,
+    required int planId,
+    required double amountPaid,
+    required String paymentMethod,
+    String transactionId = '',
+    String notes = '',
+  }) async {
+    final token = await AuthService.getToken();
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/purchase/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'member_id': memberId,
+        'plan_id': planId,
+        'amount_paid': amountPaid,
+        'payment_method': paymentMethod,
+        'transaction_id': transactionId,
+        'notes': notes,
+      }),
+    );
+
+    print('PURCHASE STATUS: ${response.statusCode}');
+    print('PURCHASE BODY: ${response.body}');
+
+    return response.statusCode == 201;
   }
 }
