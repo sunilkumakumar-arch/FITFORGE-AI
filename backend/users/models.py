@@ -22,6 +22,16 @@ class UserProfile(models.Model):
         blank=True,
     )
 
+    last_login_ip = models.GenericIPAddressField(
+        null=True,
+        blank=True,
+    )
+
+    last_activity = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
     profile_photo = models.ImageField(
         upload_to="users/profile_photos/",
         null=True,

@@ -7,6 +7,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from employees.models import Employee
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class AuthenticationService:
@@ -14,18 +15,74 @@ class AuthenticationService:
     Enterprise authentication service.
     """
 
+
     @staticmethod
-    def authenticate_user(employee_code, password):
+    def get_client_ip(request):
+        """
+        Return the client's IP address.
+        """
+
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+
+        if x_forwarded_for:
+            return x_forwarded_for.split(",")[0].strip()
+
+        return request.META.get("REMOTE_ADDR") 
+
+    @staticmethod
+    def authenticate_user(request, employee_code, password):
         """
         Authenticate a user using employee code and password.
         """
 
+        employee = (
+            Employee.objects.select_related(
+                "user",
+                "user__profile",
+            )
+            .filter(employee_code=employee_code)
+            .first()
+        )
+
+        if employee:
+            profile = employee.user.profile
+
+            if profile.account_locked:
+                raise AuthenticationFailed(
+                    "Your account has been locked. Please contact an administrator."
+                )
         user = authenticate(
             username=employee_code,
             password=password,
         )
 
         if user is None:
+
+            employee = (
+                Employee.objects.select_related(
+                    "user",
+                    "user__profile",
+                )
+                .filter(employee_code=employee_code)
+                .first()
+            )
+
+            if employee:
+
+                profile = employee.user.profile
+
+                profile.failed_login_attempts += 1
+
+                if profile.failed_login_attempts >= 5:
+                    profile.account_locked = True
+
+                profile.save(
+                    update_fields=[
+                        "failed_login_attempts",
+                        "account_locked",
+                    ]
+                )
+
             raise AuthenticationFailed(
                 "Invalid employee code or password."
             )
@@ -46,7 +103,19 @@ class AuthenticationService:
                 "Employee record not found."
             )
 
+        current_time = timezone.now()
+
         profile = user.profile
+        profile.failed_login_attempts = 0
+        profile.last_activity = timezone.now()
+        profile.last_login_ip = AuthenticationService.get_client_ip(request)
+        profile.save(
+            update_fields=[
+                "failed_login_attempts",
+                "last_activity",
+                "last_login_ip",
+            ]
+        )
 
         tokens = AuthenticationService.generate_tokens(user)
 
@@ -135,12 +204,13 @@ class AuthenticationService:
         }
 
     @staticmethod
-    def login(employee_code, password):
+    def login(request, employee_code, password):
         """
         Complete login workflow.
         """
 
         auth_result = AuthenticationService.authenticate_user(
+            request,
             employee_code,
             password,
         )
@@ -186,4 +256,51 @@ class AuthenticationService:
 
         return {
             "message": "Password changed successfully."
+        }
+
+
+    @staticmethod
+    def get_current_user(user):
+        """
+        Return the current authenticated user session.
+        """
+
+        try:
+            employee = Employee.objects.select_related(
+                "organization",
+                "branch",
+                "department",
+                "designation",
+                "role",
+                "user__profile",
+            ).get(user=user)
+
+        except Employee.DoesNotExist:
+            raise AuthenticationFailed(
+                "Employee record not found."
+            )
+
+        return AuthenticationService.build_session(
+            user=user,
+            employee=employee,
+            profile=user.profile,
+        )
+
+    @staticmethod
+    def logout(refresh_token):
+        """
+        Logout user by blacklisting the refresh token.
+        """
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+        except Exception:
+            raise AuthenticationFailed(
+                "Invalid or expired refresh token."
+            )
+
+        return {
+            "message": "Logged out successfully."
         }
