@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Role, UserRole
+from .models import Role
 
 
 @admin.register(Role)
@@ -20,20 +20,3 @@ class RoleAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(UserRole)
-class UserRoleAdmin(admin.ModelAdmin):
-
-    list_display = (
-        "user",
-        "role",
-        "assigned_at",
-    )
-
-    list_filter = (
-        "role",
-    )
-
-    search_fields = (
-        "user__username",
-        "user__email",
-    )

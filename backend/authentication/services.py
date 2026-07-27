@@ -64,6 +64,8 @@ class AuthenticationService:
     @staticmethod
     def generate_tokens(user):
         """
+
+        
         Generate JWT access and refresh tokens.
         """
 
@@ -116,8 +118,8 @@ class AuthenticationService:
             },
             "role": {
                 "id": role.id if role else None,
+                "code": role.code if role else None,
                 "name": role.name if role else None,
-                
             },
             "profile": {
                 "must_change_password": profile.must_change_password,

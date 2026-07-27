@@ -27,7 +27,7 @@ class RolePermissionMixin:
         employee = self.get_employee()
 
         if employee and employee.role:
-            return ROLE_LEVELS.get(employee.role.name, 0)
+            return ROLE_LEVELS.get(employee.role.code, 0)
 
         return 0
 

@@ -4,6 +4,12 @@ from django.contrib.auth.models import User
 
 class Role(models.Model):
 
+    code = models.CharField(
+        max_length=50,
+        unique=True,
+        db_index=True,
+    )
+
     name = models.CharField(
         max_length=100,
         unique=True,
@@ -82,23 +88,3 @@ class Permission(models.Model):
     
 
 
-class UserRole(models.Model):
-
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name="role_assignment"
-    )
-
-    role = models.ForeignKey(
-        Role,
-        on_delete=models.CASCADE,
-        related_name="users"
-    )
-
-    assigned_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    def __str__(self):
-        return f"{self.user.username} - {self.role.name}"

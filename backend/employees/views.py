@@ -8,6 +8,7 @@ from .permissions import EmployeePermission
 from common.mixins import RolePermissionMixin
 from common.filters import OrganizationFilterMixin
 from common.constants import ROLE_LEVELS
+from common.role_codes import RoleCodes
 from roles.permissions import RolePermission
 
 class EmployeeViewSet(
@@ -18,7 +19,7 @@ class EmployeeViewSet(
     
     permission_classes = [RolePermission]
 
-    minimum_role_level = ROLE_LEVELS["BRANCH_MANAGER"]
+    minimum_role_level = ROLE_LEVELS[RoleCodes.BRANCH_MANAGER]
 
     required_permission = "employee.create"
     """

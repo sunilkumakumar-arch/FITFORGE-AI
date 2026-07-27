@@ -29,6 +29,8 @@ urlpatterns = [
     ),
     
     path("accounts/", include("accounts.urls")),
+    path("core/", include("core.urls")),
+    path("bootstrap/", include("bootstrap.urls")),
     path("memberships/", include("memberships.urls")),
     path("employees/", include("employees.urls")),
     path("attendance/", include("attendance.urls")),

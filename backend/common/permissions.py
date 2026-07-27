@@ -17,7 +17,7 @@ class IsSuperAdmin(BasePermission):
 
         if hasattr(user, "employee_profile") and user.employee_profile.role:
             return (
-                user.employee_profile.role.name == "SUPER_ADMIN"
+                user.employee_profile.role.code == "SUPER_ADMIN"
             )
 
         return False
@@ -36,7 +36,7 @@ class IsOrganizationOwner(BasePermission):
 
         if hasattr(user, "employee_profile") and user.employee_profile.role:
             return (
-                user.employee_profile.role.name == "ORG_OWNER"
+                user.employee_profile.role.code == "ORG_OWNER"
             )
 
         return False
@@ -55,7 +55,7 @@ class IsBranchManager(BasePermission):
 
         if hasattr(user, "employee_profile") and user.employee_profile.role:
             return (
-                user.employee_profile.role.name == "BRANCH_MANAGER"
+                user.employee_profile.role.code == "BRANCH_MANAGER"
             )
 
         return False
@@ -74,7 +74,7 @@ class IsTrainer(BasePermission):
 
         if hasattr(user, "employee_profile") and user.employee_profile.role:
             return (
-                user.employee_profile.role.name in [
+                user.employee_profile.role.code in [
                     "TRAINER",
                     "FREELANCE_TRAINER",
                 ]
@@ -96,7 +96,7 @@ class IsReceptionist(BasePermission):
 
         if hasattr(user, "employee_profile") and user.employee_profile.role:
             return (
-                user.employee_profile.role.name == "RECEPTIONIST"
+                user.employee_profile.role.code == "RECEPTIONIST"
             )
 
         return False

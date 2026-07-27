@@ -7,6 +7,7 @@ from django.db import transaction
 from audit.services import AuditService
 from .models import Employee
 
+
 User = get_user_model()
 
 
@@ -68,7 +69,9 @@ class EmployeeService:
             password=temporary_password,
         )
 
-        return user, temporary_password              
+        # UserProfile is created automatically by the post_save signal.
+
+        return user, temporary_password             
 
     @staticmethod
     def generate_employee_code():
@@ -91,14 +94,14 @@ class EmployeeService:
 
     @staticmethod
     @transaction.atomic
-    def create_employee(validated_data):
+    def create_employee(
+        validated_data,
+        role=None,
+    ):
 
         employee_code = EmployeeService.generate_employee_code()
 
-        print("=" * 60)
-        print("Generated Employee Code :", employee_code)
-        print("Validated Data :", validated_data)
-        print("=" * 60)
+        # Employee code generated successfully
         
 
         user, temporary_password = EmployeeService.create_login_account(
@@ -107,11 +110,12 @@ class EmployeeService:
             last_name=validated_data["last_name"],
             email=validated_data["email"],
         )
-        print("Saved Employee Code :", employee.employee_code)
+        
 
         employee = Employee.objects.create(
             user=user,
             employee_code=employee_code,
+            role=role,
             **validated_data,
         )
 
@@ -126,5 +130,6 @@ class EmployeeService:
 
         return {
             "employee": employee,
+            "user": user,
             "temporary_password": temporary_password,
         }

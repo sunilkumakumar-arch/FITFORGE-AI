@@ -16,6 +16,18 @@ class OrganizationAdmin(admin.ModelAdmin):
         "owner_name",
         "email",
         "phone",
+        "is_active",
+        "created_at",
+    )
+
+    list_filter = (
+        "is_active",
+        "created_at",
+    )
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
     )
 
     search_fields = (
@@ -42,6 +54,7 @@ class BranchAdmin(admin.ModelAdmin):
     search_fields = (
         "name",
         "city",
+        "organization__name",
     )
 
     ordering = (

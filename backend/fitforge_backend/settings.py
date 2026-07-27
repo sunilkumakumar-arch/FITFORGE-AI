@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     "pt_packages",
     "leads",
     'certifications',
+    "bootstrap",
     
     
 

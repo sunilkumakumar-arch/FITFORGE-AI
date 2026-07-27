@@ -1,0 +1,1046 @@
+====================================================================================================
+FILE: .\roles\models.py
+====================================================================================================
+from django.db import models
+from django.contrib.auth.models import User
+
+
+class Role(models.Model):
+
+    code = models.CharField(
+        max_length=50,
+        unique=True,
+        db_index=True,
+    )
+
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+
+    description = models.TextField(
+        blank=True,
+    )
+
+    is_system_role = models.BooleanField(
+        default=False,
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+    )
+
+    permissions = models.ManyToManyField(
+        "Permission",
+        blank=True,
+        related_name="roles",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+    
+
+class Permission(models.Model):
+
+    module = models.CharField(
+        max_length=50,
+    )
+
+    code = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+
+    name = models.CharField(
+        max_length=150,
+    )
+
+    description = models.TextField(
+        blank=True,
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = ["module", "name"]
+
+    def __str__(self):
+        return self.code    
+    
+    
+
+
+class UserRole(models.Model):
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="role_assignment"
+    )
+
+    role = models.ForeignKey(
+        Role,
+        on_delete=models.CASCADE,
+        related_name="users"
+    )
+
+    assigned_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role.name}"
+
+====================================================================================================
+FILE: .\roles\permissions.py
+====================================================================================================
+from rest_framework.permissions import BasePermission
+from .models import UserRole
+
+
+class IsSuperAdmin(BasePermission):
+
+    def has_permission(self, request, view):
+        try:
+            return (
+                request.user.is_authenticated
+                and request.user.role_assignment.role.name
+                == "SUPER_ADMIN"
+            )
+        except:
+            return False
+
+
+class IsManager(BasePermission):
+
+    def has_permission(self, request, view):
+        try:
+            return (
+                request.user.is_authenticated
+                and request.user.role_assignment.role.name
+                == "MANAGER"
+            )
+        except:
+            return False
+
+
+class IsTrainer(BasePermission):
+
+    def has_permission(self, request, view):
+        try:
+            return (
+                request.user.is_authenticated
+                and request.user.role_assignment.role.name
+                == "TRAINER"
+            )
+        except:
+            return False
+
+
+class IsReceptionist(BasePermission):
+
+    def has_permission(self, request, view):
+        try:
+            return (
+                request.user.is_authenticated
+                and request.user.role_assignment.role.name
+                == "RECEPTIONIST"
+            )
+        except:
+            return False
+
+
+class IsMember(BasePermission):
+
+    def has_permission(self, request, view):
+        try:
+            return (
+                request.user.is_authenticated
+                and request.user.role_assignment.role.name
+                == "MEMBER"
+            )
+        except:
+            return False
+        
+     
+
+class IsAdminOrManager(BasePermission):
+
+    def has_permission(self, request, view):
+
+        try:
+            role = request.user.role_assignment.role.name
+
+            return role in [
+                "SUPER_ADMIN",
+                "MANAGER"
+            ]
+
+        except:
+            return False           
+
+
+from employees.models import Employee
+
+
+class RolePermission(BasePermission):
+
+    message = "You do not have permission to perform this action."
+
+    def has_permission(self, request, view):
+
+        required_permission = getattr(
+            view,
+            "required_permission",
+            None,
+        )
+
+        # If the view doesn't require a permission,
+        # allow authenticated users.
+        if required_permission is None:
+            return True
+
+        if not request.user.is_authenticated:
+            return False
+
+        try:
+
+            employee = (
+                Employee.objects
+                .select_related("role")
+                .prefetch_related("role__permissions")
+                .get(user=request.user)
+            )
+
+        except Employee.DoesNotExist:
+            return False
+
+        if employee.role is None:
+            return False
+
+        return employee.role.permissions.filter(
+            code=required_permission,
+            is_active=True,
+        ).exists()
+
+====================================================================================================
+FILE: .\common\constants.py
+====================================================================================================
+from common.role_codes import RoleCodes
+
+"""
+FitForge Role Hierarchy
+
+Higher number = Higher authority
+"""
+
+ROLE_LEVELS = {
+    RoleCodes.SUPER_ADMIN: 100,
+    RoleCodes.ORG_OWNER: 90,
+    RoleCodes.BRANCH_MANAGER: 80,
+    RoleCodes.HR: 70,
+    RoleCodes.OPERATIONS_MANAGER: 60,
+    RoleCodes.FITNESS_CONSULTANT: 50,
+    RoleCodes.SALES_EXECUTIVE: 45,
+    RoleCodes.RECEPTIONIST: 40,
+    RoleCodes.TRAINER: 30,
+    RoleCodes.FREELANCE_TRAINER: 25,
+    RoleCodes.MEMBER: 10,
+    RoleCodes.ONLINE_MEMBER: 5,
+}
+
+====================================================================================================
+FILE: .\common\role_codes.py
+====================================================================================================
+class RoleCodes:
+    SUPER_ADMIN = "SUPER_ADMIN"
+    ORG_OWNER = "ORG_OWNER"
+    BRANCH_MANAGER = "BRANCH_MANAGER"
+    HR = "HR"
+    OPERATIONS_MANAGER = "OPERATIONS_MANAGER"
+    FITNESS_CONSULTANT = "FITNESS_CONSULTANT"
+    SALES_EXECUTIVE = "SALES_EXECUTIVE"
+    RECEPTIONIST = "RECEPTIONIST"
+    TRAINER = "TRAINER"
+    FREELANCE_TRAINER = "FREELANCE_TRAINER"
+    NUTRITIONIST = "NUTRITIONIST"
+    HOUSEKEEPING = "HOUSEKEEPING"
+    MEMBER = "MEMBER"
+    ONLINE_MEMBER = "ONLINE_MEMBER"
+
+====================================================================================================
+FILE: .\common\mixins.py
+====================================================================================================
+from rest_framework.exceptions import PermissionDenied
+
+from .constants import ROLE_LEVELS
+
+
+class RolePermissionMixin:
+    """
+    Enterprise RBAC Mixin
+
+    Responsibilities:
+    - Enforce minimum role hierarchy
+    - Enforce permission-based authorization
+    """
+
+    minimum_role_level = 0
+    required_permission = None
+
+    def get_employee(self):
+        return getattr(self.request.user, "employee_profile", None)
+
+    def get_user_role_level(self):
+        user = self.request.user
+
+        if user.is_superuser:
+            return ROLE_LEVELS["SUPER_ADMIN"]
+
+        employee = self.get_employee()
+
+        if employee and employee.role:
+            return ROLE_LEVELS.get(employee.role.name, 0)
+
+        return 0
+
+    def has_required_permission(self):
+        if not self.required_permission:
+            return True
+
+        employee = self.get_employee()
+
+        if not employee or not employee.role:
+            return False
+
+        return employee.role.permissions.filter(
+            code=self.required_permission,
+            is_active=True,
+        ).exists()
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+
+        if self.get_user_role_level() < self.minimum_role_level:
+            raise PermissionDenied(
+                "You do not have the required role level."
+            )
+
+        if not self.has_required_permission():
+            raise PermissionDenied(
+                "You do not have the required permission."
+            )
+
+====================================================================================================
+FILE: .\common\permissions.py
+====================================================================================================
+from rest_framework.permissions import BasePermission
+
+
+class IsSuperAdmin(BasePermission):
+    """
+    Allows access only to Super Admin users.
+    """
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        if not user.is_authenticated:
+            return False
+
+        if user.is_superuser:
+            return True
+
+        if hasattr(user, "employee_profile") and user.employee_profile.role:
+            return (
+                user.employee_profile.role.name == "SUPER_ADMIN"
+            )
+
+        return False
+
+
+class IsOrganizationOwner(BasePermission):
+    """
+    Allows access only to Organization Owners.
+    """
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        if not user.is_authenticated:
+            return False
+
+        if hasattr(user, "employee_profile") and user.employee_profile.role:
+            return (
+                user.employee_profile.role.name == "ORG_OWNER"
+            )
+
+        return False
+
+
+class IsBranchManager(BasePermission):
+    """
+    Allows access only to Branch Managers.
+    """
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        if not user.is_authenticated:
+            return False
+
+        if hasattr(user, "employee_profile") and user.employee_profile.role:
+            return (
+                user.employee_profile.role.name == "BRANCH_MANAGER"
+            )
+
+        return False
+
+
+class IsTrainer(BasePermission):
+    """
+    Allows access only to Trainers.
+    """
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        if not user.is_authenticated:
+            return False
+
+        if hasattr(user, "employee_profile") and user.employee_profile.role:
+            return (
+                user.employee_profile.role.name in [
+                    "TRAINER",
+                    "FREELANCE_TRAINER",
+                ]
+            )
+
+        return False
+
+
+class IsReceptionist(BasePermission):
+    """
+    Allows access only to Receptionists.
+    """
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        if not user.is_authenticated:
+            return False
+
+        if hasattr(user, "employee_profile") and user.employee_profile.role:
+            return (
+                user.employee_profile.role.name == "RECEPTIONIST"
+            )
+
+        return False
+
+
+class IsEmployee(BasePermission):
+    """
+    Allows any authenticated employee.
+    """
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        if not user.is_authenticated:
+            return False
+
+        return hasattr(user, "employee_profile")
+
+====================================================================================================
+FILE: .\employees\models.py
+====================================================================================================
+from django.db import models
+from django.contrib.auth.models import User
+
+from core.models import (
+    Organization,
+    Branch,
+    Department,
+    
+)
+
+from roles.models import Role
+
+
+class Employee(models.Model):
+
+    STATUS_CHOICES = [
+        ("ACTIVE", "Active"),
+        ("ON_LEAVE", "On Leave"),
+        ("SUSPENDED", "Suspended"),
+        ("TERMINATED", "Terminated"),
+    ]
+
+    EMPLOYMENT_TYPE_CHOICES = [
+        ("FULL_TIME", "Full Time"),
+        ("PART_TIME", "Part Time"),
+        ("FREELANCE", "Freelance"),
+        ("CONTRACT", "Contract"),
+        ("CONSULTANT", "Consultant"),
+        ("INTERN", "Intern"),
+    ]
+
+    EMPLOYEE_CLASSIFICATION_CHOICES = [
+        ("TRAINER", "Trainer"),
+        ("SALES_EXECUTIVE", "Sales Executive"),
+        ("CENTER_MANAGER", "Center Manager"),
+        ("HOUSEKEEPING", "Housekeeping"),
+        ("NUTRITIONIST", "Nutritionist"),
+        ("PHYSIOTHERAPIST", "Physiotherapist"),
+        ("YOGA_INSTRUCTOR", "Yoga Instructor"),
+        ("ZUMBA_INSTRUCTOR", "Zumba Instructor"),
+        ("OPERATIONS_MANAGER", "Operations Manager"),
+        ("HR", "Human Resources"),
+        ("ADMIN", "Administrator"),
+    ]
+
+    employee_code = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=True,
+    )
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="employee_profile",
+    )
+
+    first_name = models.CharField(max_length=100)
+
+    last_name = models.CharField(max_length=100)
+
+    email = models.EmailField(unique=True)
+
+    phone = models.CharField(max_length=15)
+
+    date_of_birth = models.DateField(
+        null=True,
+        blank=True,
+    )
+
+    gender = models.CharField(
+        max_length=10,
+        choices=[
+            ("Male", "Male"),
+            ("Female", "Female"),
+            ("Other", "Other"),
+        ],
+        blank=True,
+    )
+
+    alternate_phone = models.CharField(
+        max_length=15,
+        blank=True,
+    )
+
+    aadhaar_number = models.CharField(
+        max_length=12,
+        blank=True,
+    )
+
+    pan_number = models.CharField(
+        max_length=10,
+        blank=True,
+    )
+
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name="employees",
+    )
+
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.CASCADE,
+        related_name="employees",
+    )
+
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="employees",
+    )
+
+    designation = models.ForeignKey(
+        "core.Designation",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="employees",
+    )
+
+    role = models.ForeignKey(
+        Role,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="employees",
+    )
+
+    joining_date = models.DateField()
+
+    confirmation_date = models.DateField(
+        null=True,
+        blank=True,
+    )
+
+    relieving_date = models.DateField(
+        null=True,
+        blank=True,
+    )
+
+    employment_status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="ACTIVE",
+    )
+
+    employment_type = models.CharField(
+        max_length=20,
+        choices=EMPLOYMENT_TYPE_CHOICES,
+        default="FULL_TIME",
+    ) 
+
+    employee_classification = models.CharField(
+        max_length=30,
+        choices=EMPLOYEE_CLASSIFICATION_CHOICES,
+        default="TRAINER",
+    ) 
+
+    profile_photo = models.ImageField(
+        upload_to="employees/profile_photos/",
+        blank=True,
+        null=True,
+    )
+
+    emergency_contact_name = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
+    emergency_contact_phone = models.CharField(
+        max_length=15,
+        blank=True,
+    )
+
+    notes = models.TextField(blank=True)
+
+    address = models.TextField(
+        blank=True,
+    )
+
+    city = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
+    state = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
+    pincode = models.CharField(
+        max_length=10,
+        blank=True,
+    )
+
+    blood_group = models.CharField(
+        max_length=5,
+        blank=True,
+    )
+
+    salary = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+
+    aadhaar_document = models.FileField(
+        upload_to="employees/documents/aadhaar/",
+        blank=True,
+        null=True,
+    )
+
+    pan_document = models.FileField(
+        upload_to="employees/documents/pan/",
+        blank=True,
+        null=True,
+    )
+
+    resume = models.FileField(
+        upload_to="employees/documents/resume/",
+        blank=True,
+        null=True,
+    )
+
+    appointment_letter = models.FileField(
+        upload_to="employees/documents/appointment_letters/",
+        blank=True,
+        null=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["employee_code"]
+
+    
+
+    def __str__(self):
+        return f"{self.employee_code} - {self.first_name} {self.last_name}"
+
+====================================================================================================
+FILE: .\employees\permissions.py
+====================================================================================================
+from rest_framework.permissions import BasePermission
+
+
+class EmployeePermission(BasePermission):
+    """
+    Permission class for Employee APIs.
+    """
+
+    ALLOWED_ROLES = {
+        "SUPER_ADMIN",
+        "ORG_OWNER",
+        "BRANCH_MANAGER",
+    }
+
+    def has_permission(self, request, view):
+
+        if not request.user.is_authenticated:
+            return False
+
+        if request.user.is_superuser:
+            return True
+
+        if not hasattr(request.user, "employee_profile"):
+            return False
+
+        employee = request.user.employee_profile
+
+        if employee.role is None:
+            return False
+
+        if not employee.role.is_active:
+            return False
+
+        return employee.role.name in self.ALLOWED_ROLES
+
+====================================================================================================
+FILE: .\employees\views.py
+====================================================================================================
+from rest_framework import status, viewsets
+from rest_framework.response import Response
+
+from .models import Employee
+from .serializers import EmployeeSerializer
+from .services import EmployeeService
+from .permissions import EmployeePermission
+from common.mixins import RolePermissionMixin
+from common.filters import OrganizationFilterMixin
+from common.constants import ROLE_LEVELS
+from common.role_codes import RoleCodes
+from roles.permissions import RolePermission
+
+class EmployeeViewSet(
+    OrganizationFilterMixin,
+    RolePermissionMixin,
+    viewsets.ModelViewSet,
+):
+    
+    permission_classes = [RolePermission]
+
+    minimum_role_level = ROLE_LEVELS[RoleCodes.CENTER_MANAGER]
+
+    required_permission = "employee.create"
+    """
+    API endpoints for Employee Management.
+    """
+
+    queryset = Employee.objects.all().order_by("employee_code")
+    serializer_class = EmployeeSerializer
+    
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        result = EmployeeService.create_employee(
+            serializer.validated_data
+        )
+
+        employee = result["employee"]
+        temporary_password = result["temporary_password"]
+
+        response_serializer = self.get_serializer(employee)
+
+        return Response(
+            {
+                "message": "Employee created successfully.",
+                "employee": response_serializer.data,
+                "login_credentials": {
+                    "username": employee.user.username,
+                    "temporary_password": temporary_password,
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+====================================================================================================
+FILE: .\bootstrap\roles.py
+====================================================================================================
+from roles.models import Role
+from common.role_codes import RoleCodes
+
+DEFAULT_ROLES = [
+    {
+        "code": RoleCodes.SUPER_ADMIN,
+        "name": "Super Admin",
+        "description": "Complete system access",
+        "is_system_role": True,
+    },
+    {
+        "code": RoleCodes.ADMIN,
+        "name": "Admin",
+        "description": "Administrative access",
+        "is_system_role": True,
+    },
+    {
+        "code": RoleCodes.CENTER_MANAGER,
+        "name": "Center Manager",
+        "description": "Manage gym branch",
+        "is_system_role": True,
+    },
+    {
+        "code": RoleCodes.TRAINER,
+        "name": "Trainer",
+        "description": "Manage members and workouts",
+        "is_system_role": True,
+    },
+    {
+        "code": RoleCodes.SALES_EXECUTIVE,
+        "name": "Sales Executive",
+        "description": "Handle memberships and leads",
+        "is_system_role": True,
+    },
+    {
+        "code": RoleCodes.NUTRITIONIST,
+        "name": "Nutritionist",
+        "description": "Manage nutrition plans",
+        "is_system_role": True,
+    },
+    {
+        "code": RoleCodes.HOUSEKEEPING,
+        "name": "Housekeeping",
+        "description": "Housekeeping staff",
+        "is_system_role": True,
+    },
+]
+
+def seed_roles():
+    created = 0
+
+    for role in DEFAULT_ROLES:
+        _, is_created = Role.objects.get_or_create(
+            code=role["code"],
+            defaults=role,
+        )
+
+        if is_created:
+            created += 1
+
+    return created
+
+====================================================================================================
+FILE: .\bootstrap\role_permissions.py
+====================================================================================================
+from roles.models import Role, Permission
+
+
+ROLE_PERMISSION_MAP = {
+    "SUPER_ADMIN": "__ALL__",
+
+    "ADMIN": [
+        "dashboard.view",
+        "employee.view",
+        "employee.create",
+        "employee.update",
+        "trainer.view",
+        "trainer.create",
+        "trainer.update",
+        "member.view",
+        "member.create",
+        "member.update",
+        "attendance.view",
+        "attendance.mark",
+        "billing.view",
+        "billing.create",
+        "membership.view",
+        "membership.create",
+        "membership.update",
+        "reports.view",
+    ],
+
+    "CENTER_MANAGER": [
+        "dashboard.view",
+        "trainer.view",
+        "member.view",
+        "member.create",
+        "attendance.view",
+        "attendance.mark",
+        "membership.view",
+        "billing.view",
+    ],
+
+    "TRAINER": [
+        "member.view",
+        "attendance.mark",
+    ],
+
+    "SALES_EXECUTIVE": [
+        "member.view",
+        "member.create",
+        "membership.view",
+        "membership.create",
+        "billing.create",
+    ],
+
+    "NUTRITIONIST": [
+        "member.view",
+    ],
+
+    "HOUSEKEEPING": [],
+}
+
+
+def assign_default_permissions():
+    assigned_roles = 0
+
+    for role_name, permission_codes in ROLE_PERMISSION_MAP.items():
+
+        role = Role.objects.filter(code=role_name).first()
+
+        if not role:
+            print(f"⚠️ Role '{role_name}' not found. Skipping...")
+            continue
+
+        if permission_codes == "__ALL__":
+            role.permissions.set(Permission.objects.all())
+        else:
+            permissions = Permission.objects.filter(
+                code__in=permission_codes
+            )
+            role.permissions.set(permissions)
+
+        assigned_roles += 1
+
+    return assigned_roles
+
+====================================================================================================
+FILE: .\bootstrap\service.py
+====================================================================================================
+from django.db import transaction
+
+from roles.seeds import seed_permissions
+from bootstrap.roles import seed_roles
+from bootstrap.role_permissions import assign_default_permissions
+
+
+class BootstrapService:
+    """
+    Initializes FitForge master data.
+    Safe to run multiple times.
+    """
+
+    @staticmethod
+    @transaction.atomic
+    def run():
+
+        result = {}
+
+        created_permissions = seed_permissions()
+        created_roles = seed_roles()
+
+        assigned_roles = assign_default_permissions()
+
+        result["permissions_created"] = created_permissions
+        result["roles_created"] = created_roles
+        result["roles_configured"] = assigned_roles
+
+        return result
+    
+
+    
+
+====================================================================================================
+FILE: .\bootstrap\management\commands\bootstrap.py
+====================================================================================================
+from django.core.management.base import BaseCommand
+
+from bootstrap.service import BootstrapService
+
+
+class Command(BaseCommand):
+    help = "Initialize FitForge master data."
+
+    def handle(self, *args, **options):
+
+        self.stdout.write("")
+        self.stdout.write("=" * 60)
+        self.stdout.write(" FitForge Bootstrap")
+        self.stdout.write("=" * 60)
+
+        result = BootstrapService.run()
+
+        self.stdout.write("")
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Permissions Created : {result['permissions_created']}"
+            )
+        )
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Roles Created : {result['roles_created']}"
+            )
+        )
+
+        self.stdout.write("")
+        self.stdout.write(
+            self.style.SUCCESS("Bootstrap completed successfully.")
+        )
+
