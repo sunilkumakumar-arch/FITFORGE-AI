@@ -4,24 +4,29 @@ from rest_framework.response import Response
 from .models import Employee
 from .serializers import EmployeeSerializer
 from .services import EmployeeService
-from .permissions import EmployeePermission
-from common.mixins import RolePermissionMixin
+
 from common.filters import OrganizationFilterMixin
-from common.constants import ROLE_LEVELS
-from common.role_codes import RoleCodes
+
 from roles.permissions import RolePermission
 
 class EmployeeViewSet(
     OrganizationFilterMixin,
-    RolePermissionMixin,
     viewsets.ModelViewSet,
 ):
     
+    
+
     permission_classes = [RolePermission]
 
-    minimum_role_level = ROLE_LEVELS[RoleCodes.BRANCH_MANAGER]
 
-    required_permission = "employee.create"
+    permission_map = {
+        "list": "employee.view",
+        "retrieve": "employee.view",
+        "create": "employee.create",
+        "update": "employee.edit",
+        "partial_update": "employee.edit",
+        "destroy": "employee.delete",
+    }
     """
     API endpoints for Employee Management.
     """
