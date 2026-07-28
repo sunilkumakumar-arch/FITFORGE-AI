@@ -39,28 +39,73 @@ class MemberViewSet(viewsets.ModelViewSet):
 class MemberProfileViewSet(viewsets.ModelViewSet):
     queryset = MemberProfile.objects.all()
     serializer_class = MemberProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "member.view",
+        "retrieve": "member.view",
+        "create": "member.update",
+        "update": "member.update",
+        "partial_update": "member.update",
+        "destroy": "member.delete",
+    }
 
 
 class EmergencyContactViewSet(viewsets.ModelViewSet):
     queryset = EmergencyContact.objects.all()
     serializer_class = EmergencyContactSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "member.view",
+        "retrieve": "member.view",
+        "create": "member.update",
+        "update": "member.update",
+        "partial_update": "member.update",
+        "destroy": "member.delete",
+    }
 
 
 class MedicalProfileViewSet(viewsets.ModelViewSet):
     queryset = MedicalProfile.objects.all()
     serializer_class = MedicalProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "member.view",
+        "retrieve": "member.view",
+        "create": "member.update",
+        "update": "member.update",
+        "partial_update": "member.update",
+        "destroy": "member.delete",
+    }
 
 
 class FitnessGoalViewSet(viewsets.ModelViewSet):
     queryset = FitnessGoal.objects.all()
     serializer_class = FitnessGoalSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "member.view",
+        "retrieve": "member.view",
+        "create": "member.update",
+        "update": "member.update",
+        "partial_update": "member.update",
+        "destroy": "member.delete",
+    }
 
 
 class BodyAssessmentViewSet(viewsets.ModelViewSet):
     queryset = BodyAssessment.objects.all()
     serializer_class = BodyAssessmentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "member.view",
+        "retrieve": "member.view",
+        "create": "member.update",
+        "update": "member.update",
+        "partial_update": "member.update",
+        "destroy": "member.delete",
+    }
