@@ -30,6 +30,26 @@ class Member(models.Model):
         auto_now_add=True
     )
 
+    member_code = models.CharField(
+        max_length=30,
+        unique=True,
+        db_index=True,
+        blank=True,
+        default="",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        null=True,
+        blank=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        null=True,
+        blank=True,
+    )
+
     # =====================================
     # TRAINER ASSIGNMENT PROFILE
     # =====================================
@@ -66,7 +86,7 @@ class MemberProfile(models.Model):
         related_name="profile"
     )
 
-    member_code = models.CharField(max_length=30, unique=True)
+    
 
     address = models.TextField(blank=True)
     city = models.CharField(max_length=100, blank=True)

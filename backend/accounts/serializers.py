@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from .models import (
     Member,
     MemberProfile,
@@ -8,29 +9,22 @@ from .models import (
     BodyAssessment,
 )
 
+from .selectors import MemberSelector
+
 
 class MemberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Member
         fields = "__all__"
+        read_only_fields = (
+            "member_code",
+        )
 
     def validate_phone(self, value):
+        member_id = self.instance.id if self.instance else None
 
-        member_id = (
-            self.instance.id
-            if self.instance
-            else None
-        )
-
-        existing_member = (
-            Member.objects
-            .filter(phone=value)
-            .exclude(id=member_id)
-            .first()
-        )
-
-        if existing_member:
+        if MemberSelector.phone_exists(value, exclude_id=member_id):
             raise serializers.ValidationError(
                 "Mobile number already exists."
             )
@@ -38,24 +32,12 @@ class MemberSerializer(serializers.ModelSerializer):
         return value
 
     def validate_email(self, value):
-
         if not value:
             return value
 
-        member_id = (
-            self.instance.id
-            if self.instance
-            else None
-        )
+        member_id = self.instance.id if self.instance else None
 
-        existing_member = (
-            Member.objects
-            .filter(email=value)
-            .exclude(id=member_id)
-            .first()
-        )
-
-        if existing_member:
+        if MemberSelector.email_exists(value, exclude_id=member_id):
             raise serializers.ValidationError(
                 "Email already exists."
             )

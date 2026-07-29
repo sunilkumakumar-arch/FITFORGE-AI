@@ -11,14 +11,36 @@ from .models import (
 
 @admin.register(Member)
 class MemberAdmin(admin.ModelAdmin):
-    list_display = ("first_name", "last_name", "phone", "email")
-    search_fields = ("first_name", "last_name", "phone", "email")
+    list_display = (
+        "member_code",
+        "first_name",
+        "last_name",
+        "phone",
+        "email",
+    )
+
+    search_fields = (
+        "member_code",
+        "first_name",
+        "last_name",
+        "phone",
+        "email",
+    )
 
 
 @admin.register(MemberProfile)
 class MemberProfileAdmin(admin.ModelAdmin):
-    list_display = ("member", "member_code", "city", "country")
-    search_fields = ("member__first_name", "member__last_name", "member_code")
+    list_display = (
+        "member",
+        "city",
+        "country",
+    )
+
+    search_fields = (
+        "member__member_code",
+        "member__first_name",
+        "member__last_name",
+    )
 
 
 @admin.register(EmergencyContact)

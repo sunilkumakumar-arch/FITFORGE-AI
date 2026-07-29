@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'ai_coach',
     'gym_management',
     'dashboard',
+    'member_hub',
     'memberships',
     'employees',
     'common',

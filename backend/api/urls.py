@@ -29,6 +29,7 @@ urlpatterns = [
     ),
     
     path("accounts/", include("accounts.urls")),
+    path("member-hub/", include("member_hub.urls")),
     path("core/", include("core.urls")),
     path("bootstrap/", include("bootstrap.urls")),
     path("memberships/", include("memberships.urls")),
