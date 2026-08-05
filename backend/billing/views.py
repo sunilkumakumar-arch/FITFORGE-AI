@@ -1,21 +1,20 @@
-from django.db.models import Sum
-
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Payment
 from .serializers import PaymentSerializer
 
 
-
-
 class PaymentViewSet(viewsets.ModelViewSet):
 
-    queryset = Payment.objects.select_related(
-        "member",
-        "membership_plan",
+    queryset = (
+        Payment.objects
+        .select_related(
+            "member",
+            "membership_plan",
+        )
+        .order_by("-payment_date", "-id")
     )
 
     serializer_class = PaymentSerializer
@@ -30,21 +29,11 @@ class PaymentViewSet(viewsets.ModelViewSet):
             data=request.data
         )
 
-        if not serializer.is_valid():
-
-            print("PAYMENT ERRORS:")
-            print(serializer.errors)
-
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer.is_valid(raise_exception=True)
 
         payment = serializer.save()
 
-        
-
         return Response(
             PaymentSerializer(payment).data,
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_201_CREATED,
         )

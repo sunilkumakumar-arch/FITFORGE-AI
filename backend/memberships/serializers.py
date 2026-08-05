@@ -46,10 +46,7 @@ class MemberMembershipSerializer(
         self,
         obj,
     ):
-        return (
-            f"{obj.member.first_name} "
-            f"{obj.member.last_name}"
-        )
+        return f"{obj.member.first_name} {obj.member.last_name}".strip()
 
     def get_plan_name(
         self,

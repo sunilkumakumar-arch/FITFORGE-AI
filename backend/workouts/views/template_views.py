@@ -21,7 +21,7 @@ class WorkoutTemplateViewSet(viewsets.ModelViewSet):
             "days",
             "days__exercises",
         )
-        .all()
+        .order_by("-id")
     )
 
     serializer_class = WorkoutTemplateSerializer
@@ -33,8 +33,9 @@ class WorkoutDayViewSet(viewsets.ModelViewSet):
         WorkoutDay.objects
         .select_related("workout_template")
         .prefetch_related("exercises")
-        .all()
+        .order_by("sort_order", "id")
     )
+    
 
     serializer_class = WorkoutDaySerializer
     permission_classes = [IsAuthenticated]
@@ -47,7 +48,7 @@ class WorkoutExerciseViewSet(viewsets.ModelViewSet):
             "workout_day",
             "exercise",
         )
-        .all()
+        .order_by("id")
     )
 
     serializer_class = WorkoutExerciseSerializer

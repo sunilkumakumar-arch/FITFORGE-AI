@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from rest_framework import status, viewsets
@@ -16,14 +17,16 @@ from .qr_serializers import QRScanSerializer
 from .services import AttendanceService
 
 
-class AttendanceViewSet(
-    viewsets.ModelViewSet
-):
+class AttendanceViewSet(viewsets.ModelViewSet):
 
-    queryset = Attendance.objects.select_related(
-        "member",
-        "trainer",
-        "branch"
+    queryset = (
+        Attendance.objects
+        .select_related(
+            "member",
+            "trainer",
+            "branch",
+        )
+        .order_by("-attendance_date", "-id")
     )
 
     serializer_class = AttendanceSerializer
@@ -36,10 +39,8 @@ class AttendanceViewSet(
         detail=False,
         methods=["get"]
     )
-    def today_count(
-        self,
-        request
-    ):
+    def today_count(self, request):
+
         today = timezone.now().date()
 
         count = Attendance.objects.filter(
@@ -54,14 +55,21 @@ class AttendanceViewSet(
         detail=False,
         methods=["get"]
     )
-    def today_members(
-        self,
-        request
-    ):
+    def today_members(self, request):
+
         today = timezone.now().date()
 
-        records = Attendance.objects.filter(
-            attendance_date=today
+        records = (
+            Attendance.objects
+            .select_related(
+                "member",
+                "trainer",
+                "branch",
+            )
+            .filter(
+                attendance_date=today
+            )
+            .order_by("-check_in")
         )
 
         serializer = self.get_serializer(
@@ -69,10 +77,7 @@ class AttendanceViewSet(
             many=True
         )
 
-        return Response(
-            serializer.data
-        )
-    
+        return Response(serializer.data)
 
     @action(
         detail=False,
@@ -89,19 +94,13 @@ class AttendanceViewSet(
                     "success": False,
                     "message": "Member ID is required."
                 },
-                status=400
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        try:
-            member = Member.objects.get(id=member_id)
-        except Member.DoesNotExist:
-            return Response(
-                {
-                    "success": False,
-                    "message": "Member not found."
-                },
-                status=404
-            )
+        member = get_object_or_404(
+            Member,
+            id=member_id,
+        )
 
         result = AttendanceService.check_in(
             member=member,
@@ -119,11 +118,11 @@ class AttendanceViewSet(
 
         return Response(
             result,
-            status=200 if result["success"] else 400
+            status=status.HTTP_200_OK
+            if result["success"]
+            else status.HTTP_400_BAD_REQUEST
         )
-    
-    
-    
+
     @action(
         detail=False,
         methods=["post"],
@@ -139,35 +138,40 @@ class AttendanceViewSet(
                     "success": False,
                     "message": "Member ID is required."
                 },
-                status=400
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        try:
-            member = Member.objects.get(id=member_id)
-        except Member.DoesNotExist:
-            return Response(
-                {
-                    "success": False,
-                    "message": "Member not found."
-                },
-                status=404
-            )
+        member = get_object_or_404(
+            Member,
+            id=member_id,
+        )
 
         result = AttendanceService.check_out(member)
 
         return Response(
             result,
-            status=200 if result["success"] else 400
+            status=status.HTTP_200_OK
+            if result["success"]
+            else status.HTTP_400_BAD_REQUEST
         )
 
-    @action(detail=False, methods=["post"], url_path="scan")
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="scan"
+    )
     def scan(self, request):
         """
         QR Attendance Scanner
         """
 
-        serializer = QRScanSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer = QRScanSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
 
         verification = VerificationService.verify_qr(
             serializer.validated_data["qr_payload"]
@@ -181,18 +185,10 @@ class AttendanceViewSet(
 
         member = verification["member_hub"].member
 
-        try:
-            branch = Branch.objects.get(
-                id=serializer.validated_data["branch_id"]
-            )
-        except Branch.DoesNotExist:
-            return Response(
-                {
-                    "success": False,
-                    "message": "Branch not found."
-                },
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        branch = get_object_or_404(
+            Branch,
+            id=serializer.validated_data["branch_id"],
+        )
 
         result = AttendanceService.scan_qr(
             member=member,
@@ -200,15 +196,14 @@ class AttendanceViewSet(
             device_id=serializer.validated_data["device_id"],
         )
 
-        # Convert Attendance model to JSON
         if result.get("attendance"):
-            attendance_serializer = AttendanceSerializer(
+            result["attendance"] = AttendanceSerializer(
                 result["attendance"]
-            )
-            result["attendance"] = attendance_serializer.data
+            ).data
 
         return Response(
             result,
-            status=200 if result["success"] else 400
+            status=status.HTTP_200_OK
+            if result["success"]
+            else status.HTTP_400_BAD_REQUEST
         )
-

@@ -45,7 +45,7 @@ class MemberMembershipViewSet(viewsets.ModelViewSet):
             "member",
             "plan"
         )
-        .all()
+        .order_by("-created_at")
     )
 
     serializer_class = MemberMembershipSerializer

@@ -19,7 +19,7 @@ class WorkoutLogViewSet(viewsets.ModelViewSet):
         .prefetch_related(
             "exercise_logs",
         )
-        .all()
+        .order_by("-id")
     )
 
     serializer_class = WorkoutLogSerializer
