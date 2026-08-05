@@ -7,10 +7,9 @@ from workouts.views.template_views import (
     WorkoutDayViewSet,
     WorkoutExerciseViewSet,
 )
-
 from workouts.views.assignment_views import MemberWorkoutPlanViewSet
-
 from workouts.views.logging_views import WorkoutLogViewSet
+
 router = DefaultRouter()
 
 router.register(
@@ -37,10 +36,6 @@ router.register(
     basename="workout-exercise",
 )
 
-urlpatterns = [
-    path("", include(router.urls)),
-]
-
 router.register(
     r"member-plans",
     MemberWorkoutPlanViewSet,
@@ -52,3 +47,7 @@ router.register(
     WorkoutLogViewSet,
     basename="workout-log",
 )
+
+urlpatterns = [
+    path("", include(router.urls)),
+]
