@@ -10,3 +10,13 @@ from .template_serializer import (
     WorkoutDaySerializer,
     WorkoutExerciseSerializer,
 )
+
+from .assignment_serializer import (
+    MemberWorkoutPlanSerializer,
+    MemberWorkoutDaySerializer,
+)
+
+from .logging_serializer import (
+    WorkoutLogSerializer,
+    ExerciseLogSerializer,
+)

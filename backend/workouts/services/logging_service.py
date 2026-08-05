@@ -66,6 +66,19 @@ class WorkoutLoggingService:
         Save a completed exercise.
         """
 
+        existing = ExerciseLog.objects.filter(
+            workout_log=workout_log,
+            workout_exercise=workout_exercise,
+        ).first()
+
+        if existing:
+            raise ValidationError(
+                {
+                    "exercise": "Exercise already logged."
+                }
+            )
+
+
         return ExerciseLog.objects.create(
             workout_log=workout_log,
             workout_exercise=workout_exercise,
@@ -106,6 +119,7 @@ class WorkoutLoggingService:
                 "duration_minutes",
                 "calories_burned",
                 "notes",
+                "updated_at",
             ]
         )
 
@@ -142,7 +156,7 @@ class WorkoutLoggingService:
 
             try:
                 reps = int(log.reps_completed)
-            except ValueError:
+            except (TypeError, ValueError):
                 continue
 
             volume += (
