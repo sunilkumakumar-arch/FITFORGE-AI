@@ -14,7 +14,6 @@ class AttendanceService:
         """
         Returns the member's active membership if valid.
         """
-
         today = timezone.now().date()
 
         return (
@@ -33,7 +32,6 @@ class AttendanceService:
         """
         Returns today's attendance record if one exists.
         """
-
         today = timezone.now().date()
 
         return Attendance.objects.filter(
@@ -117,4 +115,49 @@ class AttendanceService:
             "message": "Check-out successful.",
             "attendance": attendance,
             "duration": attendance.workout_duration,
+        }
+
+    @staticmethod
+    def scan_qr(
+        member,
+        branch,
+        trainer=None,
+        device_id=""
+    ):
+        """
+        Handles QR attendance scanning.
+
+        First Scan  -> Check In
+        Second Scan -> Check Out
+        Third Scan  -> Attendance already completed
+        """
+
+        attendance = AttendanceService.get_today_attendance(member)
+
+        if attendance is None:
+            result = AttendanceService.check_in(
+                member=member,
+                branch=branch,
+                trainer=trainer,
+                checkin_method="QR",
+                device_id=device_id,
+            )
+
+            if result["success"]:
+                result["action"] = "CHECK_IN"
+
+            return result
+
+        if attendance.check_out is None:
+            result = AttendanceService.check_out(member)
+
+            if result["success"]:
+                result["action"] = "CHECK_OUT"
+
+            return result
+
+        return {
+            "success": False,
+            "action": "COMPLETED",
+            "message": "Attendance already completed today."
         }

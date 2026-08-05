@@ -29,6 +29,7 @@ class MembershipPlan(models.Model):
 class MemberMembership(models.Model):
 
     STATUS_CHOICES = [
+        ("Scheduled", "Scheduled"),
         ("Active", "Active"),
         ("Expired", "Expired"),
         ("Frozen", "Frozen"),

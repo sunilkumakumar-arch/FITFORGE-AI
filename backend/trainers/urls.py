@@ -1,5 +1,6 @@
 from rest_framework.routers import DefaultRouter
-
+from .views import TrainerCreateAPIView
+from django.urls import path
 from .views import (
     TrainerViewSet,
     TrainerCertificationViewSet,
@@ -27,3 +28,13 @@ router.register(
 )
 
 urlpatterns = router.urls
+
+urlpatterns = [
+    path(
+        "create/",
+        TrainerCreateAPIView.as_view(),
+        name="trainer-create",
+    ),
+]
+
+urlpatterns += router.urls

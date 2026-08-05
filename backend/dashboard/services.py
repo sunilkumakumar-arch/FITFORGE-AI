@@ -48,7 +48,6 @@ class DashboardService:
                 MemberMembership.objects.filter(
                     status="Expired"
                 ).count(),
-
             # Attendance
             "today_attendance":
                 Attendance.objects.filter(

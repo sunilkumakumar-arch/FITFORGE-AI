@@ -1,5 +1,5 @@
 from django.db import models
-
+from trainers.models import Trainer
 
 class Certification(models.Model):
     name = models.CharField(max_length=150, unique=True)

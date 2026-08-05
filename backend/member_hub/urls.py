@@ -5,6 +5,7 @@ from .views import (
     MemberHubByPublicIdView,
     MemberHubDetailView,
     MemberHubListView,
+    QRVerificationView,
 )
 
 app_name = "member_hub"
@@ -14,6 +15,12 @@ urlpatterns = [
         "",
         MemberHubListView.as_view(),
         name="member-hub-list",
+    ),
+
+    path(
+        "verify/",
+        QRVerificationView.as_view(),
+        name="memberhub-verify",
     ),
     path(
         "<int:pk>/",

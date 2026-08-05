@@ -55,4 +55,37 @@ class PTSessionSerializer(
 
     class Meta:
         model = PTSession
+ 
         fields = "__all__"
+
+class PTPackagePurchaseSerializer(serializers.Serializer):
+    member_code = serializers.CharField(max_length=20)
+
+    
+
+    package_id = serializers.IntegerField()
+
+    amount_paid = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+    )
+
+    payment_method = serializers.ChoiceField(
+        choices=[
+            "Cash",
+            "UPI",
+            "Card",
+            "Bank Transfer",
+        ]
+    )
+
+    transaction_id = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=100,
+    )        
+
+class PTAssignTrainerSerializer(serializers.Serializer):
+    member_package_id = serializers.IntegerField()
+
+    trainer_id = serializers.IntegerField()    

@@ -1,12 +1,29 @@
-from rest_framework import viewsets, status
-from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from django.utils import timezone
+from accounts.models import Member
 
-from memberships.models import MemberMembership
+from trainers.models import Trainer
+
+from .services import (
+    PTPackagePurchaseService,
+    PTTrainerAssignmentService,
+)
+
+from .serializers import (
+    PTPackageSerializer,
+    MemberPTPackageSerializer,
+    PTSessionSerializer,
+    PTPackagePurchaseSerializer,
+    PTAssignTrainerSerializer,
+)
+
 
 from .models import (
     PTPackage,
@@ -14,26 +31,14 @@ from .models import (
     PTSession,
 )
 
-from .serializers import (
-    PTPackageSerializer,
-    MemberPTPackageSerializer,
-    PTSessionSerializer,
-)
-from billing.models import Payment
-from decimal import Decimal
 
 
-class PTPackageViewSet(
-    viewsets.ModelViewSet
-):
+from .services import PTPackagePurchaseService
 
-    serializer_class = (
-        PTPackageSerializer
-    )
 
-    permission_classes = [
-        IsAuthenticated
-    ]
+class PTPackageViewSet(viewsets.ModelViewSet):
+    serializer_class = PTPackageSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return (
@@ -42,34 +47,22 @@ class PTPackageViewSet(
             .order_by("name")
         )
 
-    @action(
-        detail=True,
-        methods=["patch"],
-    )
-    def deactivate(
-        self,
-        request,
-        pk=None,
-    ):
+    @action(detail=True, methods=["patch"])
+    def deactivate(self, request, pk=None):
         package = self.get_object()
 
         package.is_active = False
-
-        package.save()
+        package.save(update_fields=["is_active"])
 
         return Response(
             {
-                "message":
-                "Package deactivated successfully"
+                "message": "Package deactivated successfully",
             },
             status=status.HTTP_200_OK,
         )
 
 
-class MemberPTPackageViewSet(
-    viewsets.ModelViewSet
-):
-
+class MemberPTPackageViewSet(viewsets.ModelViewSet):
     queryset = (
         MemberPTPackage.objects
         .select_related(
@@ -80,125 +73,167 @@ class MemberPTPackageViewSet(
         .all()
     )
 
-    serializer_class = (
-        MemberPTPackageSerializer
-    )
+    serializer_class = MemberPTPackageSerializer
+    permission_classes = [IsAuthenticated]
 
-    permission_classes = [
-        IsAuthenticated
-    ]
-
-    def perform_create(
-        self,
-        serializer,
-    ):
-
-        member = serializer.validated_data.get(
-            "member"
+    def create(self, request, *args, **kwargs):
+        return Response(
+            {
+                "success": False,
+                "message": (
+                    "Direct PT Package creation is not allowed. "
+                    "Use the /purchase/ endpoint."
+                ),
+            },
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
 
-        if not member:
-            raise ValidationError(
-                {
-                    "error":
-                    "Member information missing."
-                }
-            )
+    def perform_create(self, serializer):
+        data = serializer.validated_data
 
-        active_membership = (
-            MemberMembership.objects
-            .filter(
-                member=member,
-                status="Active",
-            )
-            .order_by("-end_date")
-            .first()
-        )
-
-        if not active_membership:
-            raise ValidationError(
-                {
-                    "error":
-                    "Active membership required before purchasing a PT Package."
-                }
-            )
-
-        remaining_membership_days = (
-            active_membership.end_date -
-            timezone.now().date()
-        ).days
-
-        if remaining_membership_days <= 0:
-            raise ValidationError(
-                {
-                    "error":
-                    "Membership has expired. Renew membership first."
-                }
-            )
-
-        active_package = (
-            MemberPTPackage.objects
-            .filter(
-                member=member,
-                is_active=True,
-            )
-            .order_by("-expiry_date")
-            .first()
-        )
-
-        if active_package:
-
-            remaining_sessions = (
-                active_package.package.total_sessions -
-                active_package.sessions_used
-            )
-
-            remaining_days = (
-                active_package.expiry_date -
-                timezone.now().date()
-            ).days
-
-            if (
-                remaining_sessions > 3 and
-                remaining_days > 15
-            ):
-                raise ValidationError(
-                    {
-                        "error":
-                        f"Active PT Package already exists. Remaining Sessions: {remaining_sessions}, Remaining Days: {remaining_days}"
-                    }
-                )
-
-        package_instance = serializer.save()
-
-        if (
-            package_instance.expiry_date >
-            active_membership.end_date
-        ):
-            package_instance.expiry_date = (
-                active_membership.end_date
-            )
-
-            package_instance.save()
-
-        Payment.objects.create(
-            member=member,
-            membership_plan=None,
-            amount=package_instance.package.price,
+        PTPackagePurchaseService.purchase_package(
+            member=data["member"],
+            package=data["package"],
+            amount_paid=data["package"].price,
             payment_method="Cash",
-            payment_status="Paid",
             transaction_id="",
-            notes=(
-                f"PT Package Purchase - "
-                f"{package_instance.package.name}"
-            ),
-        )    
+            notes=f"PT Package Purchase - {data['package'].name}",
+        )
 
 
-class PTSessionViewSet(
-    viewsets.ModelViewSet
-):
+class PTPackagePurchaseAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request):
+
+        serializer = PTPackagePurchaseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+
+        member = get_object_or_404(
+            Member,
+            member_code=data["member_code"],
+        )
+
+        
+
+        package = get_object_or_404(
+            PTPackage,
+            id=data["package_id"],
+            is_active=True,
+        )
+
+        try:
+            member_package = PTPackagePurchaseService.purchase_package(
+                member=member,
+                package=package,
+                amount_paid=data["amount_paid"],
+                payment_method=data["payment_method"],
+                transaction_id=data.get("transaction_id", ""),
+                notes=f"PT Package Purchase - {package.name}",
+            )
+
+            return Response(
+                {
+                    "success": True,
+                    "message": "PT Package purchased successfully.",
+                    "member_package_id": member_package.id,
+                    "package": package.name,
+                    "total_sessions": package.total_sessions,
+                    "remaining_sessions": member_package.sessions_remaining,
+                    "expiry_date": member_package.expiry_date.isoformat(),
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        except ValidationError as e:
+            return Response(
+                {
+                    "success": False,
+                    "message": str(e.detail),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        except Exception as e:
+            return Response(
+                {
+                    "success": False,
+                    "message": "An unexpected error occurred while purchasing the PT package.",
+                    "error": str(e),  # Remove in production if desired
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class PTAssignTrainerAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        serializer = PTAssignTrainerSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+
+        member_package = get_object_or_404(
+            MemberPTPackage,
+            id=data["member_package_id"],
+            is_active=True,
+        )
+
+        trainer = get_object_or_404(
+            Trainer,
+            id=data["trainer_id"],
+        )
+
+        try:
+
+            trainer_assignment = (
+                PTTrainerAssignmentService.assign_trainer(
+                    member_package=member_package,
+                    trainer=trainer,
+                )
+            )
+
+            return Response(
+                {
+                    "success": True,
+                    "message": (
+                        "Trainer assigned successfully."
+                    ),
+                    "trainer_assignment_id": (
+                        trainer_assignment.id
+                    ),
+                    "member": (
+                        member_package.member.member_code
+                    ),
+                    "trainer": (
+                        trainer.first_name
+                    ),
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        except Exception as e:
+
+            return Response(
+                {
+                    "success": False,
+                    "message": (
+                        "Unable to assign trainer."
+                    ),
+                    "error": str(e),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )        
+
+
+class PTSessionViewSet(viewsets.ModelViewSet):
     queryset = (
         PTSession.objects
         .select_related(
@@ -208,10 +243,5 @@ class PTSessionViewSet(
         .all()
     )
 
-    serializer_class = (
-        PTSessionSerializer
-    )
-
-    permission_classes = [
-        IsAuthenticated
-    ]
+    serializer_class = PTSessionSerializer
+    permission_classes = [IsAuthenticated]

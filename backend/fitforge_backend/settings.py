@@ -92,7 +92,9 @@ INSTALLED_APPS = [
     "leads",
     'certifications',
     "bootstrap",
-    
+    "reception",
+    "general_training",
+    "shared",
     
 
 

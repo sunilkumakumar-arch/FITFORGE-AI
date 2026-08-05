@@ -35,22 +35,6 @@ class BootstrapService:
         return result
 
 
-class BootstrapSuperAdminService:
-    """
-    Installs FitForge for the first time.
 
-    Creates:
-    - Organization
-    - Primary Branch
-    - Super Admin Employee
-
-    This service can only run once.
-    """
-
-    @staticmethod
-    @transaction.atomic
-    def run(validated_data):
-        pass    
-    
 
     

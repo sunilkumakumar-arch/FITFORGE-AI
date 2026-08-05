@@ -4,6 +4,14 @@ from rest_framework.permissions import IsAuthenticated
 from .selectors import MemberHubSelector
 from .serializers import MemberHubSerializer
 
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .verification_serializers import QRVerificationSerializer
+from .verification_service import VerificationService
+from .serializers import MemberHubSerializer
+
 
 class MemberHubListView(generics.ListAPIView):
     """
@@ -55,3 +63,35 @@ class MemberHubByMemberCodeView(generics.RetrieveAPIView):
         return MemberHubSelector.get_by_member_code(
             self.kwargs["member_code"]
         )
+
+class QRVerificationView(APIView):
+    """
+    Verifies a scanned member QR code.
+    """
+
+    def post(self, request):
+        serializer = QRVerificationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        result = VerificationService.verify_qr(
+            serializer.validated_data["qr_payload"]
+        )
+
+        if not result["valid"]:
+            return Response(
+                result,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        member_serializer = MemberHubSerializer(
+            result["member_hub"],
+            context={"request": request},
+        )
+
+        return Response(
+            {
+                "valid": True,
+                "member": member_serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )    

@@ -160,3 +160,57 @@ class TrainerCertificationSerializer(serializers.ModelSerializer):
         read_only_fields = (
             "created_at",
         )
+
+
+class TrainerCreateSerializer(serializers.Serializer):
+
+    first_name = serializers.CharField(max_length=100)
+    last_name = serializers.CharField(max_length=100)
+
+    phone = serializers.CharField(max_length=15)
+
+    email = serializers.EmailField(
+        required=False,
+        allow_blank=True,
+    )
+
+    specialization = serializers.CharField(
+        required=False,
+        allow_blank=True,
+    )
+
+    experience_years = serializers.IntegerField(
+        default=0
+    )
+
+    trainer_level = serializers.ChoiceField(
+        choices=Trainer.TRAINER_LEVELS,
+        default="LEVEL_1",
+    )
+
+    trainer_capacity = serializers.IntegerField(
+        default=40
+    )
+
+    shift_type = serializers.ChoiceField(
+        choices=Trainer.SHIFT_CHOICES,
+        default="SHIFT_3",
+    )
+
+    salary = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+
+    employment_status = serializers.ChoiceField(
+        choices=Trainer.EMPLOYMENT_STATUS,
+        default="Active",
+    )
+
+    def create(self, validated_data):
+        from .services import TrainerService
+
+        return TrainerService.create_trainer(
+            validated_data
+        )        

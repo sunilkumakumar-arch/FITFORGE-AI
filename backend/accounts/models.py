@@ -72,6 +72,10 @@ class Member(models.Model):
         default=""
     )
 
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}".strip()
+
     def __str__(self):
         return (
             f"{self.first_name} "
@@ -282,6 +286,12 @@ class BodyAssessment(models.Model):
     notes = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}".strip()
+
+
 
     def __str__(self):
         return f"{self.member} - {self.assessment_date}"    

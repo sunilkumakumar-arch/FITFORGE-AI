@@ -3,6 +3,11 @@ from django.utils import timezone
 
 from .models import MemberMembership
 from billing.services import PaymentService
+from datetime import timedelta
+
+from general_training.services import (
+    GeneralTrainingService,
+)
 
 
 class MembershipPurchaseService:
@@ -39,17 +44,11 @@ class MembershipPurchaseService:
             .first()
         )
 
+        membership_status = "Active"
+
         if active_membership:
-
-            remaining_days = (
-                active_membership.end_date -
-                timezone.now().date()
-            ).days
-
-            if remaining_days > 15:
-                raise ValueError(
-                    f"Member already has an active membership. Remaining days: {remaining_days}"
-                )
+            start_date = active_membership.end_date + timedelta(days=1)
+            membership_status = "Scheduled"
 
         membership = MemberMembership.objects.create(
             member=member,
@@ -57,7 +56,7 @@ class MembershipPurchaseService:
             start_date=start_date,
             amount_paid=amount_paid,
             payment_reference=transaction_id,
-            status="Active",
+            status=membership_status,
         )
         print(f"Saved Membership ID: {membership.id}")
 
@@ -70,5 +69,16 @@ class MembershipPurchaseService:
             transaction_id=transaction_id,
             notes=notes,
         )
+
+        # ---------------------------------------
+        # AUTO GENERAL TRAINER ASSIGNMENT
+        # ---------------------------------------
+
+        if membership.status == "Active":
+
+            GeneralTrainingService.auto_assign_trainer(
+                member=member,
+                membership=membership,
+            )
 
         return membership

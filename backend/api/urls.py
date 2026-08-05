@@ -1,5 +1,6 @@
 from django.urls import include, path
 
+
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -21,6 +22,11 @@ urlpatterns = [
     path(
         "auth/",
         include("authentication.urls"),
+    ),
+
+    path(
+        "general-training/",
+        include("general_training.urls"),
     ),
 
     path(
@@ -47,5 +53,6 @@ urlpatterns = [
     path("leads/", include("leads.urls")),
     path("certifications/",include("certifications.urls")),
     path("roles/",include("roles.urls")),
+    path("reception/",include("reception.urls")),
 
 ]    

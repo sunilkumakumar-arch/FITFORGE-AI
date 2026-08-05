@@ -51,8 +51,10 @@ class MemberPTPackage(models.Model):
 
     trainer_assignment = models.ForeignKey(
         TrainerAssignment,
-        on_delete=models.CASCADE,
-        related_name="member_packages"
+        on_delete=models.SET_NULL,
+        related_name="member_packages",
+        null=True,
+        blank=True,
     )
 
     package = models.ForeignKey(

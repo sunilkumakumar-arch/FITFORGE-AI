@@ -1,16 +1,19 @@
-
 from django.utils import timezone
 
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from core.models import Branch
+from accounts.models import Member
+
+from member_hub.verification_service import VerificationService
 
 from .models import Attendance
 from .serializers import AttendanceSerializer
+from .qr_serializers import QRScanSerializer
 from .services import AttendanceService
-
-from accounts.models import Member
 
 
 class AttendanceViewSet(
@@ -156,4 +159,56 @@ class AttendanceViewSet(
             result,
             status=200 if result["success"] else 400
         )
-    
+
+    @action(detail=False, methods=["post"], url_path="scan")
+    def scan(self, request):
+        """
+        QR Attendance Scanner
+        """
+
+        serializer = QRScanSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        verification = VerificationService.verify_qr(
+            serializer.validated_data["qr_payload"]
+        )
+
+        if not verification["valid"]:
+            return Response(
+                verification,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        member = verification["member_hub"].member
+
+        try:
+            branch = Branch.objects.get(
+                id=serializer.validated_data["branch_id"]
+            )
+        except Branch.DoesNotExist:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Branch not found."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        result = AttendanceService.scan_qr(
+            member=member,
+            branch=branch,
+            device_id=serializer.validated_data["device_id"],
+        )
+
+        # Convert Attendance model to JSON
+        if result.get("attendance"):
+            attendance_serializer = AttendanceSerializer(
+                result["attendance"]
+            )
+            result["attendance"] = attendance_serializer.data
+
+        return Response(
+            result,
+            status=200 if result["success"] else 400
+        )
+

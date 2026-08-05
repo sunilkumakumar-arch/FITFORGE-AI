@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import Employee
 
 from datetime import date
-from .models import Organization, Branch
+
 import re
 
 
