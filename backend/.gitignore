@@ -29,3 +29,33 @@ Thumbs.db
 htmlcov/
 .mypy_cache/
 .ruff_cache/
+
+
+
+# PostgreSQL backups
+*.backup
+
+# Python
+__pycache__/
+*.pyc
+
+# Environment
+.env
+
+# Logs
+logs/
+*.log
+
+# Media
+media/
+
+# Static collected files
+staticfiles/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
