@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 from rest_framework.response import Response
 
 from core.models import Branch
@@ -32,8 +32,22 @@ class AttendanceViewSet(viewsets.ModelViewSet):
     serializer_class = AttendanceSerializer
 
     permission_classes = [
-        IsAuthenticated
+        RolePermission
     ]
+
+    permission_map = {
+        "list": "attendance.view",
+        "retrieve": "attendance.view",
+        "today_count": "attendance.view",
+        "today_members": "attendance.view",
+        "create": "attendance.mark",
+        "check_in": "attendance.mark",
+        "check_out": "attendance.mark",
+        "scan": "attendance.mark",
+        "update": "attendance.update",
+        "partial_update": "attendance.update",
+        "destroy": "attendance.delete",
+    }
 
     @action(
         detail=False,

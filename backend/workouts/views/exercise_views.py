@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 
 from workouts.models import Exercise
 from workouts.serializers.exercise_serializer import ExerciseSerializer
@@ -22,9 +22,16 @@ class ExerciseViewSet(viewsets.ModelViewSet):
 
     serializer_class = ExerciseSerializer
 
-    permission_classes = [
-        IsAuthenticated,
-    ]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "workout.view",
+        "retrieve": "workout.view",
+        "create": "workout.create",
+        "update": "workout.update",
+        "partial_update": "workout.update",
+        "destroy": "workout.delete",
+    }
 
     filterset_fields = [
         "muscle_group",

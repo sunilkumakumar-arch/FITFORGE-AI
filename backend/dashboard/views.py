@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 from rest_framework.response import Response
 
 from .services import DashboardService
@@ -7,7 +7,11 @@ from .services import DashboardService
 
 class DashboardSummaryView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+    permission_map = {
+        "list": "dashboard.view",
+        "summary": "dashboard.view",
+    }
 
     def get(self, request):
 

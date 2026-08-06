@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -18,7 +18,8 @@ from .services import ReceptionDashboardService
 
 
 class ReceptionMemberDashboardAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+    required_permission = "member.view"
 
     def get(self, request, member_code):
 
@@ -36,7 +37,8 @@ class ReceptionMemberDashboardAPIView(APIView):
 
 
 class ReceptionSearchAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+    required_permission = "member.view"
 
     def get(self, request):
 
@@ -57,7 +59,8 @@ class ReceptionSearchAPIView(APIView):
 
 
 class ReceptionRenewAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+    required_permission = "member.view"
 
     def post(self, request, member_code):
 

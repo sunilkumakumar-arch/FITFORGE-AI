@@ -7,85 +7,177 @@ ROLE_PERMISSION_MAP = {
 
     "ORG_OWNER": [
         "dashboard.view",
+
         "employee.view",
         "employee.create",
         "employee.update",
+        "employee.delete",
+
         "trainer.view",
         "trainer.create",
         "trainer.update",
+        "trainer.delete",
+
         "member.view",
         "member.create",
         "member.update",
+        "member.delete",
+
         "attendance.view",
         "attendance.mark",
+        "attendance.update",
+        "attendance.delete",
+
         "billing.view",
         "billing.create",
+        "billing.update",
+        "billing.delete",
+        "billing.refund",
+
         "membership.view",
         "membership.create",
         "membership.update",
+        "membership.delete",
+        "membership.cancel",
+
+        "workout.view",
+        "workout.create",
+        "workout.update",
+        "workout.delete",
+
+        "nutrition.view",
+        "nutrition.create",
+        "nutrition.update",
+
+        "ai_coach.use",
+
         "reports.view",
+        "settings.manage",
     ],
 
     "BRANCH_MANAGER": [
         "dashboard.view",
+
         "employee.view",
         "employee.create",
         "employee.update",
+
         "trainer.view",
         "trainer.create",
         "trainer.update",
+
         "member.view",
         "member.create",
+        "member.update",
+
         "attendance.view",
         "attendance.mark",
-        "membership.view",
+        "attendance.update",
+
         "billing.view",
+        "billing.create",
+        "billing.update",
+
+        "membership.view",
+        "membership.create",
+        "membership.update",
+
+        "workout.view",
+        "workout.create",
+        "workout.update",
+
+        "nutrition.view",
+
+        "reports.view",
     ],
 
     "HR": [
         "employee.view",
         "employee.create",
         "employee.update",
+        "employee.delete",
     ],
 
     "OPERATIONS_MANAGER": [
         "dashboard.view",
+
         "trainer.view",
+        "trainer.update",
+
         "attendance.view",
         "attendance.mark",
+        "attendance.update",
+
+        "workout.view",
+        "workout.update",
+
+        "reports.view",
     ],
 
     "FITNESS_CONSULTANT": [
         "member.view",
         "member.create",
+
         "membership.view",
+        "membership.create",
+
+        "workout.view",
+
+        "nutrition.view",
     ],
 
     "SALES_EXECUTIVE": [
         "member.view",
         "member.create",
+
         "membership.view",
         "membership.create",
+
         "billing.create",
+        "billing.view",
     ],
 
     "RECEPTIONIST": [
         "member.view",
+
         "attendance.view",
+        "attendance.mark",
+
+        "membership.view",
+
+        "billing.view",
+        "billing.create",
     ],
 
     "TRAINER": [
         "member.view",
+
         "attendance.mark",
+
+        "workout.view",
+        "workout.update",
+
+        "nutrition.view",
+
+        "ai_coach.use",
     ],
 
     "FREELANCE_TRAINER": [
         "member.view",
+
         "attendance.mark",
+
+        "workout.view",
+
+        "nutrition.view",
     ],
 
     "NUTRITIONIST": [
         "member.view",
+
+        "nutrition.view",
+        "nutrition.create",
+        "nutrition.update",
     ],
 
     "HOUSEKEEPING": [],

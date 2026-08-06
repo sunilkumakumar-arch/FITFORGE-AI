@@ -1,4 +1,4 @@
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 
 from .services import MembershipPurchaseService
 from rest_framework.decorators import action
@@ -26,8 +26,12 @@ class MembershipPlanViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = MembershipPlanSerializer
 
     permission_classes = [
-        IsAuthenticated
+        RolePermission
     ]
+    permission_map = {
+        "list": "membership.view",
+        "retrieve": "membership.view",
+    }
 
     def get_queryset(self):
         return (
@@ -51,8 +55,18 @@ class MemberMembershipViewSet(viewsets.ModelViewSet):
     serializer_class = MemberMembershipSerializer
 
     permission_classes = [
-        IsAuthenticated
+        RolePermission
     ]
+
+    permission_map = {
+        "list": "membership.view",
+        "retrieve": "membership.view",
+        "create": "membership.create",
+        "purchase": "membership.create",
+        "update": "membership.update",
+        "partial_update": "membership.update",
+        "destroy": "membership.delete",
+    }
 
     
 

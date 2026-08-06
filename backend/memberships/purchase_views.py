@@ -1,7 +1,7 @@
 from django.utils import timezone
 
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -15,7 +15,9 @@ from .serializers import MemberMembershipSerializer
 
 class MembershipPurchaseView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    required_permission = "membership.create"
 
     def post(self, request):
 

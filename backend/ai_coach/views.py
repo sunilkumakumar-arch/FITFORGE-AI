@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 from .models import PostureAssessment
 
 from .serializers import (
@@ -18,7 +18,16 @@ from .services import (
 
 class GenerateWorkoutView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "ai_coach.use",
+        "retrieve": "ai_coach.use",
+        "create": "ai_coach.use",
+        "update": "ai_coach.use",
+        "partial_update": "ai_coach.use",
+        "destroy": "ai_coach.use",
+    }
 
     def post(self, request):
 
@@ -39,7 +48,16 @@ class GenerateWorkoutView(APIView):
 
 class GenerateNutritionView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "ai_coach.use",
+        "retrieve": "ai_coach.use",
+        "create": "ai_coach.use",
+        "update": "ai_coach.use",
+        "partial_update": "ai_coach.use",
+        "destroy": "ai_coach.use",
+    }
 
     def post(self, request):
 
@@ -61,7 +79,16 @@ class GenerateNutritionView(APIView):
 
 class PostureAssessmentView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "ai_coach.use",
+        "retrieve": "ai_coach.use",
+        "create": "ai_coach.use",
+        "update": "ai_coach.use",
+        "partial_update": "ai_coach.use",
+        "destroy": "ai_coach.use",
+    }
 
     def post(self, request):
 

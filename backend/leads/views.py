@@ -1,7 +1,7 @@
 # leads/views.py
 
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 
 from .models import (
     Lead,
@@ -22,9 +22,16 @@ class LeadViewSet(
 
     serializer_class = LeadSerializer
 
-    permission_classes = [
-        IsAuthenticated
-    ]
+    permission_classes = [RolePermission]
+
+    permission_map = { 
+        "list": "member.view",
+        "retrieve": "member.view",
+        "create": "member.create",
+        "update": "member.update",
+        "partial_update": "member.update",
+        "destroy": "member.delete",
+    }
 
 
 class LeadFollowUpViewSet(
@@ -37,6 +44,13 @@ class LeadFollowUpViewSet(
         LeadFollowUpSerializer
     )
 
-    permission_classes = [
-        IsAuthenticated
-    ]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "member.view",
+        "retrieve": "member.view",
+        "create": "member.create",
+        "update": "member.update",
+        "partial_update": "member.update",
+        "destroy": "member.delete",
+    }

@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 
 from .models import Notification
 from .serializers import NotificationSerializer
@@ -11,4 +11,13 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
     serializer_class = NotificationSerializer
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "member.view",
+        "retrieve": "member.view",
+        "create": "member.update",
+        "update": "member.update",
+        "partial_update": "member.update",
+        "destroy": "member.delete",
+    }

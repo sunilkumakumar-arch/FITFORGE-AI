@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 
 from workouts.models import (
     WorkoutTemplate,
@@ -25,7 +25,16 @@ class WorkoutTemplateViewSet(viewsets.ModelViewSet):
     )
 
     serializer_class = WorkoutTemplateSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "workout.view",
+        "retrieve": "workout.view",
+        "create": "workout.create",
+        "update": "workout.update",
+        "partial_update": "workout.update",
+        "destroy": "workout.delete",
+    }
 
 
 class WorkoutDayViewSet(viewsets.ModelViewSet):
@@ -38,7 +47,16 @@ class WorkoutDayViewSet(viewsets.ModelViewSet):
     
 
     serializer_class = WorkoutDaySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "workout.view",
+        "retrieve": "workout.view",
+        "create": "workout.create",
+        "update": "workout.update",
+        "partial_update": "workout.update",
+        "destroy": "workout.delete",
+    }
 
 
 class WorkoutExerciseViewSet(viewsets.ModelViewSet):
@@ -52,4 +70,13 @@ class WorkoutExerciseViewSet(viewsets.ModelViewSet):
     )
 
     serializer_class = WorkoutExerciseSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "workout.view",
+        "retrieve": "workout.view",
+        "create": "workout.create",
+        "update": "workout.update",
+        "partial_update": "workout.update",
+        "destroy": "workout.delete",
+    }

@@ -1,5 +1,5 @@
 from rest_framework import viewsets, status
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 from rest_framework.response import Response
 
 from .models import Payment
@@ -20,8 +20,17 @@ class PaymentViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
 
     permission_classes = [
-        IsAuthenticated
+        RolePermission
     ]
+
+    permission_map = {
+        "list": "billing.view",
+        "retrieve": "billing.view",
+        "create": "billing.create",
+        "update": "billing.update",
+        "partial_update": "billing.update",
+        "destroy": "billing.delete",
+    }
 
     def create(self, request, *args, **kwargs):
 

@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 
 from .selectors import MemberHubSelector
 from .serializers import MemberHubSerializer
@@ -19,7 +19,9 @@ class MemberHubListView(generics.ListAPIView):
     """
 
     serializer_class = MemberHubSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    required_permission = "member.view"
 
     def get_queryset(self):
         return MemberHubSelector.get_queryset()
@@ -31,7 +33,9 @@ class MemberHubDetailView(generics.RetrieveAPIView):
     """
 
     serializer_class = MemberHubSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    required_permission = "member.view"
 
     def get_queryset(self):
         return MemberHubSelector.get_queryset()
@@ -43,7 +47,9 @@ class MemberHubByPublicIdView(generics.RetrieveAPIView):
     """
 
     serializer_class = MemberHubSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    required_permission = "member.view"
 
     def get_object(self):
         return MemberHubSelector.get_by_public_member_id(
@@ -57,7 +63,9 @@ class MemberHubByMemberCodeView(generics.RetrieveAPIView):
     """
 
     serializer_class = MemberHubSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    required_permission = "member.view"
 
     def get_object(self):
         return MemberHubSelector.get_by_member_code(

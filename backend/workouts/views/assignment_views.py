@@ -1,6 +1,6 @@
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 from rest_framework.response import Response
 
 from workouts.models import MemberWorkoutPlan
@@ -22,7 +22,18 @@ class MemberWorkoutPlanViewSet(viewsets.ModelViewSet):
     )
 
     serializer_class = MemberWorkoutPlanSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "workout.view",
+        "retrieve": "workout.view",
+        "create": "workout.create",
+        "update": "workout.update",
+        "partial_update": "workout.update",
+        "destroy": "workout.delete",
+        "complete": "workout.update",
+        "cancel": "workout.update",
+    }
 
     @action(detail=True, methods=["post"])
     def complete(self, request, pk=None):

@@ -1,7 +1,7 @@
 from django.db.models import Count, Q
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 from rest_framework.response import Response
 from django.db.models import Prefetch, Sum
 from rest_framework import status
@@ -29,7 +29,16 @@ class TrainerViewSet(viewsets.ModelViewSet):
 
     serializer_class = TrainerSerializer
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "trainer.view",
+        "retrieve": "trainer.view",
+        "create": "trainer.create",
+        "update": "trainer.update",
+        "partial_update": "trainer.update",
+        "destroy": "trainer.delete",
+    }
 
     @action(detail=False, methods=["get"])
     def dashboard(self, request):
@@ -188,7 +197,16 @@ class TrainerViewSet(viewsets.ModelViewSet):
 
 class TrainerCreateAPIView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "trainer.view",
+        "retrieve": "trainer.view",
+        "create": "trainer.create",
+         "update": "trainer.update",
+         "partial_update": "trainer.update",
+         "destroy": "trainer.delete",
+    }
 
     def post(self, request):
 
@@ -225,9 +243,15 @@ class TrainerWeeklyOffViewSet(
         TrainerWeeklyOffSerializer
     )
 
-    permission_classes = [
-        IsAuthenticated
-    ]
+    permission_classes = [RolePermission]
+    permission_map = {
+        "list": "trainer.view",
+        "retrieve": "trainer.view",
+        "create": "trainer.create",
+        "update": "trainer.update",
+        "partial_update": "trainer.update",
+        "destroy": "trainer.delete",
+    }
 
     
 
@@ -242,4 +266,13 @@ class TrainerCertificationViewSet(viewsets.ModelViewSet):
     )
 
     serializer_class = TrainerCertificationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "trainer.view",
+        "retrieve": "trainer.view",
+        "create": "trainer.create",
+        "update": "trainer.update",
+        "partial_update": "trainer.update",
+        "destroy": "trainer.delete",
+    }

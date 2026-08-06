@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 
 from .models import (
     NutritionPlan,
@@ -20,7 +20,16 @@ class NutritionPlanViewSet(viewsets.ModelViewSet):
 
     serializer_class = NutritionPlanSerializer
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "nutrition.view",
+        "retrieve": "nutrition.view",
+        "create": "nutrition.create",
+        "update": "nutrition.update",
+        "partial_update": "nutrition.update",
+        "destroy": "nutrition.delete",
+    }
 
 
 class MealViewSet(viewsets.ModelViewSet):
@@ -29,7 +38,16 @@ class MealViewSet(viewsets.ModelViewSet):
 
     serializer_class = MealSerializer
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "nutrition.view",
+        "retrieve": "nutrition.view",
+        "create": "nutrition.create",
+        "update": "nutrition.update",
+        "partial_update": "nutrition.update",
+        "destroy": "nutrition.delete",
+    }
 
 
 class MemberNutritionAssignmentViewSet(viewsets.ModelViewSet):
@@ -38,4 +56,13 @@ class MemberNutritionAssignmentViewSet(viewsets.ModelViewSet):
 
     serializer_class = MemberNutritionAssignmentSerializer
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "nutrition.view",
+        "retrieve": "nutrition.view",
+        "create": "nutrition.create",
+        "update": "nutrition.update",
+        "partial_update": "nutrition.update",
+        "destroy": "nutrition.delete",
+    }

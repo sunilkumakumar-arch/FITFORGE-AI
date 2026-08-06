@@ -1,7 +1,7 @@
 from datetime import date
 
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -20,7 +20,21 @@ class TrainerAssignmentViewSet(
 
     serializer_class = TrainerAssignmentSerializer
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "trainer.view",
+        "retrieve": "trainer.view",
+        "create": "trainer.create",
+        "update": "trainer.update",
+        "partial_update": "trainer.update",
+        "destroy": "trainer.delete",
+
+        "available_trainers": "trainer.view",
+        "auto_assign": "trainer.update",
+        "change_trainer": "trainer.update",
+        "create_assignment": "trainer.create",
+    }
 
     # =====================================
     # AVAILABLE TRAINERS

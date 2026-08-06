@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from roles.permissions import RolePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -38,7 +38,17 @@ from .services import PTPackagePurchaseService
 
 class PTPackageViewSet(viewsets.ModelViewSet):
     serializer_class = PTPackageSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = { 
+        "list": "membership.view",
+        "retrieve": "membership.view",
+        "create": "membership.create",
+        "update": "membership.update",
+        "partial_update": "membership.update",
+        "destroy": "membership.delete",
+        "deactivate": "membership.update",
+    }
 
     def get_queryset(self):
         return (
@@ -74,7 +84,17 @@ class MemberPTPackageViewSet(viewsets.ModelViewSet):
     )
 
     serializer_class = MemberPTPackageSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "membership.view",
+        "retrieve": "membership.view",
+        
+        "update": "membership.update",
+        "partial_update": "membership.update",
+        "destroy": "membership.delete",
+        
+    }
 
     def create(self, request, *args, **kwargs):
         return Response(
@@ -102,7 +122,9 @@ class MemberPTPackageViewSet(viewsets.ModelViewSet):
 
 
 class PTPackagePurchaseAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    required_permission = "membership.create"
 
     def post(self, request):
 
@@ -168,7 +190,9 @@ class PTPackagePurchaseAPIView(APIView):
 
 
 class PTAssignTrainerAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    required_permission = "trainer.update"
 
     def post(self, request):
 
@@ -244,4 +268,13 @@ class PTSessionViewSet(viewsets.ModelViewSet):
     )
 
     serializer_class = PTSessionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "trainer.view",
+        "retrieve": "trainer.view",
+        "create": "trainer.update",
+        "update": "trainer.update",
+        "partial_update": "trainer.update",
+        "destroy": "trainer.delete",
+    }
