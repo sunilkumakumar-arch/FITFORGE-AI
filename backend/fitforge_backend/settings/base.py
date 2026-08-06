@@ -14,13 +14,16 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+import logging
+import logging.config
+
 import os
 from dotenv import load_dotenv
 
 load_dotenv(BASE_DIR / ".env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -195,9 +198,49 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "FitForge API",
-    "DESCRIPTION": "FitForge Commercial Fitness Platform",
+    "TITLE": "FitForge Enterprise API",
+    "DESCRIPTION": (
+        "Enterprise-grade AI-powered Gym Management System API "
+        "for Body Beast Gym and FitForge SaaS."
+    ),
     "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SCHEMA_PATH_PREFIX": "/api/v1",
+
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "displayOperationId": True,
+        "displayRequestDuration": True,
+        "persistAuthorization": True,
+    },
+
+    "COMPONENT_SPLIT_REQUEST": True,
+
+    "SECURITY": [
+        {
+            "BearerAuth": [],
+        }
+    ],
+
+    "SECURITY_SCHEMES": {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+        }
+    },
+
+    "TAGS": [
+        {"name": "Authentication", "description": "Authentication APIs"},
+        {"name": "Accounts", "description": "Member & Employee APIs"},
+        {"name": "Memberships", "description": "Membership Management"},
+        {"name": "Attendance", "description": "Attendance Management"},
+        {"name": "Billing", "description": "Payments & Billing"},
+        {"name": "Workouts", "description": "Workout Management"},
+        {"name": "Nutrition", "description": "Nutrition Management"},
+        {"name": "Dashboard", "description": "Dashboard & Analytics"},
+        {"name": "Reports", "description": "Reports"},
+    ],
 }
 
 SIMPLE_JWT = {
@@ -223,6 +266,23 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    "EXCEPTION_HANDLER": "common.exceptions.fitforge_exception_handler",
+
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ),
+
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "100/hour",
+        "user": "1000/hour",
+
+        "login": "10/minute",
+        "logout": "30/minute",
+        "change_password": "10/minute",
+    },
+
+
 
     "DEFAULT_SCHEMA_CLASS": (
         "drf_spectacular.openapi.AutoSchema"
@@ -238,4 +298,91 @@ REST_FRAMEWORK = {
         "rest_framework.pagination.PageNumberPagination",
 
     "PAGE_SIZE": 20,
+}
+
+
+# ==========================================================
+# Security Headers
+# ==========================================================
+
+X_FRAME_OPTIONS = "DENY"
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+SECURE_BROWSER_XSS_FILTER = True
+
+CSRF_COOKIE_HTTPONLY = True
+
+SESSION_COOKIE_HTTPONLY = True
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        "standard": {
+            "format": "[{asctime}] {levelname} {name}: {message}",
+            "style": "{",
+        },
+    },
+
+    "handlers": {
+        "info_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs" / "info.log",
+            "formatter": "standard",
+        },
+
+        "error_file": {
+            "level": "ERROR",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs" / "error.log",
+            "formatter": "standard",
+        },
+
+        "security_file": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "logs" / "security.log",
+            "formatter": "standard",
+        },
+
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+    },
+
+    "root": {
+        "handlers": [
+            "console",
+            "info_file",
+            "error_file",
+        ],
+        "level": "INFO",
+    },
+
+    "loggers": {
+        "django.security": {
+            "handlers": [
+                "security_file",
+                "console",
+            ],
+            "level": "WARNING",
+            "propagate": False,
+        },
+
+        "roles.permissions": {
+            "handlers": [
+                "security_file",
+                "console",
+            ],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
 }

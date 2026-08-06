@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.throttling import ScopedRateThrottle
 
 from .serializers import LoginSerializer
 from .services import AuthenticationService
@@ -22,8 +23,13 @@ class LoginView(APIView):
 
     authentication_classes = []
     permission_classes = [AllowAny]
+    
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "login"        
 
     def post(self, request):
+
+
 
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -45,6 +51,9 @@ class ChangePasswordView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "change_password"
 
     def post(self, request):
 
@@ -87,6 +96,9 @@ class LogoutView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "logout"
 
     def post(self, request):
 
