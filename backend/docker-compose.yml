@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:17
+    container_name: fitforge-db
+
+    environment:
+      POSTGRES_DB: fitforge_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Sunil@8686
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: fitforge-backend
+
+    command: python manage.py runserver 0.0.0.0:8000
+
+    volumes:
+      - .:/app
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      - db
+
+    environment:
+      DEBUG: "True"
+
+      DB_NAME: fitforge_db
+      DB_USER: postgres
+      DB_PASSWORD: Sunil@8686
+      DB_HOST: db
+      DB_PORT: 5432
+
+volumes:
+  postgres_data:

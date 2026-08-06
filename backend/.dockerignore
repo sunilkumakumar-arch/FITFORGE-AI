@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+.git
+.gitignore
+.env
+logs/
+media/
+fitforge_backup_v1.backup
