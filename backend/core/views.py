@@ -6,6 +6,7 @@ from .models import (
     Branch,
     Department,
     Designation,
+    Shift,
     
 )
 from .serializers import (
@@ -13,12 +14,14 @@ from .serializers import (
     BranchSerializer,
     DepartmentSerializer,
     DesignationSerializer,
+    ShiftSerializer,
 )
 from .services import (
     OrganizationService,
     BranchService,
     DepartmentService,
     DesignationService,
+    ShiftService,
 )
 from roles.permissions import RolePermission
 from common.responses import (
@@ -342,3 +345,82 @@ class DesignationViewSet(viewsets.ModelViewSet):
         )
 
 
+class ShiftViewSet(viewsets.ModelViewSet):
+    """
+    API endpoints for Shift Management.
+    """
+
+    permission_classes = [RolePermission]
+
+    permission_map = {
+        "list": "shift.view",
+        "retrieve": "shift.view",
+        "create": "shift.create",
+        "update": "shift.update",
+        "partial_update": "shift.update",
+        "destroy": "shift.delete",
+    }
+
+    queryset = Shift.objects.filter(
+        is_active=True
+    ).order_by("name")
+
+    serializer_class = ShiftSerializer
+
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+
+    filterset_fields = (
+        "shift_type",
+        "is_active",
+    )
+
+    search_fields = (
+        "name",
+        "code",
+    )
+
+    ordering_fields = (
+        "name",
+        "code",
+        "created_at",
+    )
+
+    ordering = (
+        "name",
+    )
+
+    def create(self, request, *args, **kwargs):
+
+        serializer = self.get_serializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        shift = ShiftService.create_shift(
+            serializer.validated_data
+        )
+
+        return created_response(
+            data=ShiftSerializer(shift).data,
+            message="Shift created successfully.",
+        )
+
+    def destroy(self, request, *args, **kwargs):
+
+        shift = self.get_object()
+
+        ShiftService.deactivate_shift(
+            shift=shift,
+            user=request.user,
+        )
+
+        return success_response(
+            message="Shift deactivated successfully.",
+        )

@@ -6,6 +6,7 @@ from .views import (
     BranchViewSet,
     DepartmentViewSet,
     DesignationViewSet,
+    ShiftViewSet,
 )
 
 router = DefaultRouter()
@@ -33,5 +34,13 @@ router.register(
     DesignationViewSet,
     basename="designation",
 )
+
+router.register(
+    r"shifts",
+    ShiftViewSet,
+    basename="shift",
+)
+
+
 
 urlpatterns = router.urls

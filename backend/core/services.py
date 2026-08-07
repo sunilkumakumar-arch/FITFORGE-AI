@@ -7,6 +7,7 @@ from .models import (
     Branch,
     Department,
     Designation,
+    Shift,
 )
 
 
@@ -211,3 +212,52 @@ class DesignationService:
         )
 
         return designation
+    
+
+class ShiftService:
+    """
+    Business logic for Shift Management.
+    """
+
+    @staticmethod
+    def create_shift(validated_data):
+
+        shift = Shift.objects.create(
+            **validated_data
+        )
+
+        AuditService.log(
+            user=None,
+            action="CREATE",
+            module="SHIFT",
+            object_id=str(shift.id),
+            object_name=shift.name,
+            description=f"Shift {shift.name} created successfully.",
+        )
+
+        return shift
+
+    @staticmethod
+    def deactivate_shift(
+        shift,
+        user,
+    ):
+
+        shift.is_active = False
+
+        shift.save(
+            update_fields=[
+                "is_active",
+            ]
+        )
+
+        AuditService.log(
+            user=user,
+            action="DELETE",
+            module="SHIFT",
+            object_id=str(shift.id),
+            object_name=shift.name,
+            description=f"Shift {shift.name} deactivated.",
+        )
+
+        return shift

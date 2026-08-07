@@ -5,6 +5,8 @@ from .models import (
     Branch,
     Department,
     Designation,
+    Shift,
+
 )
 
 
@@ -180,3 +182,53 @@ class DesignationSerializer(serializers.ModelSerializer):
 
     def validate_description(self, value):
         return value.strip()    
+
+
+class ShiftSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Shift
+
+        fields = [
+            "id",
+            "name",
+            "code",
+            "shift_type",
+            "start_time",
+            "end_time",
+            "grace_period_minutes",
+            "break_duration_minutes",
+            "minimum_working_hours",
+            "weekly_working_days",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+
+        read_only_fields = (
+            "id",
+            "created_at",
+            "updated_at",
+        )
+
+    def validate_name(self, value):
+        value = value.strip()
+
+        if len(value) < 2:
+            raise serializers.ValidationError(
+                "Shift name must contain at least 2 characters."
+            )
+
+        return value.title()
+
+    def validate_code(self, value):
+        return value.strip().upper()
+
+    def validate(self, attrs):
+
+        if attrs["start_time"] >= attrs["end_time"]:
+            raise serializers.ValidationError(
+                "Shift end time must be after start time."
+            )
+
+        return attrs

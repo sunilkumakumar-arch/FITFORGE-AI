@@ -129,16 +129,16 @@ class DesignationAdmin(admin.ModelAdmin):
 
 
 
-
-
 @admin.register(Shift)
 class ShiftAdmin(admin.ModelAdmin):
+
     list_display = (
         "name",
         "code",
         "shift_type",
         "start_time",
         "end_time",
+        "minimum_working_hours",
         "weekly_working_days",
         "is_active",
     )
@@ -161,3 +161,5 @@ class ShiftAdmin(admin.ModelAdmin):
     ordering = (
         "name",
     )
+
+    list_per_page = 25
