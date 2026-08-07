@@ -45,16 +45,24 @@ class BranchAdmin(admin.ModelAdmin):
         "name",
         "organization",
         "city",
+        "is_active",
+        "created_at",
     )
 
     list_filter = (
         "organization",
+        "is_active",
     )
 
     search_fields = (
         "name",
         "city",
         "organization__name",
+    )
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
     )
 
     ordering = (

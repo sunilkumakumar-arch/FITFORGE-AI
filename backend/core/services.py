@@ -2,7 +2,12 @@ from django.db import transaction
 
 from audit.services import AuditService
 
-from .models import Organization, Branch
+from .models import (
+    Organization,
+    Branch,
+    Department,
+    Designation,
+)
 
 
 class OrganizationService:
@@ -89,6 +94,120 @@ class BranchService:
         """
         Soft delete a branch.
         """
-        raise NotImplementedError(
-            "Branch soft delete is not implemented yet."
-        )   
+
+        branch.is_active = False
+        branch.save(update_fields=["is_active"])
+
+        AuditService.log(
+            user=user,
+            action="DELETE",
+            module="BRANCH",
+            object_id=str(branch.id),
+            object_name=branch.name,
+            description=(
+                f"Branch '{branch.name}' deactivated successfully."
+            ),
+        )
+
+        return branch 
+    
+
+class DepartmentService:
+    """
+    Business logic for Department Management.
+    """
+
+    @staticmethod
+    @transaction.atomic
+    def create_department(validated_data):
+
+        department = Department.objects.create(
+            **validated_data
+        )
+
+        AuditService.log(
+            user=None,
+            action="CREATE",
+            module="DEPARTMENT",
+            object_id=str(department.id),
+            object_name=department.name,
+            description=(
+                f"Department '{department.name}' created successfully."
+            ),
+        )
+
+        return department
+
+    @staticmethod
+    @transaction.atomic
+    def deactivate_department(
+        department,
+        user=None,
+    ):
+
+        department.is_active = False
+
+        department.save(
+            update_fields=[
+                "is_active",
+            ]
+        )
+
+        AuditService.log(
+            user=user,
+            action="DELETE",
+            module="DEPARTMENT",
+            object_id=str(department.id),
+            object_name=department.name,
+            description=(
+                f"Department '{department.name}' deactivated successfully."
+            ),
+        )
+
+        return department
+
+
+class DesignationService:
+    """
+    Business logic for Designation Management.
+    """
+
+    @staticmethod
+    def create_designation(validated_data):
+
+        designation = Designation.objects.create(
+            **validated_data
+        )
+
+        AuditService.log(
+            user=None,
+            action="CREATE",
+            module="DESIGNATION",
+            object_id=str(designation.id),
+            object_name=designation.name,
+            description=f"Designation {designation.name} created successfully.",
+        )
+
+        return designation
+
+    @staticmethod
+    def deactivate_designation(
+        designation,
+        user,
+    ):
+
+        designation.is_active = False
+        designation.save(
+            update_fields=["is_active"]
+        )
+
+        AuditService.log(
+            user=user,
+            action="DELETE",
+            module="DESIGNATION",
+            object_id=str(designation.id),
+            object_name=designation.name,
+            description=f"Designation {designation.name} deactivated.",
+        )
+
+        return designation

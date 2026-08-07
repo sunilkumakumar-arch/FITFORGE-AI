@@ -36,12 +36,28 @@ class Branch(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+    )
+
     class Meta:
+        ordering = ["organization", "name"]
+
+        unique_together = (
+            "organization",
+            "name",
+        )
+
         verbose_name = "Branch"
+
         verbose_name_plural = "Branches"
 
     def __str__(self):
-        return f"{self.organization.name} - {self.name}"
+         return f"{self.organization.name} - {self.name}"
 
 
 
