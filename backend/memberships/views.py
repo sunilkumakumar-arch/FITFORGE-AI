@@ -1,53 +1,97 @@
-from roles.permissions import RolePermission
-
-from .services import MembershipPurchaseService
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.response import Response
-from rest_framework import status
 
-from .purchase_serializer import PurchaseMembershipSerializer
+from roles.permissions import RolePermission
 
 from .models import (
     MembershipPlan,
     MemberMembership,
 )
-
+from .purchase_serializer import PurchaseMembershipSerializer
 from .serializers import (
     MembershipPlanSerializer,
     MemberMembershipSerializer,
 )
+from .services import MembershipPurchaseService
 
-from rest_framework import viewsets
 
 class MembershipPlanViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoints for Membership Plan Management.
+    """
 
     queryset = MembershipPlan.objects.all()
 
     serializer_class = MembershipPlanSerializer
 
     permission_classes = [
-        RolePermission
+        RolePermission,
     ]
+
     permission_map = {
         "list": "membership.view",
         "retrieve": "membership.view",
     }
 
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+
+    filterset_fields = (
+        "organization",
+        "branch",
+        "is_active",
+        "duration_days",
+    )
+
+    search_fields = (
+        "name",
+        "code",
+        "description",
+    )
+
+    ordering_fields = (
+        "name",
+        "code",
+        "price",
+        "duration_days",
+        "created_at",
+        "updated_at",
+    )
+
+    ordering = (
+        "name",
+    )
+
     def get_queryset(self):
         return (
             MembershipPlan.objects
+            .select_related(
+                "organization",
+                "branch",
+            )
             .filter(is_active=True)
             .order_by("name")
         )
 
 
 class MemberMembershipViewSet(viewsets.ModelViewSet):
+    """
+    Enterprise Membership Management API.
+    """
 
     queryset = (
         MemberMembership.objects
         .select_related(
             "member",
-            "plan"
+            "plan",
+            "plan__organization",
+            "plan__branch",
         )
         .order_by("-created_at")
     )
@@ -55,7 +99,7 @@ class MemberMembershipViewSet(viewsets.ModelViewSet):
     serializer_class = MemberMembershipSerializer
 
     permission_classes = [
-        RolePermission
+        RolePermission,
     ]
 
     permission_map = {
@@ -68,8 +112,42 @@ class MemberMembershipViewSet(viewsets.ModelViewSet):
         "destroy": "membership.delete",
     }
 
-    
+    filter_backends = (
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
 
+    filterset_fields = (
+        "member",
+        "plan",
+        "status",
+        "start_date",
+        "end_date",
+        "plan__organization",
+        "plan__branch",
+    )
+
+    search_fields = (
+        "member__first_name",
+        "member__last_name",
+        "member__phone",
+        "plan__name",
+        "plan__code",
+        "payment_reference",
+    )
+
+    ordering_fields = (
+        "start_date",
+        "end_date",
+        "amount_paid",
+        "created_at",
+        "updated_at",
+    )
+
+    ordering = (
+        "-created_at",
+    )
 
     @action(
         detail=False,
@@ -82,7 +160,9 @@ class MemberMembershipViewSet(viewsets.ModelViewSet):
             data=request.data
         )
 
-        serializer.is_valid(raise_exception=True)
+        serializer.is_valid(
+            raise_exception=True
+        )
 
         data = serializer.validated_data
 
@@ -92,11 +172,19 @@ class MemberMembershipViewSet(viewsets.ModelViewSet):
             start_date=data["start_date"],
             amount_paid=data["amount_paid"],
             payment_method=data["payment_method"],
-            transaction_id=data.get("transaction_id", ""),
-            notes=data.get("notes", ""),
+            transaction_id=data.get(
+                "transaction_id",
+                "",
+            ),
+            notes=data.get(
+                "notes",
+                "",
+            ),
         )
 
         return Response(
-            MemberMembershipSerializer(membership).data,
+            MemberMembershipSerializer(
+                membership
+            ).data,
             status=status.HTTP_201_CREATED,
-        )    
+        )
