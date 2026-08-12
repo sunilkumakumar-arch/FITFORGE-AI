@@ -65,6 +65,17 @@ class WorkoutLoggingService:
         """
         Save a completed exercise.
         """
+        if workout_exercise.workout_day_id != (
+            workout_log.workout_day.workout_day_id
+        ):
+            raise ValidationError(
+                {
+                    "exercise": (
+                        "Selected exercise does not belong "
+                        "to the workout being logged."
+                    )
+                }
+            )
 
         existing = ExerciseLog.objects.filter(
             workout_log=workout_log,
