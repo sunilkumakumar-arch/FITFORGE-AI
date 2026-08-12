@@ -40,6 +40,7 @@ urlpatterns = [
     path("bootstrap/", include("bootstrap.urls")),
     path("memberships/", include("memberships.urls")),
     path("employees/", include("employees.urls")),
+    path("gym-management/", include("gym_management.urls")),
     path("attendance/", include("attendance.urls")),
     path("trainers/", include("trainers.urls")),
     path("billing/", include("billing.urls")),
@@ -54,5 +55,7 @@ urlpatterns = [
     path("certifications/",include("certifications.urls")),
     path("roles/",include("roles.urls")),
     path("reception/",include("reception.urls")),
+
+    
 
 ]    

@@ -53,6 +53,13 @@ ROLE_PERMISSION_MAP = {
 
         "reports.view",
         "settings.manage",
+
+        "gym_management.view",
+        "gym_management.create",
+        "gym_management.update",
+        "gym_management.delete",
+
+        
     ],
 
     "BRANCH_MANAGER": [
@@ -89,6 +96,11 @@ ROLE_PERMISSION_MAP = {
         "nutrition.view",
 
         "reports.view",
+
+        "gym_management.view",
+        "gym_management.create",
+        "gym_management.update",
+        "gym_management.delete",
     ],
 
     "HR": [

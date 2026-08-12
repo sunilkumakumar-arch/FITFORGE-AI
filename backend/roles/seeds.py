@@ -87,6 +87,14 @@ PERMISSIONS = [
     # Settings
     # ==========================
     ("Settings", "settings.manage", "Manage Settings"),
+
+    # ==========================
+    # Gym Management
+    # ==========================
+    ("Gym Management", "gym_management.view", "View Gym Management"),
+    ("Gym Management", "gym_management.create", "Create Gym Management"),
+    ("Gym Management", "gym_management.update", "Update Gym Management"),
+    ("Gym Management", "gym_management.delete", "Delete Gym Management"),
 ]
 
 
