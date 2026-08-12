@@ -12,44 +12,46 @@ class AttendanceService:
     @staticmethod
     def get_active_membership(member):
         """
-        Returns the member's active membership if valid.
+        Returns the member's currently active membership.
         """
+
         today = timezone.now().date()
 
         return (
-            MemberMembership.objects.filter(
+            MemberMembership.objects
+            .filter(
                 member=member,
                 status="Active",
                 start_date__lte=today,
                 end_date__gte=today,
             )
-            .select_related("plan")
+            .select_related(
+                "plan",
+                "plan__organization",
+                "plan__branch",
+            )
             .first()
         )
 
     @staticmethod
-    def get_today_attendance(member):
+    def get_member_branch(member):
         """
-        Returns today's attendance record if one exists.
+        Returns the branch associated with the member's
+        currently active membership.
         """
-        today = timezone.now().date()
 
-        return Attendance.objects.filter(
-            member=member,
-            attendance_date=today,
-        ).first()
+        membership = AttendanceService.get_active_membership(member)
+
+        if not membership:
+            return None
+
+        return membership.plan.branch
 
     @staticmethod
-    def check_in(
-        member,
-        branch,
-        trainer=None,
-        checkin_method="Reception",
-        device_id=""
-    ):
+    def validate_member_branch(member, branch):
         """
-        Performs member check-in after validating membership
-        and preventing duplicate attendance.
+        Ensures the member's active membership belongs to
+        the branch where attendance is being recorded.
         """
 
         membership = AttendanceService.get_active_membership(member)
@@ -57,15 +59,79 @@ class AttendanceService:
         if not membership:
             return {
                 "success": False,
-                "message": "Member does not have an active membership."
+                "message": "Member does not have an active membership.",
             }
+
+        membership_branch = membership.plan.branch
+
+        if not membership_branch:
+            return {
+                "success": False,
+                "message": "Member's active membership has no assigned branch.",
+            }
+
+        if membership_branch.id != branch.id:
+            return {
+                "success": False,
+                "message": "Member's active membership does not belong to this branch.",
+            }
+
+        return {
+            "success": True,
+            "membership": membership,
+        }
+
+    @staticmethod
+    def get_today_attendance(member):
+        """
+        Returns today's attendance record if one exists.
+        """
+
+        today = timezone.now().date()
+
+        return (
+            Attendance.objects
+            .select_related(
+                "member",
+                "trainer",
+                "branch",
+            )
+            .filter(
+                member=member,
+                attendance_date=today,
+            )
+            .first()
+        )
+
+    @staticmethod
+    def check_in(
+        member,
+        branch,
+        trainer=None,
+        checkin_method="Reception",
+        device_id="",
+    ):
+        """
+        Performs member check-in after validating:
+        - active membership
+        - membership branch
+        - duplicate attendance
+        """
+
+        validation = AttendanceService.validate_member_branch(
+            member=member,
+            branch=branch,
+        )
+
+        if not validation["success"]:
+            return validation
 
         existing = AttendanceService.get_today_attendance(member)
 
         if existing:
             return {
                 "success": False,
-                "message": "Member has already checked in today."
+                "message": "Member has already checked in today.",
             }
 
         now = timezone.now()
@@ -98,17 +164,23 @@ class AttendanceService:
         if not attendance:
             return {
                 "success": False,
-                "message": "No check-in found for today."
+                "message": "No check-in found for today.",
             }
 
         if attendance.check_out:
             return {
                 "success": False,
-                "message": "Member has already checked out."
+                "message": "Member has already checked out.",
             }
 
         attendance.check_out = timezone.now()
-        attendance.save(update_fields=["check_out", "updated_at"])
+
+        attendance.save(
+            update_fields=[
+                "check_out",
+                "updated_at",
+            ]
+        )
 
         return {
             "success": True,
@@ -122,19 +194,28 @@ class AttendanceService:
         member,
         branch,
         trainer=None,
-        device_id=""
+        device_id="",
     ):
         """
-        Handles QR attendance scanning.
+        QR attendance flow.
 
-        First Scan  -> Check In
-        Second Scan -> Check Out
-        Third Scan  -> Attendance already completed
+        First scan  -> Check In
+        Second scan -> Check Out
+        Third scan  -> Already completed
         """
+
+        validation = AttendanceService.validate_member_branch(
+            member=member,
+            branch=branch,
+        )
+
+        if not validation["success"]:
+            return validation
 
         attendance = AttendanceService.get_today_attendance(member)
 
         if attendance is None:
+
             result = AttendanceService.check_in(
                 member=member,
                 branch=branch,
@@ -149,6 +230,7 @@ class AttendanceService:
             return result
 
         if attendance.check_out is None:
+
             result = AttendanceService.check_out(member)
 
             if result["success"]:
@@ -159,5 +241,5 @@ class AttendanceService:
         return {
             "success": False,
             "action": "COMPLETED",
-            "message": "Attendance already completed today."
+            "message": "Attendance already completed today.",
         }
