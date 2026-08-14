@@ -60,7 +60,7 @@ class ReceptionSearchAPIView(APIView):
 
 class ReceptionRenewAPIView(APIView):
     permission_classes = [RolePermission]
-    required_permission = "member.view"
+    required_permission = "membership.create"
 
     def post(self, request, member_code):
 
