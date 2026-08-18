@@ -128,3 +128,30 @@ class WorkoutLogSerializer(serializers.ModelSerializer):
             "exercises",
             "created_at",
         ]
+
+class ExerciseHistorySerializer(serializers.ModelSerializer):
+
+    exercise_name = serializers.CharField(
+        source="workout_exercise.exercise.name",
+        read_only=True,
+    )
+
+    workout_date = serializers.DateField(
+        source="workout_log.workout_date",
+        read_only=True,
+    )
+
+    class Meta:
+        model = ExerciseLog
+        fields = [
+            "id",
+            "workout_date",
+            "exercise_name",
+            "sets_completed",
+            "reps_completed",
+            "weight_used",
+            "rpe",
+            "rest_seconds",
+            "completed",
+            "notes",
+        ]

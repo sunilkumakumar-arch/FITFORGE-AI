@@ -1,20 +1,27 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
 
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from roles.permissions import RolePermission
 from rest_framework.response import Response
+
+from roles.permissions import RolePermission
+
+from accounts.models import Member
 
 from workouts.models import (
     WorkoutLog,
     WorkoutExercise,
+    Exercise,
 )
+
 from workouts.serializers import (
     WorkoutLogSerializer,
     StartWorkoutSerializer,
     ExerciseLogCreateSerializer,
     ExerciseLogSerializer,
+    ExerciseHistorySerializer,
 )
+
 from workouts.services.logging_service import WorkoutLoggingService
 
 
@@ -43,8 +50,13 @@ class WorkoutLogViewSet(viewsets.ModelViewSet):
         "partial_update": "workout.update",
         "destroy": "workout.delete",
         "log_exercise": "workout.update",
+        "exercise_history": "workout.view",
         "finish": "workout.update",
     }
+
+    # =====================================================
+    # Start Workout
+    # =====================================================
 
     def create(self, request, *args, **kwargs):
         """
@@ -74,6 +86,10 @@ class WorkoutLogViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    # =====================================================
+    # Log Exercise
+    # =====================================================
+
     @action(
         detail=True,
         methods=["post"],
@@ -94,14 +110,11 @@ class WorkoutLogViewSet(viewsets.ModelViewSet):
             raise_exception=True
         )
 
-        from workouts.models import WorkoutExercise
-
         workout_exercise = get_object_or_404(
             WorkoutExercise,
             id=serializer.validated_data[
                 "workout_exercise"
             ],
-
         )
 
         exercise_log = (
@@ -133,6 +146,91 @@ class WorkoutLogViewSet(viewsets.ModelViewSet):
             ).data,
             status=status.HTTP_201_CREATED,
         )
+
+    # =====================================================
+    # Exercise Performance History
+    # =====================================================
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="exercise-history",
+    )
+    def exercise_history(self, request):
+        """
+        Return exercise performance history for a member.
+        """
+
+        member_id = request.query_params.get(
+            "member"
+        )
+
+        exercise_id = request.query_params.get(
+            "exercise"
+        )
+
+        if not member_id:
+            return Response(
+                {
+                    "member": (
+                        "This query parameter is required."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not exercise_id:
+            return Response(
+                {
+                    "exercise": (
+                        "This query parameter is required."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        member = Member.objects.filter(
+            id=member_id
+        ).first()
+
+        if not member:
+            return Response(
+                {
+                    "member": "Member not found."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        exercise = Exercise.objects.filter(
+            id=exercise_id
+        ).first()
+
+        if not exercise:
+            return Response(
+                {
+                    "exercise": "Exercise not found."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        history = (
+            WorkoutLoggingService.get_exercise_history(
+                member=member,
+                exercise=exercise,
+            )
+        )
+
+        return Response(
+            ExerciseHistorySerializer(
+                history,
+                many=True,
+            ).data,
+            status=status.HTTP_200_OK,
+        )
+
+    # =====================================================
+    # Finish Workout
+    # =====================================================
 
     @action(
         detail=True,

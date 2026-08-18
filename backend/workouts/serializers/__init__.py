@@ -21,4 +21,5 @@ from .logging_serializer import (
     ExerciseLogSerializer,
     StartWorkoutSerializer,
     ExerciseLogCreateSerializer,
+    ExerciseHistorySerializer,
 )

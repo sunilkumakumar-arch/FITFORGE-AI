@@ -217,3 +217,38 @@ class WorkoutLoggingService:
         """
 
         return True
+
+
+        # =====================================================
+    # Exercise Performance History
+    # =====================================================
+
+    @staticmethod
+    def get_exercise_history(
+        *,
+        member,
+        exercise,
+    ):
+        """
+        Return the member's historical performance
+        for a specific exercise.
+        """
+
+        history = (
+            ExerciseLog.objects
+            .select_related(
+                "workout_log",
+                "workout_exercise",
+                "workout_exercise__exercise",
+            )
+            .filter(
+                workout_log__member_workout__member=member,
+                workout_exercise__exercise=exercise,
+            )
+            .order_by(
+                "-workout_log__workout_date",
+                "-id",
+            )
+        )
+
+        return history
