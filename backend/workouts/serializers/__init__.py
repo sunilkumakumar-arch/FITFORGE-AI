@@ -19,4 +19,6 @@ from .assignment_serializer import (
 from .logging_serializer import (
     WorkoutLogSerializer,
     ExerciseLogSerializer,
+    StartWorkoutSerializer,
+    ExerciseLogCreateSerializer,
 )

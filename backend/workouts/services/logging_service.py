@@ -130,7 +130,6 @@ class WorkoutLoggingService:
                 "duration_minutes",
                 "calories_burned",
                 "notes",
-                "updated_at",
             ]
         )
 
