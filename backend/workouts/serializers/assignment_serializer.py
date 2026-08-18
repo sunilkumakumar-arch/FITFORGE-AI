@@ -20,7 +20,23 @@ class MemberWorkoutDaySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MemberWorkoutDay
-        fields = "__all__"
+        fields = [
+            "id",
+            "member_workout",
+            "workout_day",
+            "workout_day_name",
+            "focus_area",
+            "completed",
+            "completed_at",
+            "notes",
+        ]
+
+        read_only_fields = [
+            "id",
+            "member_workout",
+            "completed",
+            "completed_at",
+        ]
 
 
 class MemberWorkoutPlanSerializer(serializers.ModelSerializer):
@@ -47,4 +63,37 @@ class MemberWorkoutPlanSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MemberWorkoutPlan
-        fields = "__all__"
+
+        fields = [
+            "id",
+            "member",
+            "member_name",
+            "workout_template",
+            "template_name",
+            "trainer",
+            "trainer_name",
+            "assigned_by",
+            "last_updated_by",
+            "assignment_type",
+            "source",
+            "version",
+            "start_date",
+            "end_date",
+            "status",
+            "notes",
+            "days",
+            "created_at",
+            "updated_at",
+        ]
+
+        read_only_fields = [
+            "id",
+            "assigned_by",
+            "last_updated_by",
+            "version",
+            "end_date",
+            "status",
+            "days",
+            "created_at",
+            "updated_at",
+        ]

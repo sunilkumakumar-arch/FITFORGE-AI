@@ -35,6 +35,51 @@ class MemberWorkoutPlanViewSet(viewsets.ModelViewSet):
         "cancel": "workout.update",
     }
 
+    def create(self, request, *args, **kwargs):
+
+        serializer = self.get_serializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        member_plan = AssignmentService.assign_template(
+            member=serializer.validated_data["member"],
+            workout_template=serializer.validated_data[
+                "workout_template"
+            ],
+            trainer=serializer.validated_data.get(
+                "trainer"
+            ),
+            assigned_by=request.user,
+            assignment_type=serializer.validated_data.get(
+                "assignment_type",
+                "GENERAL",
+            ),
+            source=serializer.validated_data.get(
+                "source",
+                "TEMPLATE",
+            ),
+            start_date=serializer.validated_data.get(
+                "start_date"
+            ),
+            notes=serializer.validated_data.get(
+                "notes",
+                "",
+            ),
+        )
+
+        output_serializer = self.get_serializer(
+            member_plan
+        )
+
+        return Response(
+            output_serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
+
     @action(detail=True, methods=["post"])
     def complete(self, request, pk=None):
 
