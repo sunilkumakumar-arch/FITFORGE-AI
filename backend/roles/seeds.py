@@ -67,6 +67,7 @@ PERMISSIONS = [
     ("Nutrition", "nutrition.create", "Create Nutrition"),
     ("Nutrition", "nutrition.update", "Update Nutrition"),
     ("Nutrition", "nutrition.delete", "Delete Nutrition"),
+    ("Nutrition", "nutrition.assign", "Assign Nutrition Plan"),
 
     # ==========================
     # AI Coach

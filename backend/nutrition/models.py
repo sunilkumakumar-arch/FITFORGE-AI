@@ -1,6 +1,7 @@
 from django.db import models
 
 from accounts.models import Member
+from employees.models import Employee
 from trainers.models import Trainer
 
 
@@ -93,6 +94,13 @@ class MemberNutritionAssignment(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True
+    )
+    assigned_by_employee = models.ForeignKey(
+        Employee,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="nutrition_assignments_made",
     )
 
     assigned_date = models.DateField(
