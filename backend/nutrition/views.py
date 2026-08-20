@@ -20,6 +20,10 @@ from .services.assignment_service import (
     NutritionAssignmentService,
 )
 
+from .services.meal_service import (
+    NutritionMealService,
+)
+
 
 class NutritionPlanViewSet(viewsets.ModelViewSet):
 
@@ -41,7 +45,16 @@ class NutritionPlanViewSet(viewsets.ModelViewSet):
 
 class MealViewSet(viewsets.ModelViewSet):
 
-    queryset = Meal.objects.all()
+    queryset = (
+        Meal.objects
+        .select_related(
+            "nutrition_plan",
+        )
+        .order_by(
+            "nutrition_plan_id",
+            "id",
+        )
+    )
 
     serializer_class = MealSerializer
 
@@ -55,6 +68,114 @@ class MealViewSet(viewsets.ModelViewSet):
         "partial_update": "nutrition.update",
         "destroy": "nutrition.delete",
     }
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create a meal under a nutrition plan.
+
+        Meal creation is routed through the service layer
+        so nutrition business rules cannot be bypassed.
+        """
+
+        serializer = self.get_serializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        meal = NutritionMealService.create_meal(
+            nutrition_plan=serializer.validated_data[
+                "nutrition_plan"
+            ],
+            meal_name=serializer.validated_data[
+                "meal_name"
+            ],
+            meal_time=serializer.validated_data[
+                "meal_time"
+            ],
+            foods=serializer.validated_data[
+                "foods"
+            ],
+            calories=serializer.validated_data[
+                "calories"
+            ],
+        )
+
+        response_serializer = self.get_serializer(
+            meal
+        )
+
+        return Response(
+            response_serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    def update(self, request, *args, **kwargs):
+        """
+        Update a meal through the service layer.
+        """
+
+        partial = kwargs.pop(
+            "partial",
+            False,
+        )
+
+        meal = self.get_object()
+
+        serializer = self.get_serializer(
+            meal,
+            data=request.data,
+            partial=partial,
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        updated_meal = NutritionMealService.update_meal(
+            meal=meal,
+            meal_name=serializer.validated_data.get(
+                "meal_name"
+            ),
+            meal_time=serializer.validated_data.get(
+                "meal_time"
+            ),
+            foods=serializer.validated_data.get(
+                "foods"
+            ),
+            calories=serializer.validated_data.get(
+                "calories"
+            ),
+        )
+
+        response_serializer = self.get_serializer(
+            updated_meal
+        )
+
+        return Response(
+            response_serializer.data,
+            status=status.HTTP_200_OK,
+        )
+
+    def partial_update(
+        self,
+        request,
+        *args,
+        **kwargs,
+    ):
+        """
+        Partial update of a meal through the service layer.
+        """
+
+        kwargs["partial"] = True
+
+        return self.update(
+            request,
+            *args,
+            **kwargs,
+        )
 
 
 class MemberNutritionAssignmentViewSet(viewsets.ModelViewSet):

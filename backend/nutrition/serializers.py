@@ -77,6 +77,13 @@ class MemberNutritionAssignmentSerializer(
     assigned_by_name = serializers.CharField(
         source="assigned_by.first_name",
         read_only=True,
+        allow_null=True,
+    )
+
+    assigned_by_employee_name = serializers.CharField(
+        source="assigned_by_employee.first_name",
+        read_only=True,
+        allow_null=True,
     )
 
     class Meta:
@@ -90,6 +97,8 @@ class MemberNutritionAssignmentSerializer(
             "nutrition_plan_name",
             "assigned_by",
             "assigned_by_name",
+            "assigned_by_employee",
+            "assigned_by_employee_name",
             "assigned_date",
             "active",
         ]
@@ -98,5 +107,7 @@ class MemberNutritionAssignmentSerializer(
             "id",
             "assigned_by",
             "assigned_by_name",
+            "assigned_by_employee",
+            "assigned_by_employee_name",
             "assigned_date",
         ]
