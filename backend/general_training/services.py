@@ -106,7 +106,7 @@ class GeneralTrainingService:
 
         trainer = Trainer.objects.filter(
             employment_status="Active",
-            available_for_pi=True,
+            available_for_pt=True,
         ).order_by("active_clients","id").first()
 
         if trainer is None:

@@ -62,10 +62,10 @@ class MembershipPurchaseService:
 
         PaymentService.create_payment(
             member=member,
-            membership_plan=plan,
+            membership=membership,
             amount=amount_paid,
             payment_method=payment_method,
-            payment_status="Paid",
+            payment_status="COMPLETED",
             transaction_id=transaction_id,
             notes=notes,
         )
