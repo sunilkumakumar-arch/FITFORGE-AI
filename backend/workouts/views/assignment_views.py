@@ -18,7 +18,7 @@ class MemberWorkoutPlanViewSet(viewsets.ModelViewSet):
             "workout_template",
         )
         .prefetch_related("days")
-        .all()
+        .order_by("-created_at", "-id")
     )
 
     serializer_class = MemberWorkoutPlanSerializer
