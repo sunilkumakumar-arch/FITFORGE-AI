@@ -27,7 +27,11 @@ from .services.meal_service import (
 
 class NutritionPlanViewSet(viewsets.ModelViewSet):
 
-    queryset = NutritionPlan.objects.all()
+    queryset = (
+        NutritionPlan.objects
+        .all()
+        .order_by("-id")
+    )
 
     serializer_class = NutritionPlanSerializer
 
