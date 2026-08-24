@@ -30,7 +30,9 @@ class MemberPTPackageSerializer(
         read_only=True
     )
 
-    sessions_remaining = serializers.ReadOnlyField()
+    sessions_remaining = serializers.IntegerField(
+        read_only=True
+    )
 
     class Meta:
         model = MemberPTPackage

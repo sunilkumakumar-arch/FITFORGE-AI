@@ -4,6 +4,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from drf_spectacular.utils import extend_schema
+
 from accounts.models import Member
 from memberships.models import MemberMembership
 from trainers.models import Trainer
@@ -20,7 +22,17 @@ from .services import GeneralTrainingService
 
 
 class AssignTrainerAPIView(APIView):
+    """
+    Manually assign a General Trainer to a member.
+    """
 
+    @extend_schema(
+        request=AssignTrainerSerializer,
+        responses={
+            201: GeneralTrainerAssignmentSerializer,
+        },
+        tags=["General Training"],
+    )
     def post(self, request):
 
         serializer = AssignTrainerSerializer(
@@ -70,8 +82,20 @@ class AssignTrainerAPIView(APIView):
             status=status.HTTP_201_CREATED,
         )
 
-class AutoAssignTrainerAPIView(APIView):
 
+class AutoAssignTrainerAPIView(APIView):
+    """
+    Automatically assign the most suitable available
+    General Trainer to a member.
+    """
+
+    @extend_schema(
+        request=AutoAssignTrainerSerializer,
+        responses={
+            201: GeneralTrainerAssignmentSerializer,
+        },
+        tags=["General Training"],
+    )
     def post(self, request):
 
         serializer = AutoAssignTrainerSerializer(
@@ -113,7 +137,17 @@ class AutoAssignTrainerAPIView(APIView):
 
 
 class ChangeTrainerAPIView(APIView):
+    """
+    Change the active General Trainer assigned to a member.
+    """
 
+    @extend_schema(
+        request=ChangeTrainerSerializer,
+        responses={
+            200: GeneralTrainerAssignmentSerializer,
+        },
+        tags=["General Training"],
+    )
     def post(self, request):
 
         serializer = ChangeTrainerSerializer(
@@ -155,10 +189,23 @@ class ChangeTrainerAPIView(APIView):
                 "data": GeneralTrainerAssignmentSerializer(
                     result["assignment"]
                 ).data,
-            }
+            },
+            status=status.HTTP_200_OK,
         )
-class MemberAssignmentAPIView(APIView):
 
+
+class MemberAssignmentAPIView(APIView):
+    """
+    Return the current active General Trainer assignment
+    for a member.
+    """
+
+    @extend_schema(
+        responses={
+            200: GeneralTrainerAssignmentSerializer,
+        },
+        tags=["General Training"],
+    )
     def get(self, request, member_id):
 
         member = get_object_or_404(
@@ -188,11 +235,24 @@ class MemberAssignmentAPIView(APIView):
                 "data": GeneralTrainerAssignmentSerializer(
                     assignment
                 ).data,
-            }
+            },
+            status=status.HTTP_200_OK,
         )
 
-class TrainerHistoryAPIView(APIView):
 
+class TrainerHistoryAPIView(APIView):
+    """
+    Return the General Trainer change history for a member.
+    """
+
+    @extend_schema(
+        responses={
+            200: GeneralTrainerChangeHistorySerializer(
+                many=True
+            ),
+        },
+        tags=["General Training"],
+    )
     def get(self, request, member_id):
 
         member = get_object_or_404(
@@ -213,8 +273,6 @@ class TrainerHistoryAPIView(APIView):
                     history,
                     many=True,
                 ).data,
-            }
-        )                    
-
-
-
+            },
+            status=status.HTTP_200_OK,
+        )

@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from .models import Payment
 
@@ -68,12 +69,16 @@ class PaymentSerializer(serializers.ModelSerializer):
             "updated_at",
         )
 
+    @extend_schema_field(serializers.CharField())
     def get_member_name(self, obj):
         return (
             f"{obj.member.first_name} "
             f"{obj.member.last_name}"
         ).strip()
 
+    @extend_schema_field(
+        serializers.CharField(allow_null=True)
+    )
     def get_membership_name(self, obj):
 
         if not obj.membership:
@@ -81,6 +86,9 @@ class PaymentSerializer(serializers.ModelSerializer):
 
         return obj.membership.plan.name
 
+    @extend_schema_field(
+        serializers.CharField(allow_null=True)
+    )
     def get_organization_name(self, obj):
 
         if not obj.organization:
@@ -88,6 +96,9 @@ class PaymentSerializer(serializers.ModelSerializer):
 
         return obj.organization.name
 
+    @extend_schema_field(
+        serializers.CharField(allow_null=True)
+    )
     def get_branch_name(self, obj):
 
         if not obj.branch:
@@ -95,6 +106,9 @@ class PaymentSerializer(serializers.ModelSerializer):
 
         return obj.branch.name
 
+    @extend_schema_field(
+        serializers.CharField(allow_null=True)
+    )
     def get_collected_by_name(self, obj):
 
         if not obj.collected_by:

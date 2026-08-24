@@ -1,7 +1,7 @@
 from decimal import Decimal
 
-from django.utils import timezone
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from .models import (
     MembershipPlan,
@@ -9,7 +9,9 @@ from .models import (
 )
 
 
-class MembershipPlanSerializer(serializers.ModelSerializer):
+class MembershipPlanSerializer(
+    serializers.ModelSerializer
+):
 
     class Meta:
         model = MembershipPlan
@@ -135,6 +137,7 @@ class MembershipPlanSerializer(serializers.ModelSerializer):
         )
 
         if branch and organization:
+
             if branch.organization_id != organization.id:
                 raise serializers.ValidationError(
                     {
@@ -156,7 +159,10 @@ class MemberMembershipSerializer(
 
     plan_name = serializers.SerializerMethodField()
 
-    remaining_days = serializers.ReadOnlyField()
+    remaining_days = serializers.IntegerField(
+        read_only=True,
+        allow_null=True,
+    )
 
     class Meta:
         model = MemberMembership
@@ -186,12 +192,18 @@ class MemberMembershipSerializer(
             "updated_at",
         )
 
+    @extend_schema_field(
+        serializers.CharField()
+    )
     def get_member_name(self, obj):
         return (
             f"{obj.member.first_name} "
             f"{obj.member.last_name}"
         ).strip()
 
+    @extend_schema_field(
+        serializers.CharField()
+    )
     def get_plan_name(self, obj):
         return obj.plan.name
 
@@ -285,6 +297,7 @@ class MemberMembershipSerializer(
         # -------------------------------------------------
 
         if plan and not plan.is_active:
+
             raise serializers.ValidationError(
                 {
                     "plan": (

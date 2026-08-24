@@ -1,27 +1,27 @@
-from django.db.models import Count, Q
-from rest_framework import viewsets
+from django.db.models import Count, Prefetch
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from roles.permissions import RolePermission
 from rest_framework.response import Response
-from django.db.models import Prefetch, Sum
-from rest_framework import status
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
-from .serializers import TrainerCreateSerializer
+from roles.permissions import RolePermission
 
 from .models import (
     Trainer,
     TrainerWeeklyOff,
+    TrainerCertification,
 )
 
 from .serializers import (
     TrainerSerializer,
     TrainerWeeklyOffSerializer,
+    TrainerCertificationSerializer,
+    TrainerCreateSerializer,
 )
 
 from trainer_assignments.models import TrainerAssignment
-from .models import TrainerCertification
-from .serializers import TrainerCertificationSerializer
+
 
 class TrainerViewSet(viewsets.ModelViewSet):
 
@@ -53,15 +53,6 @@ class TrainerViewSet(viewsets.ModelViewSet):
             status="ACTIVE"
         ).count()
 
-        total_capacity = (
-            Trainer.objects.filter(
-                status="ACTIVE"
-            )
-            .aggregate(
-                total=Count("id")
-            )
-        )
-
         total_capacity = sum(
             trainer.trainer_capacity
             for trainer in Trainer.objects.filter(
@@ -85,23 +76,14 @@ class TrainerViewSet(viewsets.ModelViewSet):
         ).count()
 
         return Response({
-
             "total_trainers": total_trainers,
-
             "active_trainers": active_trainers,
-
             "inactive_trainers": inactive_trainers,
-
             "total_capacity": total_capacity,
-
             "occupied_capacity": occupied_capacity,
-
             "available_capacity": available_capacity,
-
             "pt_clients": pt_clients,
-
         })
-    
 
     @action(detail=False, methods=["get"])
     def assignment_center(self, request):
@@ -151,39 +133,27 @@ class TrainerViewSet(viewsets.ModelViewSet):
             )
 
             data.append({
-
                 "trainer_id": trainer.id,
-
                 "trainer_code": trainer.trainer_code,
-
                 "trainer_name":
                     f"{trainer.first_name} {trainer.last_name}",
-
                 "employment_status":
                     trainer.employment_status,
-
                 "trainer_status":
                     trainer.trainer_status,
-
                 "capacity":
                     trainer.trainer_capacity,
-
                 "occupied":
                     occupied,
-
                 "available":
                     available,
-
                 "membership_clients":
                     membership_clients,
-
                 "pt_clients":
                     pt_clients,
-
             })
 
         return Response(data)
-
 
     def create(self, request, *args, **kwargs):
 
@@ -195,6 +165,7 @@ class TrainerViewSet(viewsets.ModelViewSet):
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
 
+
 class TrainerCreateAPIView(APIView):
 
     permission_classes = [RolePermission]
@@ -203,11 +174,36 @@ class TrainerCreateAPIView(APIView):
         "list": "trainer.view",
         "retrieve": "trainer.view",
         "create": "trainer.create",
-         "update": "trainer.update",
-         "partial_update": "trainer.update",
-         "destroy": "trainer.delete",
+        "update": "trainer.update",
+        "partial_update": "trainer.update",
+        "destroy": "trainer.delete",
     }
 
+    @extend_schema(
+        request=TrainerCreateSerializer,
+        responses={
+            201: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "success": {
+                            "type": "boolean"
+                        },
+                        "message": {
+                            "type": "string"
+                        },
+                        "trainer_id": {
+                            "type": "integer"
+                        },
+                        "trainer_code": {
+                            "type": "string"
+                        },
+                    },
+                },
+                description="Trainer created successfully.",
+            ),
+        },
+    )
     def post(self, request):
 
         serializer = TrainerCreateSerializer(
@@ -228,7 +224,7 @@ class TrainerCreateAPIView(APIView):
                 "trainer_code": trainer.trainer_code,
             },
             status=status.HTTP_201_CREATED,
-        )    
+        )
 
 
 class TrainerWeeklyOffViewSet(
@@ -244,6 +240,7 @@ class TrainerWeeklyOffViewSet(
     )
 
     permission_classes = [RolePermission]
+
     permission_map = {
         "list": "trainer.view",
         "retrieve": "trainer.view",
@@ -253,9 +250,10 @@ class TrainerWeeklyOffViewSet(
         "destroy": "trainer.delete",
     }
 
-    
 
-class TrainerCertificationViewSet(viewsets.ModelViewSet):
+class TrainerCertificationViewSet(
+    viewsets.ModelViewSet
+):
     """
     CRUD operations for Trainer Certifications.
     """
@@ -266,6 +264,7 @@ class TrainerCertificationViewSet(viewsets.ModelViewSet):
     )
 
     serializer_class = TrainerCertificationSerializer
+
     permission_classes = [RolePermission]
 
     permission_map = {

@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 
 from roles.models import Role
 from roles.serializers import (
@@ -13,6 +14,9 @@ from roles.services import RoleService
 
 class RoleListCreateAPIView(APIView):
 
+    @extend_schema(
+        responses=RoleSerializer(many=True),
+    )
     def get(self, request):
 
         roles = RoleService.get_roles()
@@ -24,6 +28,12 @@ class RoleListCreateAPIView(APIView):
 
         return Response(serializer.data)
 
+    @extend_schema(
+        request=RoleSerializer,
+        responses={
+            201: RoleSerializer,
+        },
+    )
     def post(self, request):
 
         serializer = RoleSerializer(
@@ -46,6 +56,9 @@ class RoleListCreateAPIView(APIView):
 
 class PermissionListAPIView(APIView):
 
+    @extend_schema(
+        responses=PermissionSerializer(many=True),
+    )
     def get(self, request):
 
         permissions = RoleService.get_permissions()
@@ -60,6 +73,10 @@ class PermissionListAPIView(APIView):
 
 class AssignPermissionAPIView(APIView):
 
+    @extend_schema(
+        request=AssignPermissionSerializer,
+        responses=RoleSerializer,
+    )
     def post(
         self,
         request,

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from .models import Attendance
 
@@ -11,7 +12,10 @@ class AttendanceSerializer(
 
     trainer_name = serializers.SerializerMethodField()
 
-    workout_duration = serializers.ReadOnlyField()
+    workout_duration = serializers.DurationField(
+        read_only=True,
+        allow_null=True,
+    )
 
     class Meta:
         model = Attendance
@@ -35,6 +39,9 @@ class AttendanceSerializer(
             "updated_at",
         ]
 
+    @extend_schema_field(
+        serializers.CharField(allow_blank=True)
+    )
     def get_member_name(
         self,
         obj
@@ -44,6 +51,9 @@ class AttendanceSerializer(
             f"{obj.member.last_name}"
         )
 
+    @extend_schema_field(
+        serializers.CharField(allow_null=True)
+    )
     def get_trainer_name(
         self,
         obj

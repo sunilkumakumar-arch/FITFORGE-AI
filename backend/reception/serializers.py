@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+from drf_spectacular.utils import extend_schema_field
 
 
 class ReceptionDashboardSerializer(serializers.Serializer):
@@ -21,7 +21,15 @@ class ReceptionDashboardSerializer(serializers.Serializer):
 
     pt_package = serializers.SerializerMethodField()
 
+    # ======================================================
+    # MEMBER
+    # ======================================================
+
+    @extend_schema_field(
+        serializers.DictField(allow_null=True)
+    )
     def get_member(self, obj):
+
         member = obj.get("member")
 
         if not member:
@@ -36,7 +44,15 @@ class ReceptionDashboardSerializer(serializers.Serializer):
             "email": member.email,
         }
 
+    # ======================================================
+    # MEMBER HUB
+    # ======================================================
+
+    @extend_schema_field(
+        serializers.DictField(allow_null=True)
+    )
     def get_member_hub(self, obj):
+
         hub = obj.get("member_hub")
 
         if not hub:
@@ -48,11 +64,20 @@ class ReceptionDashboardSerializer(serializers.Serializer):
             "card_version": hub.card_version,
             "qr_code": (
                 hub.qr_code.url
-                if hub.qr_code else None
+                if hub.qr_code
+                else None
             ),
         }
 
+    # ======================================================
+    # MEMBERSHIP
+    # ======================================================
+
+    @extend_schema_field(
+        serializers.DictField(allow_null=True)
+    )
     def get_membership(self, obj):
+
         membership = obj.get("membership")
 
         if not membership:
@@ -63,25 +88,47 @@ class ReceptionDashboardSerializer(serializers.Serializer):
             "status": membership.status,
             "start_date": membership.start_date,
             "end_date": membership.end_date,
-            "remaining_days": membership.remaining_days,
+            "remaining_days": (
+                membership.remaining_days
+            ),
         }
 
+    # ======================================================
+    # ATTENDANCE
+    # ======================================================
+
+    @extend_schema_field(
+        serializers.DictField(allow_null=True)
+    )
     def get_attendance(self, obj):
+
         attendance = obj.get("attendance")
 
         if not attendance:
             return None
 
         return {
-            "attendance_date": attendance.attendance_date,
+            "attendance_date": (
+                attendance.attendance_date
+            ),
             "check_in": attendance.check_in,
             "check_out": attendance.check_out,
             "status": attendance.status,
             "method": attendance.checkin_method,
         }
 
+    # ======================================================
+    # TRAINER ASSIGNMENT
+    # ======================================================
+
+    @extend_schema_field(
+        serializers.DictField(allow_null=True)
+    )
     def get_trainer_assignment(self, obj):
-        assignment = obj.get("trainer_assignment")
+
+        assignment = obj.get(
+            "trainer_assignment"
+        )
 
         if not assignment:
             return None
@@ -91,11 +138,23 @@ class ReceptionDashboardSerializer(serializers.Serializer):
                 f"{assignment.trainer.first_name} "
                 f"{assignment.trainer.last_name}"
             ),
-            "sessions_per_week": assignment.sessions_per_week,
-            "monthly_fee": assignment.monthly_fee,
+            "sessions_per_week": (
+                assignment.sessions_per_week
+            ),
+            "monthly_fee": (
+                assignment.monthly_fee
+            ),
         }
 
+    # ======================================================
+    # PT PACKAGE
+    # ======================================================
+
+    @extend_schema_field(
+        serializers.DictField(allow_null=True)
+    )
     def get_pt_package(self, obj):
+
         package = obj.get("pt_package")
 
         if not package:
@@ -106,6 +165,9 @@ class ReceptionDashboardSerializer(serializers.Serializer):
         }
 
 
+# ==========================================================
+# MEMBERSHIP RENEWAL
+# ==========================================================
 
 
 class MembershipRenewSerializer(serializers.Serializer):
@@ -133,4 +195,4 @@ class MembershipRenewSerializer(serializers.Serializer):
         required=False,
         allow_blank=True,
         max_length=100,
-    )    
+    )

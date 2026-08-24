@@ -1,16 +1,15 @@
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from drf_spectacular.utils import extend_schema
+
 from roles.permissions import RolePermission
 
 from .selectors import MemberHubSelector
 from .serializers import MemberHubSerializer
-
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
 from .verification_serializers import QRVerificationSerializer
 from .verification_service import VerificationService
-from .serializers import MemberHubSerializer
 
 
 class MemberHubListView(generics.ListAPIView):
@@ -72,14 +71,28 @@ class MemberHubByMemberCodeView(generics.RetrieveAPIView):
             self.kwargs["member_code"]
         )
 
+
 class QRVerificationView(APIView):
     """
     Verifies a scanned member QR code.
     """
 
+    @extend_schema(
+        request=QRVerificationSerializer,
+        responses={
+            200: MemberHubSerializer,
+        },
+        tags=["Member Hub"],
+    )
     def post(self, request):
-        serializer = QRVerificationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+
+        serializer = QRVerificationSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
 
         result = VerificationService.verify_qr(
             serializer.validated_data["qr_payload"]
@@ -93,7 +106,9 @@ class QRVerificationView(APIView):
 
         member_serializer = MemberHubSerializer(
             result["member_hub"],
-            context={"request": request},
+            context={
+                "request": request,
+            },
         )
 
         return Response(
@@ -102,4 +117,4 @@ class QRVerificationView(APIView):
                 "member": member_serializer.data,
             },
             status=status.HTTP_200_OK,
-        )    
+        )

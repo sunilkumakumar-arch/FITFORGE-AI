@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from .models import MemberHub
 
@@ -52,6 +53,9 @@ class MemberHubSerializer(serializers.ModelSerializer):
 
         read_only_fields = fields
 
+    @extend_schema_field(
+        serializers.URLField(allow_null=True)
+    )
     def get_qr_code(self, obj):
         request = self.context.get("request")
 

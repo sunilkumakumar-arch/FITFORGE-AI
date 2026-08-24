@@ -79,8 +79,6 @@ class GeneralTrainerChangeHistorySerializer(
 
         fields = "__all__"
 
-        read_only_fields = fields
-
 
 # ==========================================================
 # INPUT SERIALIZERS
